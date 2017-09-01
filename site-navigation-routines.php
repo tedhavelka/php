@@ -90,7 +90,7 @@ function nav_menu_layout__closing_lines($caller)
 
 
 
-function &navigation_items_via_filenames(
+function &navigation_items_via_filenames__dev_version(
   $caller,
   $include_path,
   $include_pattern,
@@ -165,7 +165,7 @@ function &navigation_items_via_filenames(
     $term = "<br />\n";
 
 // routine name or function name:
-    $rname = "navigation_items_via_filenames";
+    $rname = "navigation_items_via_filenames__dev_version";
 
 
     
@@ -234,13 +234,152 @@ function &navigation_items_via_filenames(
 
     return $navigation_menu_items;
 
-}
+} // end function &navigation_items_via_filenames__dev_version
 
 
 
 
-function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclude_path, $options)
+
+function &navigation_items_via_filenames(
+  $caller,
+  $include_path,
+  $include_pattern,
+  $exclude_path,
+  $exclude_pattern,
+  $options)
 {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//  PURPOSE:  to build a PHP array (an ordered map) of a given site's
+//   pages, and or external URLs, to be presented in a navigation menu.
+//   The aim of this routine is to provide a dynamic response via PHP
+//   coding, to the filenames present in a given directory of a site's
+//   content.
+//
+//  EXPECTS:
+//    *  calling code name or identifer,
+//    *  file system path to directory to search for navigation markers,
+//    *  pattern to match for items to include in nav list,
+//    *  file system path to directory to search for 'exclude item' markers,
+//    *  pattern to match for items to exclude in nav list,
+//    *  additional options ( 2017-08-31 not yet implemented )
+//
+//  RETURNS:
+//    *  an array of navigation item names
+//
+//
+//  NOTES ON IMPLEMENTATION:
+//
+//   On Unix and Unix-like systems, filenames can identify among other
+//   entities,
+//
+//     *  regular files
+//     *  directories
+//     *  symbolic links
+//
+//   Via thoughtful, strategic file naming, each of these file system
+//   elements can be named to act as markers or indicators of particular
+//   site content to enable or disable.
+//
+//
+//
+//   While site navigation can be
+//   expressed and managed using data or meta-data in text files or
+//   even a database, these ways are more complicated and more likely
+//   part of a much larger content management framework implementation.
+//   These PHP routines are intended to be smaller and limited in scope,
+//   just enough to get some repetitive site mark-up generation
+//   automated and off the ground.
+
+//
+//
+//  GENERATES HTML FOR WEB BROWSERS:  no
+//
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+// array to hold navigable site items, and to return to calling code:
+    $navigation_menu_items = array();
+
+// local array for temporary storage of items which may appear in array of navigable items, but not be planned for publication yet on the give site:
+    $items_to_exclude = array();
+
+// local string parsing array, holds results of PHP preg_match() routine:
+    $matches = array();
+
+// . . .
+    $item_name_only = "";
+
+
+// mark-up string for diagnsotics to web browsers:
+    $term = "<br />\n";
+
+// routine name or function name:
+    $rname = "navigation_items_via_filenames";
+
+
+    
+// DEV - show parameters passed to us from calling code:
+
+/*
+    echo "2017-08-31 - implementation underway,<br />\n";
+
+    echo "called by '$caller'," . $term;
+    echo "caller sends path set to '$include_path'," . $term;
+    echo "pattern of items to include holds '$include_pattern'," . $term;
+    echo "caller sends path set to '$exclude_path'," . $term;
+    echo "pattern of items to exclude holds '$exclude_pattern'," . $term;
+    echo "and options string holding '$options'." . $term . $term;
+*/
+
+// END DEV
+
+
+
+// - STEP - search caller's file system path for navigable site items:
+
+    $navigation_menu_items =& list_of_filenames_by_pattern($rname, $include_path, $include_pattern);
+
+
+// - STEP - search caller's path for items explicitly marked to exclude from list of navigables:
+
+    $items_to_exclude =& list_of_filenames_by_pattern($rname, $exclude_path, $exclude_pattern);
+
+
+// - STEP - remove the include pattern, a prefix or infix, from all found navigation menu items:
+
+    foreach ($navigation_menu_items as $key => $value)
+    {
+        preg_match('@(.*--nn--)(.*)@', $value, $matches);  // . . . call preg_match() with pattern, string_to_search, array_of_matches_found
+        $navigation_menu_items[$key] = $matches[2];
+    }
+
+
+// - STEP - search in caller's specified path for items to exclude from navigation list:
+
+    foreach ($items_to_exclude as $key => $value)
+    {
+        preg_match('@(.*--nn--)(.*)(.*--exclude-from-nav$)@', $value, $matches);
+        $items_to_exclude[$key] = $matches[2];
+    }
+
+
+    return $navigation_menu_items;
+
+} // end function &navigation_items_via_filenames
+
+
+
+
+
+function nn_horizontal_navigation_menu__dev_version($caller, $base_url, $include_path, $exclude_path, $options)
+{
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//  GENERATES HTML FOR WEB BROWSERS:  yes
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     $menu_items = array();
 
@@ -249,7 +388,7 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 // local text string for use during development and diagnostics:
     $term = "<br />\n";
 
-    $rname = "nn_horizontal_navigation_menu";
+    $rname = "nn_horizontal_navigation_menu__dev_version";
 
 
 
@@ -286,6 +425,7 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
     nav_menu_layout__opening_lines($rname);
 
     $last_item = count($menu_items);
+    sort($menu_items);
 
     foreach ($menu_items as $key => $value)
     {
@@ -296,12 +436,85 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
         }
     }
 
+    nav_menu_layout__closing_lines($rname);
+
+    echo "done.$term$term$term";
+
+
+} // end function nn_horizontal_navigation_menu__dev_version()
+
+
+
+
+
+function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclude_path, $options)
+{
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//  GENERATES HTML FOR WEB BROWSERS:  yes
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $menu_items = array();
+
+    $last_item = 0;
+
+// local text string for use during development and diagnostics:
+    $term = "<br />\n";
+
+    $rname = "nn_horizontal_navigation_menu";
+
+
+
+// DEV - show parameters passed to us from calling code:
+
+/*
+    echo "2017-08-31 - implementation underway,<br />\n";
+
+    echo "called by '$caller'," . $term;
+    echo "caller sends include path set to '$include_path'," . $term;
+    echo "and exclude path set to '$exclude_path'," . $term;
+    echo "and options string holding '$options'." . $term . $term;
+*/
+
+// END DEV
+
+
+// Parameters in following call - caller, path_to_search, pattern_include, pattern_exclude, options . . .
+
+    $menu_items =& navigation_items_via_filenames(
+      $rname,
+      $include_path, "/.*-nn-*/",
+      $exclude_path,  "/.*--exclude-from-nav*/",
+      "--no-options"
+    );
+
+
+
+// - STEP - send navigation menu mark-up opening lines:
+
+    nav_menu_layout__opening_lines($rname);
+
+    $last_item = count($menu_items);
+    sort($menu_items);
+
+    foreach ($menu_items as $key => $value)
+    {
+        echo "<div class=\"menu-item\"> <a href=\"$base_url/$menu_items[$key]\">$menu_items[$key]</a> </div>\n\n";
+        if ( $key < ($last_item - 1) )
+        {
+            echo "<div class=\"menu-item-text-separator\"> : </div>\n\n";
+        }
+    }
 
     nav_menu_layout__closing_lines($rname);
 
     echo "done.$term$term$term";
 
-}
+
+} // end function nn_horizontal_navigation_menu()
+
+
 
 
 

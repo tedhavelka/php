@@ -78,9 +78,11 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
 
 // DEV - show parameters passed to us from calling code:
 
+/*
     echo "called by '$caller'," . $term;
     echo "caller sends path set to '$path_to_search'," . $term;
     echo "and pattern to match holding '$pattern_to_match'." . $term . $term;
+*/
 
 // END DEV
 
