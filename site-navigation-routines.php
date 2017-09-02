@@ -371,10 +371,9 @@ function &navigation_items_via_filenames(
         $items_to_exclude[$key] = $matches[2];
     }
 
-    echo "- DEV - array of navigation menu items to exclude holds:" . $term;
-
-    nn_show_array($rname, $items_to_exclude, "--no-options");
-    echo $term;
+//    echo "- DEV - array of navigation menu items to exclude holds:" . $term;
+//    nn_show_array($rname, $items_to_exclude, "--no-options");
+//    echo $term;
 
 
 
@@ -391,19 +390,19 @@ function &navigation_items_via_filenames(
 
     foreach ($items_to_exclude as $key => $value)
     {
-echo "- DEV - looking for navigation menu item to exclude, item by name of '$value' . . .$term";
+// echo "- DEV - looking for navigation menu item to exclude, item by name of '$value' . . .$term";
 
         $key_to_navigation_item = array_search($value, $navigation_menu_items);
 
         if ( $key_to_navigation_item !== FALSE )
         {
-echo "- DEV - in menu items array, found $key_to_navigation_item => " . $navigation_menu_items[$key_to_navigation_item] . $term;
+// echo "- DEV - in menu items array, found $key_to_navigation_item => " . $navigation_menu_items[$key_to_navigation_item] . $term;
 
             unset($navigation_menu_items[$key_to_navigation_item]);
         }
     }
 
-    echo $term . $term;
+//    echo $term . $term;
 
 
 
@@ -477,7 +476,8 @@ function nn_horizontal_navigation_menu__dev_version($caller, $base_url, $include
 
     foreach ($menu_items as $key => $value)
     {
-        echo "<div class=\"menu-item\"> <a href=\"$base_url/$menu_items[$key]\">$menu_items[$key]</a> </div>\n\n";
+        echo "<div class=\"menu-item\"> <a href=\"$base_url/" . $menu_items[$key] . "\">" . $menu_items[$key] . "</a> </div>\n\n";
+
         if ( $key < ($last_item - 1) )
         {
             echo "<div class=\"menu-item-text-separator\"> : </div>\n\n";
@@ -544,13 +544,13 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 // DEV - show parameters passed to us from calling code:
 
 /*
-*/
     echo "2017-08-31 - implementation underway,<br />\n";
 
     echo "called by '$caller'," . $term;
     echo "caller sends include path set to '$include_path'," . $term;
     echo "and exclude path set to '$exclude_path'," . $term;
     echo "and options string holding '$options'." . $term . $term;
+*/
 
 // END DEV
 
@@ -582,9 +582,13 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
     foreach ( $menu_items as $key => $menu_item )
     {
 
-// Look for menu items marked 'not ready' . . . parameters 'pattern, target_string, array_of_pattern_matches':
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - Look for menu items marked 'not ready' . . .
+//
+//  ( preg_match parameters are pattern, target_string, array_of_pattern_matches )
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// echo "$rname:  looking at menu item '$
+// echo "$rname:  DEV - looking at menu item '$
         preg_match('/.*--not-ready/', $menu_item, $matches);
 
         if ( $matches )
@@ -601,12 +605,29 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
         }
         else
         {
-            echo "<div class=\"menu-item\"> <a href=\"$base_url/" . $menu_items[$key] . "\">" . $menu_items[$key] . "</a> </div>\n\n";
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - ELSE to above STEP - handle ready, active navigation menu items . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+            preg_match('/.*--in-current-directory/', $menu_item, $matches);
+
+            if ( $matches )
+            {
+                $menu_item_minus_postfix = preg_replace('/--in-current-directory/', '', $menu_item);
+                echo "<div class=\"menu-item\"> <a href=\"$base_url\">$menu_item_minus_postfix</a> </div>\n\n";
+            }
+            else
+            {
+//                echo "<div class=\"menu-item\"> <a href=\"$base_url/" . $menu_items[$key] . "\">" . $menu_items[$key] . "</a> </div>\n\n";
+                echo "<div class=\"menu-item\"> <a href=\"$base_url/$menu_item\">$menu_item</a> </div>\n\n";
+            }
         }
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // place a visual separator between navigation menu items, looks best
 // when menu is laid out as a horizontal menu:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         if ( $key < ($last_item - 1) )
         {
