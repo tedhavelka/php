@@ -13,8 +13,13 @@
 //
 //  REFERENCES:
 //
-//    *  ___
+//    * REF *  http://php.net/manual/en/function.array-search.php
 //
+//    * REF *  http://php.net/manual/en/function.unset.php
+//
+//    * REF *  http://php.net/manual/en/function.preg-replace.php
+//
+//    * REF *  http://php.net/manual/en/language.types.string.php
 //
 //
 //======================================================================
@@ -240,6 +245,8 @@ function &navigation_items_via_filenames__dev_version(
 
 
 
+// zzz
+
 function &navigation_items_via_filenames(
   $caller,
   $include_path,
@@ -364,6 +371,47 @@ function &navigation_items_via_filenames(
         $items_to_exclude[$key] = $matches[2];
     }
 
+    echo "- DEV - array of navigation menu items to exclude holds:" . $term;
+
+    nn_show_array($rname, $items_to_exclude, "--no-options");
+    echo $term;
+
+
+
+
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  TO-DO:  yet need to delete from array of navigation menu items,
+//    all items parsed and noted in array of item to exclude from
+//    list of navigation points at given page of given site - TMH
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+
+// - STEP - for each navigation item, point, named point, delete that in nav menu list array:
+
+    foreach ($items_to_exclude as $key => $value)
+    {
+echo "- DEV - looking for navigation menu item to exclude, item by name of '$value' . . .$term";
+
+        $key_to_navigation_item = array_search($value, $navigation_menu_items);
+
+        if ( $key_to_navigation_item !== FALSE )
+        {
+echo "- DEV - in menu items array, found $key_to_navigation_item => " . $navigation_menu_items[$key_to_navigation_item] . $term;
+
+            unset($navigation_menu_items[$key_to_navigation_item]);
+        }
+    }
+
+    echo $term . $term;
+
+
+
+//   .
+//   .
+//   .
+
+
 
     return $navigation_menu_items;
 
@@ -447,35 +495,62 @@ function nn_horizontal_navigation_menu__dev_version($caller, $base_url, $include
 
 
 
+// zzz
+
 function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclude_path, $options)
 {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//  PURPOSE:  to request a list of navigation menu items from code
+//   which can read filenames in directories of a given web site, then
+//   to present these navigation menu items in one of the manners,
+//
+//     *  hyper reference to another page, file or site
+//     *  plain text name of item, greyed out
+//     *  item hidden, not shown
+//
+//
+//  OPTIONS SUPPORTED BY THIS PHP FUNCTION:
+//
+//     *  '--show-not-ready'
+//
+//
+//
 //
 //  GENERATES HTML FOR WEB BROWSERS:  yes
 //
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+// VARIABLES
+
     $menu_items = array();
 
     $last_item = 0;
+
+    $menu_item = "DEFAULT_MENU_ITEM";
+
+    $menu_item_minus_postfix = "DEFAULT_MENU_ITEM_MINUS_POSTFIX";
+
 
 // local text string for use during development and diagnostics:
     $term = "<br />\n";
 
     $rname = "nn_horizontal_navigation_menu";
 
+// END VARIABLES
+
 
 
 // DEV - show parameters passed to us from calling code:
 
 /*
+*/
     echo "2017-08-31 - implementation underway,<br />\n";
 
     echo "called by '$caller'," . $term;
     echo "caller sends include path set to '$include_path'," . $term;
     echo "and exclude path set to '$exclude_path'," . $term;
     echo "and options string holding '$options'." . $term . $term;
-*/
 
 // END DEV
 
@@ -491,6 +566,12 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - IN FUNCTION - process menu items per caller's options, before
+//    generating navigation menu:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
 // - STEP - send navigation menu mark-up opening lines:
 
     nav_menu_layout__opening_lines($rname);
@@ -498,9 +579,35 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
     $last_item = count($menu_items);
     sort($menu_items);
 
-    foreach ($menu_items as $key => $value)
+    foreach ( $menu_items as $key => $menu_item )
     {
-        echo "<div class=\"menu-item\"> <a href=\"$base_url/$menu_items[$key]\">$menu_items[$key]</a> </div>\n\n";
+
+// Look for menu items marked 'not ready' . . . parameters 'pattern, target_string, array_of_pattern_matches':
+
+// echo "$rname:  looking at menu item '$
+        preg_match('/.*--not-ready/', $menu_item, $matches);
+
+        if ( $matches )
+        {
+            if ( $options === "--show-not-ready" )
+            {
+                $menu_item_minus_postfix = preg_replace('/--not-ready/', '', $menu_items[$key]);
+                echo "<div class=\"menu-item\"> <font color=\"#7f7f7f\">" . $menu_item_minus_postfix . "</font> </div>\n\n";
+            }
+            else
+            {
+                // show nothing
+            }
+        }
+        else
+        {
+            echo "<div class=\"menu-item\"> <a href=\"$base_url/" . $menu_items[$key] . "\">" . $menu_items[$key] . "</a> </div>\n\n";
+        }
+
+
+// place a visual separator between navigation menu items, looks best
+// when menu is laid out as a horizontal menu:
+
         if ( $key < ($last_item - 1) )
         {
             echo "<div class=\"menu-item-text-separator\"> : </div>\n\n";

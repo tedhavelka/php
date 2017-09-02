@@ -13,10 +13,10 @@
 //
 //  REFERENCES:
 //
-//    *  http://php.net/manual/en/functions.returning-values.php
+//    * REF *  http://php.net/manual/en/functions.returning-values.php
 //       . . . also gives example in PHP of returning reference to array.
 //
-//    *  http://php.net/manual/en/function.preg-match.php
+//    * REF *  http://php.net/manual/en/function.preg-match.php
 //
 //
 //
