@@ -41,10 +41,10 @@
 // - SECTION - diagnostics and development
 //----------------------------------------------------------------------
 
-function nn_show_array($caller, $array_reference, $options)
+function nn_show_array__version_local($caller, $array_reference, $options)
 {
 
-    $rname = "nn_show_array";
+    $rname = "nn_show_array__version_local";
 
     $count_of_elements_in_array = count($array_reference);
 
@@ -316,6 +316,9 @@ function &navigation_items_via_filenames(
     $matches = array();
 
 // . . .
+    $marker_infix = "--nn--";
+
+// . . .
     $item_name_only = "";
 
 
@@ -346,7 +349,8 @@ function &navigation_items_via_filenames(
 
 // - STEP - search caller's file system path for navigable site items:
 
-    $navigation_menu_items =& list_of_filenames_by_pattern($rname, $include_path, $include_pattern);
+//    $navigation_menu_items =& list_of_filenames_by_pattern($rname, $include_path, $include_pattern);
+    $navigation_menu_items =& list_of_filenames_sorted_by_same_marker($rname, $include_path, $marker_infix, 2);
 
 
 // - STEP - search caller's path for items explicitly marked to exclude from list of navigables:
@@ -356,10 +360,17 @@ function &navigation_items_via_filenames(
 
 // - STEP - remove the include pattern, a prefix or infix, from all found navigation menu items:
 
-    foreach ($navigation_menu_items as $key => $value)
+    if ( 0 ) // <-- this text clean-up not needed when calling function list_of_filenames_sorted_by_same_marker() - TMH
     {
-        preg_match('@(.*--nn--)(.*)@', $value, $matches);  // . . . call preg_match() with pattern, string_to_search, array_of_matches_found
-        $navigation_menu_items[$key] = $matches[2];
+        foreach ($navigation_menu_items as $key => $value)
+        {
+            echo "$rname:  - DEV - while removing prefix characters from found menu item, working with \$key = '$key',$term";  
+            preg_match('@(.*--nn--)(.*)@', $value, $matches);  // . . . call preg_match() with pattern, string_to_search, array_of_matches_found
+            echo "$rname:  - DEV - \$matches[0] holds '". $matches[0] ."',$term";  
+            echo "$rname:  - DEV - \$matches[1] holds '". $matches[1] ."',$term";  
+            echo "$rname:  - DEV - \$matches[2] holds '". $matches[2] ."',$term";  
+            $navigation_menu_items[$key] = $matches[2];
+        }
     }
 
 
@@ -472,7 +483,9 @@ function nn_horizontal_navigation_menu__dev_version($caller, $base_url, $include
     nav_menu_layout__opening_lines($rname);
 
     $last_item = count($menu_items);
-    sort($menu_items);
+
+// Actually we may only want a navigation menu sorted alphabetically some of the time - TMH:
+//    sort($menu_items);
 
     foreach ($menu_items as $key => $value)
     {
@@ -577,7 +590,13 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
     nav_menu_layout__opening_lines($rname);
 
     $last_item = count($menu_items);
-    sort($menu_items);
+
+// Actually we may only want a navigation menu sorted alphabetically some of the time - TMH:
+    if ( 0 )
+    {
+        sort($menu_items);
+    }
+
 
     foreach ( $menu_items as $key => $menu_item )
     {
