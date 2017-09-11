@@ -125,16 +125,31 @@ if ( 0 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-function nn_build_footer($caller, $date_last_updated)
+// function nn_build_footer($caller, $date_last_updated)   // . . . as found 2017-09-11 - TMH
+function nn_build_footer($caller, $date_last_updated, $options)
 {
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//    * REF *  http://learnlayout.com/position.html
+//
 //
 // TO-DO 2017-08-06 SUN -- implement a meaningful or at least better
 //  reference to 'date web page updated' in the footer message below . . .
 //
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( $options === "--div-position-fixed" )
+    {
+        echo "<div class=\"footer-custom\">\n";
+    }
+    else
+    {
+        echo "<div style=\"width:100%; background:none; padding-top:2em; padding-bottom:2em\">\n";
+    }
+
 
     echo "
-<div class=\"footer-custom\">
 <center>
 <font size=\"2\">
 <i>
