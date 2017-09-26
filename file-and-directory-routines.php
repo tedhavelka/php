@@ -74,11 +74,7 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
 
 // We'll return an array of all matching filenames to calling code, in
 // this variable:
-
     $filenames_matching_pattern = array();
-
-// local text string for use during development and diagnostics:
-    $term = "<br />\n";
 
 // local variable to act as file handle:
     $handle = NULL;
@@ -91,6 +87,10 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
 
 // local key to $matches array, also known in PHP as an ordered map:
     $key_to_matches = 1;
+
+
+// local text string for use during development and diagnostics:
+    $term = "<br />\n";
 
 
 
@@ -137,10 +137,10 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
     }
 
 
-
     return $filenames_matching_pattern;
 
-}
+
+} // end PHP function &list_of_filenames_by_pattern()
 
 
 
@@ -253,10 +253,14 @@ function &list_of_filenames_sorted_by_same_marker(
 
     echo "$rname:  - DEV - showing array of filenames matching infix:$term";
     nn_show_array($rname, $filenames_matching_infix, "--no-options");
+    echo "<br />\n";
 
     ksort($filenames_matching_infix);
     echo "$rname:  - DEV - showing array of filenames matching infix after sorting by keys:$term";
     nn_show_array($rname, $filenames_matching_infix, "--no-options");
+
+    echo "<br />\n";
+    echo "2017-09-20 NOTE - the name of this local PHP library function is poor, as the names in the above array are parsed from the full files, which originally have an infix '$marker_infix' and $number_leading_digits_showing_order digits at the start of each filename.$term$term";
 
     return $filenames_matching_infix;
 

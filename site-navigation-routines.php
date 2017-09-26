@@ -32,6 +32,8 @@
 // - SECTION - PHP include directives
 //----------------------------------------------------------------------
 
+    require_once '/opt/nn/lib/php/diagnostics-nn.php';
+
     require_once '/opt/nn/lib/php/file-and-directory-routines.php';
 
 
@@ -360,7 +362,12 @@ function &navigation_items_via_filenames(
 
 // - STEP - remove the include pattern, a prefix or infix, from all found navigation menu items:
 
-    if ( 0 ) // <-- this text clean-up not needed when calling function list_of_filenames_sorted_by_same_marker() - TMH
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  The following text clean-up not needed when calling function
+//  list_of_filenames_sorted_by_same_marker() - TMH
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( 0 )
     {
         foreach ($navigation_menu_items as $key => $value)
         {
@@ -660,6 +667,131 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 
 
 } // end function nn_horizontal_navigation_menu()
+
+
+
+
+function &nn_nav_menu_entry($caller)
+{
+
+    $nav_menu_entry = array("url" => "DEFAULT URL", "link_name" => "DEFAULT LINK NAME", "link_status" => "disabled");
+
+    return $nav_menu_entry;
+
+}
+
+
+
+
+
+function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix)
+{
+//----------------------------------------------------------------------
+//
+//   Code of this routine acts on matching filenames in three ways,
+//   generally one way per file, depending on the following conditions:
+//
+//      
+//      *  symlinks which point to directories in the working directory
+//
+//      *  text files which name the working directory or another directory
+//
+//      *  text files which name an external URL
+//
+//
+//
+//
+//  [working_directory]
+//     |
+//     |
+//     +  01--infix--site-page-1 --> ./site-page-1  . . . a directory
+//     +  02--infix--site-page-2 --> ./site-page-2  . . . another directory
+//     +  03--infix--site-page-3 --> ./site-page-3  . . . another directory
+//     |
+//     +  04--infix--site-page-4.txt     . . . a text file which contains "URL=..
+//     |                                                                   LINK-TEXT=section index"
+//     |
+//     +  05--infix--site-page-5.txt     . . . a text file which contains "URL=../..
+//     |                                                                   LINK-TEXT=site home"
+//     |
+//     +  06--infix--external-link.txt   . . . a text file which contains "URL=https://www.google.com
+//     |                                                                   LINK-TEXT=Google search engine"
+//     |
+//
+//
+//
+//  REFERENCES:
+//
+//    *  - REF - http://php.net/manual/en/language.types.null.php
+//
+//    *  - REF - http://php.net/manual/en/language.oop5.php
+//
+//
+//----------------------------------------------------------------------
+
+
+// BEGIN LOCAL VARIABLES
+
+    $handle = NULL;
+
+    $nav_links = array();
+
+    $integer_key_value = 1;
+
+    $key_name = "";
+
+//    const KEY_NAME_LENGTH = 3;
+    define("KEY_NAME_LENGTH", 3);
+
+
+    $term = "<br />\n";
+
+    $rname = "nn_menu_building_hybrid_fashion";
+
+// END LOCAL VARIABLES
+
+
+
+    show_diag($rname, "ROUTINE UNDER DEVELOPMENT", 0);
+
+    $pattern_to_match = $filename_infix;
+    show_diag($rname, "setting \$pattern_to_match equal to '$pattern_to_match',", 0);
+
+
+
+    if ( $handle = opendir($path_to_search) )
+    {
+        while (false !== ($current_filename = readdir($handle)))
+        {
+            preg_match($pattern_to_match, $current_filename, $matches);
+
+// Test to avoid PHP 'undefined offset' warning:
+            if ( $matches )
+            {
+                if ( $matches[0] )
+                {
+// this function call gives us a PHP ordered map with keys 'url', 'link_name', 'link_status':
+
+                    $key_name = str_pad($integer_key_value, 3, "0", STR_PAD_LEFT);
+                    $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
+                    ++$integer_key_value;
+echo "- DEV - found matching file, latest ordered map key name is '$key_name'," . $term;
+
+                    $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
+
+show_diag("*", "showing array of navigation links:");
+                    nn_show_array($rname, $nav_links);
+
+show_diag("*", "showing array of to hold attributes of latest added link:");
+                    nn_show_array($rname, $nav_links[$key_name]);
+                }
+            }
+        }
+    }
+
+}
+
+
 
 
 
