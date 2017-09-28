@@ -732,17 +732,30 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 // BEGIN LOCAL VARIABLES
 
-    $handle = NULL;
+    $handle = NULL;                // . . . file handle to test filenames which contain calling code's infix pattern,
 
-    $nav_links = array();
+    $nav_links = array();          // . . . PHP hash of hashes to hold navigation menu items and to return,
 
-    $integer_key_value = 1;
+    $integer_key_value = 1;        // . . . integer value which gets zero-padded to build top-level hash key names for $nav_links,
 
-    $key_name = "";
+    $key_name = "";                // . . . string to hold constructed hash key names,
 
 //    const KEY_NAME_LENGTH = 3;
-    define("KEY_NAME_LENGTH", 3);
+    define("KEY_NAME_LENGTH", 3);  // . . . constant to define character width of hash key names,
 
+
+// for specific files found during this function's execution:
+
+    $full_path_to_file;            // . . . constructed full path to given file matching caller's infix pattern,
+
+    $result = false;               // . . . variable to hold test result beyond local block of conditional test,
+
+    $matches = array();            // . . . array to hold results of calls to PHP preg_match() pattern matching function,
+
+
+// diagnostics and formatting:
+
+    $dmsg = "";                    // local diagnostics message string for development and debugging,
 
     $term = "<br />\n";
 
@@ -755,8 +768,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     show_diag($rname, "ROUTINE UNDER DEVELOPMENT", 0);
 
     $pattern_to_match = $filename_infix;
-    show_diag($rname, "setting \$pattern_to_match equal to '$pattern_to_match',", 0);
-
+    show_diag($rname, "setting \$pattern_to_match equal to '$pattern_to_match' which in parameter list is misnamed \$filename_fix! - FIX THIS - TMH", 0);
+    echo $term;
 
 
     if ( $handle = opendir($path_to_search) )
@@ -775,21 +788,88 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     $key_name = str_pad($integer_key_value, 3, "0", STR_PAD_LEFT);
                     $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
                     ++$integer_key_value;
-echo "- DEV - found matching file, latest ordered map key name is '$key_name'," . $term;
+
+                    echo "- DEV -$term found filename '$current_filename' matching pattern, latest hash key name is '$key_name'," . $term;
 
                     $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
 
-show_diag("*", "showing array of navigation links:");
+if ( 0 )
+{
+                    show_diag("*", "showing array of navigation links:");
                     nn_show_array($rname, $nav_links);
+}
 
-show_diag("*", "showing array of to hold attributes of latest added link:");
+if ( 1 )
+{
+                    show_diag("*", "showing array of to hold attributes of latest added link:");
                     nn_show_array($rname, $nav_links[$key_name]);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// 2017-09-28 - The '===' PHP operator means ___.  
+//   - REF - http://php.net/manual/en/language.types.boolean.php
+//  implies that boolean values are tested using the '==' operator,
+//  and yet when we tried that yesterday both file-type tests returned
+//  just ahead of this comment block returned true.  Seems a file in
+//  Unix and Linux context may be a symbolic link, but a symlink is
+//  not a regular file.  Better revisit PHP's documentation on functions
+//  is_link() and is_file() . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+                    $full_path_to_file = "$path_to_search/$current_filename";
+                    echo "passing string '$full_path_to_file' to is_link() . . .$term";
+
+/*
+                    $result = is_link("$path_to_search/$current_filename");
+                    if ( $result == true )
+                    {
+                        $dmsg = "test 4 - file by name '$current_filename' is a symbolic link,";
+                        show_diag($rname, $dmsg);
+                    }
+
+
+                    if ( is_file($full_path_to_file) )
+                    {
+                        $result = true;
+                        $dmsg = "test 5 - file by name '$current_filename' is a regular file,";
+                        show_diag($rname, $dmsg);
+                    }
+*/
+
+
+// - STEP - process symbolic links to add item to navigation menu:
+
+                    $result = 0;
+
+                    if ( is_link($full_path_to_file) )
+                    {
+                        $result = 1;
+                        preg_match($current_filename, "@(.*$infix)(.*)@", $matches);
+                        $link_name = $matches[2];
+
+                        $nav_links[$key_name][url] = "./$link_name";
+                        $nav_links[$key_name][link_name] = "$link_name";
+                        $nav_links[$key_name][link_status] = "enabled";
+                    }
+
+                    if ( $result )
+                    {
+                        show_diag("*", "showing array of to hold attributes of latest added link:");
+                        nn_show_array($rname, $nav_links[$key_name]);
+                    }
+
+
+                    echo $term;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
                 }
             }
         }
     }
 
-}
+} // end function nn_menu_building_hybrid_fashion()
 
 
 
