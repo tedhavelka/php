@@ -4,9 +4,22 @@
 
 function show_diag($caller, $message, $options)
 {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // 2017-09-25 MON - added by Ted:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    echo "$caller: &nbsp;$message<br />\n";
+
+// Note:  parameter options must be non-zero for calling code's message
+//  to show:
+
+    if ( $options )
+    {
+        echo "$caller: &nbsp;$message<br />\n";
+    }
+    else
+    {
+        // do nothing
+    }
 
 }
 

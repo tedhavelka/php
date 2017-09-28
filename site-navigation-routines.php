@@ -21,6 +21,12 @@
 //
 //    * REF *  http://php.net/manual/en/language.types.string.php
 //
+//    * REF *  https://www.ibm.com/developerworks/library/os-php-readfiles/index.html -- 2017-09-28
+//
+//    * REF *  https://www.tutorialspoint.com/php/php_regular_expression.htm -- 2017-09-28
+//
+//
+//
 //
 //======================================================================
 
@@ -674,7 +680,7 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 function &nn_nav_menu_entry($caller)
 {
 
-    $nav_menu_entry = array("url" => "DEFAULT URL", "link_name" => "DEFAULT LINK NAME", "link_status" => "disabled");
+    $nav_menu_entry = array("url" => "DEFAULT URL", "link_text" => "DEFAULT LINK NAME", "link_status" => "disabled");
 
     return $nav_menu_entry;
 
@@ -684,7 +690,9 @@ function &nn_nav_menu_entry($caller)
 
 
 
-function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix)
+// function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix)
+// function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix, $filename_postfix)
+function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix, $filename_postfix, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -727,10 +735,20 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //    *  - REF - http://php.net/manual/en/language.oop5.php
 //
 //
+//
+//  TO-DO:
+//
+//    [   ]  add usage message and sanity check on passed values,
+//
+//    [   ]  add finite bound on number of files to process,
+//
+//
 //----------------------------------------------------------------------
 
 
 // BEGIN LOCAL VARIABLES
+
+    $show_usage = false;
 
     $handle = NULL;                // . . . file handle to test filenames which contain calling code's infix pattern,
 
@@ -743,6 +761,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //    const KEY_NAME_LENGTH = 3;
     define("KEY_NAME_LENGTH", 3);  // . . . constant to define character width of hash key names,
 
+    $pattern_to_match = "";        // . . . locally built regex making use of calling code's filename infix pattern,
+
 
 // for specific files found during this function's execution:
 
@@ -752,12 +772,33 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     $matches = array();            // . . . array to hold results of calls to PHP preg_match() pattern matching function,
 
+    $count_filenames_matching = 0;
+    $count_filenames_not_matching = 0;
+
+
+// file handle used to read regular files, as opposed to symbolic links:
+
+    $handle_to_file = NULL;        // . . . handle to given file which tests as type "regular file",
+
+    $line = "";                    // . . . line of text from regular file whose name matches caller's infix pattern,
+
+
+// local flags set by presence of options passed by call in last parameter:
+//  ( Note:  general options parsing not yet implemented, flag set manually here . . . TMH )
+
+    $flag__hide_not_ready = true;
+
+
 
 // diagnostics and formatting:
 
-    $dmsg = "";                    // local diagnostics message string for development and debugging,
+    $dmsg = "";                    // . . . local diagnostics message string for development and debugging,
 
     $term = "<br />\n";
+
+    $dflag_verbose = 1;            // . . . diagnostics flag for verbose messages during development,
+    $dflag_dev     = 1;            // . . . diagnostics flag for development-related run time comments,
+    $dflag_warning = 1;            // . . . diagnostics flag for development-related run time comments,
 
     $rname = "nn_menu_building_hybrid_fashion";
 
@@ -765,15 +806,47 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 
 
+    show_diag($rname, "starting,", 0);
     show_diag($rname, "ROUTINE UNDER DEVELOPMENT", 0);
 
-    $pattern_to_match = $filename_infix;
-    show_diag($rname, "setting \$pattern_to_match equal to '$pattern_to_match' which in parameter list is misnamed \$filename_fix! - FIX THIS - TMH", 0);
     echo $term;
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - sanity checks of passed values
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// $caller, $path_to_search, $filename_infix, $filename_postfix, $options)
+
+    $show_usage = 0;
+    if ( 0 == strlen($caller) ) { show_diag($rname, "WARNING - calling code sends no name, zero-length identifying string.", $dflag_warning); $show_usage = true; }
+    if ( 0 == strlen($path_to_search) ) { show_diag($rname, "WARNING - calling code sends no path to read for filename.", $dflag_warning); $show_usage = true; }
+    if ( 0 == strlen($filename_infix) ) { show_diag($rname, "WARNING - calling code sends no filename infix to apply to found filenames.", $dflag_warning); $show_usage = true; }
+
+    if ( $show_usage )
+    {
+        echo " &nbsp;$rname:  parameters and use are . . .
+
+    $rname(\$caller, \$path_to_search, \$filename_infix, \$filename_postfix, \$options)
+
+ &nbsp;\$caller         . . . identifies calling code, usually by routine or code block name,
+ &nbsp;\$path_to_search . . . names path to search for files which represent navigable web page URLs,
+ &nbsp;\$filename_infix . . . text pattern which calling code expects in files which represent desired URL data,
+ &nbsp;\$options        . . . this last parameter intended to support comma-separated list of options.
+";
+    }
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     if ( $handle = opendir($path_to_search) )
     {
+        show_diag($rname, "call to opendir() succeeded!", $dflag_verbose);
+        $pattern_to_match = "@(.*$filename_infix)(.*)@i";
+        show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,");
+
         while (false !== ($current_filename = readdir($handle)))
         {
             preg_match($pattern_to_match, $current_filename, $matches);
@@ -783,9 +856,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
             {
                 if ( $matches[0] )
                 {
-// this function call gives us a PHP ordered map with keys 'url', 'link_name', 'link_status':
+// this function call gives us a PHP ordered map with keys 'url', 'link_text', 'link_status':
 
-                    $key_name = str_pad($integer_key_value, 3, "0", STR_PAD_LEFT);
                     $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
                     ++$integer_key_value;
 
@@ -793,17 +865,12 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
                     $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
 
-if ( 0 )
-{
-                    show_diag("*", "showing array of navigation links:");
-                    nn_show_array($rname, $nav_links);
-}
+//                    show_diag($rname, "showing array of navigation links:");
+//                    nn_show_array($rname, $nav_links);
 
-if ( 1 )
-{
-                    show_diag("*", "showing array of to hold attributes of latest added link:");
-                    nn_show_array($rname, $nav_links[$key_name]);
-}
+//                    show_diag($rname, "showing array of to hold attributes of latest added link:");
+//                    nn_show_array($rname, $nav_links[$key_name]);
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // 2017-09-28 - The '===' PHP operator means ___.  
@@ -818,45 +885,109 @@ if ( 1 )
 
 
                     $full_path_to_file = "$path_to_search/$current_filename";
-                    echo "passing string '$full_path_to_file' to is_link() . . .$term";
-
-/*
-                    $result = is_link("$path_to_search/$current_filename");
-                    if ( $result == true )
-                    {
-                        $dmsg = "test 4 - file by name '$current_filename' is a symbolic link,";
-                        show_diag($rname, $dmsg);
-                    }
-
-
-                    if ( is_file($full_path_to_file) )
-                    {
-                        $result = true;
-                        $dmsg = "test 5 - file by name '$current_filename' is a regular file,";
-                        show_diag($rname, $dmsg);
-                    }
-*/
+                    $result = 0;
 
 
 // - STEP - process symbolic links to add item to navigation menu:
 
-                    $result = 0;
-
                     if ( is_link($full_path_to_file) )
                     {
-                        $result = 1;
-                        preg_match($current_filename, "@(.*$infix)(.*)@", $matches);
-                        $link_name = $matches[2];
+//
+// Symlinks may be named in a way that indicates their target URLs are
+// desired to by hidden, by web maintainers.  Here check if latest
+// symlink name has a postfix indicating it should be kept out of, or
+// hidden from the navigation menu list being built here:
+//
+                        if ( ( $flag__hide_not_ready ) and ( preg_match("/(.)--not-ready$/", $current_filename) ) )
+                        {
+                            // do nothing
+                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_verbose);
+                        }
+                        else
+                        {
 
-                        $nav_links[$key_name][url] = "./$link_name";
-                        $nav_links[$key_name][link_name] = "$link_name";
-                        $nav_links[$key_name][link_status] = "enabled";
+                            $result = 1;
+//                            preg_match($current_filename, "@(.*$infix)(.*)@", $matches);
+//                            preg_match("@(.*$infix)(.*)@", $current_filename, $matches);
+                            preg_match($pattern_to_match, $current_filename, $matches);
+                            $link_text = $matches[2];
+
+                            $nav_links[$key_name]["url"] = "$path_to_search/$link_text";
+                            $nav_links[$key_name]["link_text"] = "$link_text";
+                            $nav_links[$key_name]["link_status"] = "enabled";
+                        }
                     }
+
+
+// - STEP - process regular files to add item to navigation menu:
+
+// * REF * https://www.ibm.com/developerworks/library/os-php-readfiles/index.html
+
+                    if ( is_file($full_path_to_file) )
+                    {
+                        $result = 1;
+                        show_diag($rname, "regular file contents, if any, shown here in green:");
+
+                        $handle_to_file = fopen($full_path_to_file, "r");
+                        while ( !feof($handle_to_file))
+                        {
+                            $line = fgets($handle_to_file);
+echo "<font color=\"green\">";
+                            echo $line . $term;
+echo "</font>";
+
+                            preg_match("/(^URL=)(.*)/", $line, $matches);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// DIAG START
+                            if ( $matches )
+                            {
+                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:");
+                                nn_show_array($rname, $matches);
+                            }
+                            else
+                            {
+                                show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.");
+                            }
+// DIAG END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                            if ( $matches[2] ) { $nav_links[$key_name]["url"] = $matches[2]; }
+
+
+
+                            preg_match("@(LINK_TEXT=)(.*)@", $line, $matches);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// DIAG START
+                            if ( $matches )
+                            {
+                                show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:");
+                                nn_show_array($rname, $matches);
+                            }
+                            else
+                            {
+                                show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.");
+                            }
+// DIAG END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
+
+                            echo $term;
+
+                        } // end WHILE file has lines of text to process,
+
+                    } // end IF-block testing whether file is of type regular file,
+
 
                     if ( $result )
                     {
-                        show_diag("*", "showing array of to hold attributes of latest added link:");
+                        show_diag($rname, "For latest matched filename,");
+                        show_diag($rname, "showing array of to hold attributes of latest added link:");
+echo "<font color=\"#3358ff\">";
                         nn_show_array($rname, $nav_links[$key_name]);
+echo "</font>";
                     }
 
 
@@ -864,10 +995,33 @@ if ( 1 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-                }
+                } // end IF-block testing whether there is a first match, a $matches[0],
+            } // end IF-block testing whether there are any matches to filename infix pattern from caller,
+            else
+            {
+//                show_diag($rname, "filename doesn't match");
+                ++$count_filenames_not_matching;
             }
-        }
-    }
+        } // end WHILE-block iterating over files in caller-specified directory,
+    } // end IF-block testing file handle assignment of value from opendir(),
+
+
+    show_diag($rname, "- DEVELOPMENT SUMMARY -");
+    show_diag($rname, "found $count_filenames_not_matching filenames not matching caller's infix pattern,");
+
+
+
+// At this point we have a hash of hashes which holds an effective list
+// of navigable links.  Following code will be designed to write these
+// links with horizontal (could be vertical or otherwise) CSS layout
+// and HTML tags for layout and formatting . . .
+
+
+
+
+
+    show_diag($rname, "done.");
+    echo $term;
 
 } // end function nn_menu_building_hybrid_fashion()
 
