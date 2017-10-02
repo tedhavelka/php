@@ -541,9 +541,23 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 //     *  '--show-not-ready'
 //
 //
-//
-//
 //  GENERATES HTML FOR WEB BROWSERS:  yes
+//
+//
+//  NOTES ON IMPLEMENTATION:  this routine gets a hash, a PHP ordered
+//   map of what are effecitively directory names, from another function
+//   which reads and parses file names and directory names and builds
+//   that hash.  Most of the detailed work this routine carries out is
+//   to generate HTML mark-up language and hyperlinks, creating a
+//   menu which typically gets sent to a web browser as part of a site
+//   page.
+//
+//   Ted here noting that this routine has some limitations and is
+//   really a first step and a developmental step onlly, not very useful
+//   for production use.  See routine nn_menu_building_hybrid_fashion()
+//   to view next steps in navigation menu building efforts of Ted's.
+//
+//
 //
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
