@@ -25,6 +25,10 @@
 //
 //    * REF *  https://www.tutorialspoint.com/php/php_regular_expression.htm -- 2017-09-28
 //
+//    * REF *  http://php.net/manual/en/control-structures.break.php
+//
+//    * REF *  http://php.net/manual/en/function.get-defined-constants.php
+//
 //
 //
 //
@@ -38,9 +42,23 @@
 // - SECTION - PHP include directives
 //----------------------------------------------------------------------
 
+    require_once '/opt/nn/lib/php/defines-nn.php';
+
     require_once '/opt/nn/lib/php/diagnostics-nn.php';
 
     require_once '/opt/nn/lib/php/file-and-directory-routines.php';
+
+
+
+
+//----------------------------------------------------------------------
+// - SECTION - PHP file-scoped constants
+//----------------------------------------------------------------------
+
+    define("KEY_NAME_FOR_URL", "url");
+    define("KEY_NAME_FOR_LINK_TEXT", "link_text");
+    define("KEY_NAME_FOR_LINK_STATUS", "link_status");
+
 
 
 
@@ -756,7 +774,16 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 
 
 
-    $key = "";
+    $key = "";          // . . . used to traverse passed hash reference,
+
+    $value = NULL;      // . . . holds given value from passed hash reference,
+
+    $url = "";
+    $link_text = "";
+    $link_status = "";  // . . . elements used to build one menu item,
+
+    $last_item = 0;     // . . . hold count of assumed valud menu items in caller's hash table,
+
 
     $rname = "present_menu_from_hash_of_hashes";
 
@@ -765,16 +792,70 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
     show_diag($rname, "called by '$caller',", 0);
 
 
+//
+// TO DO:  add foreach construct to check for presence of one valid
+//   child hash in the caller's passed hash reference:
+//
+//    * REF *  http://php.net/manual/en/control-structures.break.php
+//
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - SECTION - send menu in mark-up form to browser or standard out
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $last_item = count($hash_reference);   // NOTE this assignment assumes all keys point to complete valid menu item entries in caller's hash.
+
+    nav_menu_layout__opening_lines($rname);
+
+
     foreach ($hash_reference as $key => $value)
     {
         if (is_array($value))
         {
+// Here we want to check for the existence of three specifically named
+// hash keys, and only present a menu item when the keys exists and
+// when the key pointing to navigation item status holds the value
+// "eneabled" . . .
+
+/*
+            if ( isset($hash_reference[$key][KEY_NAME_FOR_URL] ) )
+                { $url = $hash_reference[$key][KEY_NAME_FOR_URL]; }
+
+            if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_TEXT] ) )
+                { $link_text = $hash_reference[$key][KEY_NAME_FOR_LINK_TEXT]; }
+*/
+
+            if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_STATUS] ) )
+                { $link_status = $hash_reference[$key][KEY_NAME_FOR_LINK_STATUS]; }
+
+            if ( 0 == strncmp("enabled", $link_status, LENGTH__KEY_NAME) )
+            {
+                if ( isset($hash_reference[$key][KEY_NAME_FOR_URL] ) )
+                    { $url = $hash_reference[$key][KEY_NAME_FOR_URL]; }
+
+                if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_TEXT] ) )
+                    { $link_text = $hash_reference[$key][KEY_NAME_FOR_LINK_TEXT]; }
+
+                echo "<div class=\"menu-item\"> <a href=\"$url\">" . $link_text . "</a> </div>\n\n";
+
+                if ( $key < ($last_item - 1) )
+                {
+                    echo "<div class=\"menu-item-text-separator\"> : </div>\n\n";
+                }
+            }
         }
         else
         {
 // Do nothing, or print warning that top-level hash entry not itself a hash reference,
         }
     }
+
+
+    nav_menu_layout__closing_lines($rname);
+
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -889,9 +970,11 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     $term = "<br />\n";
 
-    $dflag_verbose = 1;            // . . . diagnostics flag for verbose messages during development,
     $dflag_dev     = 1;            // . . . diagnostics flag for development-related run time comments,
+    $dflag_verbose = 1;            // . . . diagnostics flag for verbose messages during development,
     $dflag_warning = 1;            // . . . diagnostics flag for development-related run time comments,
+
+    $dflag_parse_filename = 1;     // . . . diagnostics flag for verbose messages during development,
 
     $rname = "nn_menu_building_hybrid_fashion";
 
@@ -937,7 +1020,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     if ( $handle = opendir($path_to_search) )
     {
         show_diag($rname, "call to opendir() succeeded!", $dflag_verbose, 0);
-        $pattern_to_match = "@(.*$filename_infix)(.*)@i";
+//        $pattern_to_match = "@(.*$filename_infix)(.*)@i";
+        $pattern_to_match = "@(.*)($filename_infix)(.*)@i";
         show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", 0);
 
         while (false !== ($current_filename = readdir($handle)))
@@ -954,7 +1038,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
                     ++$integer_key_value;
 
-                    echo "- DEV -$term found filename '$current_filename' matching pattern, latest hash key name is '$key_name'," . $term;
+//                    echo "- DEV -$term found filename '$current_filename' matching pattern, latest hash key name is '$key_name'," . $term;
+                    show_diag($rname, "- DEV - found filename '$current_filename' matching pattern, latest hash key name is '$key_name',", 0);
 
                     $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
 
@@ -994,16 +1079,17 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         if ( ( $flag__hide_not_ready ) and ( preg_match("/(.)--not-ready$/", $current_filename) ) )
                         {
                             // do nothing
-                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_verbose, 0);
+                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
                         }
                         else
                         {
-
                             $result = 1;
-//                            preg_match($current_filename, "@(.*$infix)(.*)@", $matches);
-//                            preg_match("@(.*$infix)(.*)@", $current_filename, $matches);
+                            show_diag($rname, "parsing URL and link text from filename  $current_filename,", $dflag_parse_filename);
+                            show_diag($rname, "array of text pattern matches holds:", $dflag_parse_filename);
+                            nn_show_array($rname, $matches, "--no-options");
+
                             preg_match($pattern_to_match, $current_filename, $matches);
-                            $link_text = $matches[2];
+                            $link_text = $matches[3];
 
                             $nav_links[$key_name]["url"] = "$path_to_search/$link_text";
                             $nav_links[$key_name]["link_text"] = "$link_text";
@@ -1019,7 +1105,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     if ( is_file($full_path_to_file) )
                     {
                         $result = 1;
-                        show_diag($rname, "regular file contents, if any, shown here in green:", 0);
+                        show_diag($rname, "file contents, if any, shown line by line in green:", $dflag_dev);
 
                         $handle_to_file = fopen($full_path_to_file, "r");
                         while ( !feof($handle_to_file))
@@ -1035,7 +1121,7 @@ echo "</font>";
 // DIAG START
                             if ( $matches )
                             {
-                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:", 0);
+                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:", $dflag_dev);
                                 nn_show_array($rname, $matches, "--no-options");
                             }
                             else
@@ -1069,11 +1155,26 @@ echo "</font>";
 //                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
                             if ( isset($matches[2]) ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
 
+
+                            preg_match("@(LINK_STATUS=)(.*)@", $line, $matches);
+                            if ( isset($matches[2]) ) { $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = $matches[2]; }
+
                             echo $term;
 
                         } // end WHILE file has lines of text to process,
 
                     } // end IF-block testing whether file is of type regular file,
+
+
+
+
+// 2017-10-02 - replace spaces with HTML non-breakable spaces . . . $pattern, $replacement, $string, [$replace_n_times]:
+
+                    preg_replace(' ', '&nbsp;', $link_text);
+show_diag($rname, "-- zztop -- after preg_replace() call, link text holds '$link_text',", $dflag_dev);
+
+
+
 
 
                     if ( $result )
@@ -1106,6 +1207,21 @@ echo "</font>";
 
 
 
+
+// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+// NEED 2017-10-02 - need to sanity check that $nav_links is an array,
+//  and has at least two elements:
+// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+
+//    ksort($nav_links);
+
+    if ( is_array($nav_links) )
+    {
+show_diag($rname, "\$nav_links is an array (a PHP hash),", $dflag_dev);
+        if ( 1 < count($nav_links) ) { ksort($nav_links); }
+    }
+
+
 // At this point we have a hash of hashes which holds an effective list
 // of navigable links.  Following code will be designed to write these
 // links with horizontal (could be vertical or otherwise) CSS layout
@@ -1115,7 +1231,13 @@ echo "</font>";
 
 
 
-    show_diag($rname, "done.", 0);
+show_diag($rname, "Some trouble sorting navigation menu items by hash key, PHP print_r() shows hash as follows:", $dflag_dev);
+echo "<pre>\n";
+print_r($nav_links);
+echo "</pre>\n";
+
+
+    show_diag($rname, "done.", $dflag_verbose);
     echo $term;
 
 } // end function nn_menu_building_hybrid_fashion()
