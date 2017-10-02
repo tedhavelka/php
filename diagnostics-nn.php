@@ -1,5 +1,22 @@
 <?php
 
+//======================================================================
+//
+//  FILE:  diagnostics-nn.php
+//
+//======================================================================
+
+
+
+// - 2017-10-02 MON - QUESTION:  Permissible in PHP to have like-named functions with differing parameter lists?  ANSWER:  No - TMH
+
+
+function show_diag_default_formatting($caller, $message)
+{
+    show_diag($caller, $message, 0);
+}
+
+
 
 
 function show_diag($caller, $message, $options)
@@ -38,8 +55,16 @@ function warn($caller, $message)
 
 function nn_show_array($caller, $array_reference, $options)
 {
+//----------------------------------------------------------------------
+//
+//  NOTE:  $options not yet implemented in this local PHP diagnostics
+//    routine . . .   - TMH
+//
+//----------------------------------------------------------------------
+
 
     $rname = "nn_show_array";
+
 
     $count_of_elements_in_array = count($array_reference);
 
@@ -52,7 +77,7 @@ function nn_show_array($caller, $array_reference, $options)
 
     }
 
-}
+} // end function nn_show_array()
 
 
 

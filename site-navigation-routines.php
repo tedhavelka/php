@@ -74,6 +74,11 @@ function nn_show_array__version_local($caller, $array_reference, $options)
 // - SECTION - routines to construct navigation menus
 //----------------------------------------------------------------------
 
+/*
+function ___place_holder___
+*/
+
+
 function nav_menu_layout__opening_lines($caller) {
 
     echo "<!-- BEGIN LAYOUT for Neela Nurseries top menu, navigation bar -->
@@ -691,6 +696,12 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 
 
 
+
+/*
+function ___place_holder___
+*/
+
+
 function &nn_nav_menu_entry($caller)
 {
 
@@ -700,6 +711,74 @@ function &nn_nav_menu_entry($caller)
 
 }
 
+
+
+
+function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  read a specifcally structured PHP hash of hashes, and
+//    present the values of this hash table as an HTML formatted menu
+//    of URLs.
+//
+//
+//  NOTES ON IMPLEMENTATION:
+//    This routine part of 'build_menu_hybrid_fashion' PHP library
+//    effort.  This routine is designed to take a hash of hashes with
+//    this following form:
+//
+//
+//    $hash_reference
+//         |
+//        001 => $hash_reference
+//         |            |
+//         |           url => "given URL"
+//         |           link_text => "link text presented as hyperlink"
+//         |           link_status => "[ enabled | disabled ]"
+//         |
+//        002 => $hash_reference
+//         |            |
+//         |          . . .
+//         |
+//        nnn
+//
+//
+//  REFERENCES:
+//
+//   * REF * http://php.net/manual/en/function.is-array.php
+//
+//
+//
+//
+//
+//----------------------------------------------------------------------
+
+
+
+    $key = "";
+
+    $rname = "present_menu_from_hash_of_hashes";
+
+
+    show_diag($rname, "starting,", 0);
+    show_diag($rname, "called by '$caller',", 0);
+
+
+    foreach ($hash_reference as $key => $value)
+    {
+        if (is_array($value))
+        {
+        }
+        else
+        {
+// Do nothing, or print warning that top-level hash entry not itself a hash reference,
+        }
+    }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+} // end function present_menu_from_hash_of_hashes()
 
 
 
@@ -857,9 +936,9 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     if ( $handle = opendir($path_to_search) )
     {
-        show_diag($rname, "call to opendir() succeeded!", $dflag_verbose);
+        show_diag($rname, "call to opendir() succeeded!", $dflag_verbose, 0);
         $pattern_to_match = "@(.*$filename_infix)(.*)@i";
-        show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,");
+        show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", 0);
 
         while (false !== ($current_filename = readdir($handle)))
         {
@@ -915,7 +994,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         if ( ( $flag__hide_not_ready ) and ( preg_match("/(.)--not-ready$/", $current_filename) ) )
                         {
                             // do nothing
-                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_verbose);
+                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_verbose, 0);
                         }
                         else
                         {
@@ -940,7 +1019,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     if ( is_file($full_path_to_file) )
                     {
                         $result = 1;
-                        show_diag($rname, "regular file contents, if any, shown here in green:");
+                        show_diag($rname, "regular file contents, if any, shown here in green:", 0);
 
                         $handle_to_file = fopen($full_path_to_file, "r");
                         while ( !feof($handle_to_file))
@@ -956,17 +1035,17 @@ echo "</font>";
 // DIAG START
                             if ( $matches )
                             {
-                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:");
-                                nn_show_array($rname, $matches);
+                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:", 0);
+                                nn_show_array($rname, $matches, "--no-options");
                             }
                             else
                             {
-                                show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.");
+                                show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.", 0);
                             }
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-                            if ( $matches[2] ) { $nav_links[$key_name]["url"] = $matches[2]; }
+                            if ( isset($matches[2]) ) { $nav_links[$key_name]["url"] = $matches[2]; }
 
 
 
@@ -976,17 +1055,19 @@ echo "</font>";
 // DIAG START
                             if ( $matches )
                             {
-                                show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:");
-                                nn_show_array($rname, $matches);
+                                show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:", 0);
+                                nn_show_array($rname, $matches, "--no-options");
                             }
                             else
                             {
-                                show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.");
+                                show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.", 0);
                             }
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
+// 2017-10-02 MON - Ted noticing PHP notice of undefined offset from following line . . . ok PHP isset() fixes that notice, now applying same fix to like test on line 1048 this file . . . TMH
+//                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
+                            if ( isset($matches[2]) ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
 
                             echo $term;
 
@@ -997,10 +1078,10 @@ echo "</font>";
 
                     if ( $result )
                     {
-                        show_diag($rname, "For latest matched filename,");
-                        show_diag($rname, "showing array of to hold attributes of latest added link:");
+                        show_diag($rname, "For latest matched filename,", 0);
+                        show_diag($rname, "showing array of to hold attributes of latest added link:", 0);
 echo "<font color=\"#3358ff\">";
-                        nn_show_array($rname, $nav_links[$key_name]);
+                        nn_show_array($rname, $nav_links[$key_name], "--no-options");
 echo "</font>";
                     }
 
@@ -1020,8 +1101,8 @@ echo "</font>";
     } // end IF-block testing file handle assignment of value from opendir(),
 
 
-    show_diag($rname, "- DEVELOPMENT SUMMARY -");
-    show_diag($rname, "found $count_filenames_not_matching filenames not matching caller's infix pattern,");
+    show_diag($rname, "- DEVELOPMENT SUMMARY -", 0);
+    show_diag($rname, "found $count_filenames_not_matching filenames not matching caller's infix pattern,", 0);
 
 
 
@@ -1030,11 +1111,11 @@ echo "</font>";
 // links with horizontal (could be vertical or otherwise) CSS layout
 // and HTML tags for layout and formatting . . .
 
+    present_menu_from_hash_of_hashes($rname, $nav_links, "--no-options");
 
 
 
-
-    show_diag($rname, "done.");
+    show_diag($rname, "done.", 0);
     echo $term;
 
 } // end function nn_menu_building_hybrid_fashion()
