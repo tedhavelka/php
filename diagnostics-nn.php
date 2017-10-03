@@ -21,9 +21,26 @@ function show_diag_default_formatting($caller, $message)
 
 function show_diag($caller, $message, $options)
 {
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// 2017-09-25 MON - added by Ted:
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//----------------------------------------------------------------------
+//
+//  2017-09-25 MON - added by Ted . . .
+//
+//  EXPECTS:
+//     *  calling code identifying string,
+//     *  message to send to this or given PHP script's standard out fd,
+//     *  integer type option to specify caller's desired message format,
+//
+//  RETURNS:
+//     *  nothing
+//
+//  NOTES ON IMPLEMENTATION:  In this case, unlike some other local
+//    PHP routines, the \$options parameter passed to this show_diag()
+//    routine are treated as integer values and expected to be
+//    integers.  See file `defines-nn.php' or similar for names of
+//    PHP constants which this routine treats as different kinds of
+//    requested output formats.  - TMH
+//
+//----------------------------------------------------------------------
 
 
 // Note:  parameter options must be non-zero for calling code's message

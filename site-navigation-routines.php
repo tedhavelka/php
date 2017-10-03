@@ -753,7 +753,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 //         |            |
 //         |           url => "given URL"
 //         |           link_text => "link text presented as hyperlink"
-//         |           link_status => "[ enabled | disabled ]"
+//         |           link_status => "[ enabled | disabled | hidden ]"
 //         |
 //        002 => $hash_reference
 //         |            |
@@ -793,7 +793,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 
 
 //
-// TO DO:  add foreach construct to check for presence of one valid
+// TO-DO:  add foreach construct to check for presence of one valid
 //   child hash in the caller's passed hash reference:
 //
 //    * REF *  http://php.net/manual/en/control-structures.break.php
@@ -830,6 +830,11 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
             if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_STATUS] ) )
                 { $link_status = $hash_reference[$key][KEY_NAME_FOR_LINK_STATUS]; }
 
+
+// TO-DO 2017-10-03 - place the hard-coded strings `enabled' and `disabled' into PHP constants,
+//  called out at the top of this routine or somewhere which makes it easy to see what
+//  constant values are used in the scope of this routine - TMH
+
             if ( 0 == strncmp("enabled", $link_status, LENGTH__KEY_NAME) )
             {
                 if ( isset($hash_reference[$key][KEY_NAME_FOR_URL] ) )
@@ -839,6 +844,18 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
                     { $link_text = $hash_reference[$key][KEY_NAME_FOR_LINK_TEXT]; }
 
                 echo "<div class=\"menu-item\"> <a href=\"$url\">" . $link_text . "</a> </div>\n\n";
+
+                if ( $key < ($last_item - 1) )
+                {
+                    echo "<div class=\"menu-item-text-separator\"> : </div>\n\n";
+                }
+            }
+            elseif ( 0 == strncmp("disabled", $link_status, LENGTH__KEY_NAME) )
+            {
+                if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_TEXT] ) )
+                    { $link_text = $hash_reference[$key][KEY_NAME_FOR_LINK_TEXT]; }
+
+                echo "<div class=\"menu-item\">$link_text</div>\n\n";
 
                 if ( $key < ($last_item - 1) )
                 {
@@ -985,8 +1002,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 
 
-    show_diag($rname, "starting,", 0);
-    show_diag($rname, "ROUTINE UNDER DEVELOPMENT", 0);
+    show_diag($rname, "starting,", $dflag_verbose);
+    show_diag($rname, "ROUTINE UNDER DEVELOPMENT", $dflag_verbose);
 
     echo $term;
 
@@ -1027,6 +1044,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
         $pattern_to_match = "@(.*)($filename_infix)(.*)@i";
         show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", 0);
 
+
+//  While there are filenames to read from the opened file system directory:
         while (false !== ($current_filename = readdir($handle)))
         {
             preg_match($pattern_to_match, $current_filename, $matches);
@@ -1036,14 +1055,17 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
             {
                 if ( $matches[0] )
                 {
-// this function call gives us a PHP ordered map with keys 'url', 'link_text', 'link_status':
+// blind, auto-incrementing way of naming nav' menu top level hash keys:
+//                    $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
+//                    ++$integer_key_value;
 
-                    $key_name = str_pad($integer_key_value, KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
-                    ++$integer_key_value;
+// filename based way of key naming:
+                    $key_name = str_pad($matches[1], KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
 
 //                    echo "- DEV -$term found filename '$current_filename' matching pattern, latest hash key name is '$key_name'," . $term;
                     show_diag($rname, "- DEV - found filename '$current_filename' matching pattern, latest hash key name is '$key_name',", 0);
 
+// this function call gives us a PHP ordered map with keys 'url', 'link_text', 'link_status':
                     $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
 
 //                    show_diag($rname, "showing array of navigation links:");
@@ -1069,20 +1091,43 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     $result = 0;
 
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - process symbolic links to add item to navigation menu:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
                     if ( is_link($full_path_to_file) )
                     {
+// Note:  whether links are indicated by symlink names as hidden, disabled,
+//  or enabled, parse and store the URL and link text:
+
+                        preg_match($pattern_to_match, $current_filename, $matches);
+                        $link_text = $matches[3];
+
+                        $nav_links[$key_name][KEY_NAME_FOR_URL] = "$path_to_search/$link_text";
+                        $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = "$link_text";
+
 //
 // Symlinks may be named in a way that indicates their target URLs are
 // desired to by hidden, by web maintainers.  Here check if latest
 // symlink name has a postfix indicating it should be kept out of, or
 // hidden from the navigation menu list being built here:
 //
+
+// TO-DO 2017-10-03 - place the '--not-ready' postfix pattern in a PHP constant:
+
                         if ( ( $flag__hide_not_ready ) and ( preg_match("/(.)--not-ready$/", $current_filename) ) )
                         {
-                            // do nothing
-                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
+//                            // do nothing
+//                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
+                            $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
+                        }
+                        elseif  ( preg_match("/(.)--disabled$/", $current_filename) )
+                        {
+// URLs indicated disabled will appear as text only, not hyperlinks:
+
+                            $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "disabled";
+                            $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = preg_replace('/--disabled$/', '', $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT]);
                         }
                         else
                         {
@@ -1091,17 +1136,20 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                             show_diag($rname, "array of text pattern matches holds:", $dflag_parse_filename);
                             nn_show_array($rname, $matches, "--no-options");
 
-                            preg_match($pattern_to_match, $current_filename, $matches);
-                            $link_text = $matches[3];
-
-                            $nav_links[$key_name]["url"] = "$path_to_search/$link_text";
-                            $nav_links[$key_name]["link_text"] = "$link_text";
-                            $nav_links[$key_name]["link_status"] = "enabled";
+//                            preg_match($pattern_to_match, $current_filename, $matches);
+//                            $link_text = $matches[3];
+//
+//                            $nav_links[$key_name]["url"] = "$path_to_search/$link_text";
+//                            $nav_links[$key_name]["link_text"] = "$link_text";
+                            $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "enabled";
                         }
                     }
 
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - process regular files to add item to navigation menu:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // * REF * https://www.ibm.com/developerworks/library/os-php-readfiles/index.html
 
