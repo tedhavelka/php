@@ -956,6 +956,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     $line = "";                    // . . . line of text from regular file whose name matches caller's infix pattern,
 
+    $intermediate_string = "";     // . . . intermediate string for development of text processing stuff,
+
 
 // local flags set by presence of options passed by call in last parameter:
 //  ( Note:  general options parsing not yet implemented, flag set manually here . . . TMH )
@@ -979,6 +981,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     $rname = "nn_menu_building_hybrid_fashion";
 
 // END LOCAL VARIABLES
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 
@@ -1159,8 +1162,6 @@ echo "</font>";
                             preg_match("@(LINK_STATUS=)(.*)@", $line, $matches);
                             if ( isset($matches[2]) ) { $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = $matches[2]; }
 
-                            echo $term;
-
                         } // end WHILE file has lines of text to process,
 
                     } // end IF-block testing whether file is of type regular file,
@@ -1168,10 +1169,31 @@ echo "</font>";
 
 
 
-// 2017-10-02 - replace spaces with HTML non-breakable spaces . . . $pattern, $replacement, $string, [$replace_n_times]:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - 2017-10-02 - 
+// - STEP - replace spaces with HTML non-breakable spaces . . . 
+//  $pattern, $replacement, $string, [$replacement_limit, $replacements_made]:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-                    preg_replace(' ', '&nbsp;', $link_text);
-show_diag($rname, "-- zztop -- after preg_replace() call, link text holds '$link_text',", $dflag_dev);
+// $string = $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT];
+$string = $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT];
+$count = 0;
+
+show_diag($rname, "After handlings symlinks and text files, link text holds \"$link_text\",", $dflag_dev);
+
+echo "<pre>\n";
+show_diag($rname, "-- zztop 1 -- before preg_replace() call, temporary string with copy of link text holds \"$string\",", $dflag_dev);
+
+
+//                               $string = preg_replace('/\s/', '&nbsp;', $string);
+//                    $intermediate_string = preg_replace('/\s/', '&nbsp;', $string);
+                    $intermediate_string = preg_replace('/\s/', '&nbsp;', $string, NN_MAXIMUM_PREG_REPLACEMENTS, $count);
+
+                    $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = $intermediate_string;
+
+show_diag($rname, "-- zztop 2 -- after preg_replace('/\s/', '&nbsp;', \$string), link text holds \"$intermediate_string\" and replacement count = $count,", $dflag_dev);
+show_diag($rname, "and HTML non-breakable space code within &lt;pre&gt; tag pair looks like \"&nbsp;\",", $dflag_dev);
+echo "</pre>\n";
 
 
 
@@ -1217,7 +1239,7 @@ echo "</font>";
 
     if ( is_array($nav_links) )
     {
-show_diag($rname, "\$nav_links is an array (a PHP hash),", $dflag_dev);
+        show_diag($rname, "\$nav_links is an array (a PHP hash),", $dflag_dev);
         if ( 1 < count($nav_links) ) { ksort($nav_links); }
     }
 
