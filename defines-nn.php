@@ -14,6 +14,9 @@
 // First use in file site-navigation-routines.php, for calls to PHP strncmp():
     define("LENGTH__KEY_NAME", 256);
 
+// 2017-10-04 added for use in site-navigation-routines.php:
+    define("LENGTH__FILE_NAME", 1024);
+
 // 2017-10-03 added for use in site-navigation-routines.php:
     define("NN_MAXIMUM_PREG_REPLACEMENTS", 1024);
 

@@ -966,6 +966,10 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     $count_filenames_matching = 0;
     $count_filenames_not_matching = 0;
 
+    $current_directory = "";       // . . . these three variables used to exclude current dir from navigation menu,
+    $current_directory_dirname_only = "";
+    $link_text_minus_disabled_postfix = "";
+
 
 // file handle used to read regular files, as opposed to symbolic links:
 
@@ -977,9 +981,11 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 
 // local flags set by presence of options passed by call in last parameter:
-//  ( Note:  general options parsing not yet implemented, flag set manually here . . . TMH )
+//  ( Note:  general options parsing not yet implemented, flags set manually here . . . TMH )
 
-    $flag__hide_not_ready = true;
+    $flag__hide_not_ready   = true;
+    $flag__hide_disabled    = false;
+    $flag__hide_current_dir = true;
 
 
 
@@ -997,7 +1003,10 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // Some flags for diagnostics at specific steps in routine development:
     $dflag_parse_filename = DIAGNOSTICS_OFF;
     $dflag_parse_file_text = DIAGNOSTICS_OFF;
-    $dflag_show_van_links_hash = DIAGNOSTICS_OFF;
+    $dflag_show_nav_links_hash = DIAGNOSTICS_OFF;
+    $dflag_hide_cwd            = DIAGNOSTICS_OFF;
+
+    $loop_counter = 0;
 
     $rname = "nn_menu_building_hybrid_fashion";
 
@@ -1046,6 +1055,10 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
         $pattern_to_match = "@(.*)($filename_infix)(.*)@i";
         show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", $dflag_dev);
+
+// 2017-10-04 - these two assignments used to optionally exclude this script's directory from navigable menu items:
+        $current_directory = getcwd();
+        $current_directory_dirname_only = basename($current_directory);
 
 
 //  While there are filenames to read from the opened file system directory:
@@ -1107,30 +1120,49 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         $nav_links[$key_name][KEY_NAME_FOR_URL] = "$path_to_search/$link_text";
                         $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = "$link_text";
 
-//
+// Note:  due to next IF-ELSEIF-ELSE structure we parse and hold link
+//  text minus a particular postfix pattern here to be able to optionally
+//  exclude current script directory from navigation menu items.
+//  We'll capture this possibly modified link text in the next
+//  larger IF-ELSE block to handle regular files, as link text
+//  is parsed from line inside the file rather than from name of
+//  file:
+                        $link_text_minus_disabled_postfix = preg_replace('/--disabled$/', '', $link_text);
+
+
+
 // Symlinks may be named in a way that indicates their target URLs are
-// desired to by hidden, by web maintainers.  Here check if latest
+// desired by web maintainers to be hidden.  Here check if latest
 // symlink name has a postfix indicating it should be kept out of, or
 // hidden from the navigation menu list being built here:
-//
 
-// TO-DO 2017-10-03 - place the '--not-ready' postfix pattern in a PHP constant:
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TO-DO 2017-10-03 - in following PHP IF-ELSEIF-ELSE place the '--not-ready'
+//   postfix pattern in a PHP constant:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// symlink
                         if ( ( $flag__hide_not_ready ) and ( preg_match("/(.)--not-ready$/", $current_filename) ) )
                         {
-//                            // do nothing
-//                            show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
+                            // // do nothing
+                            // show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
                         }
-                        elseif  ( preg_match("/(.)--disabled$/", $current_filename) )
-                        {
+
+
 // URLs indicated disabled will appear as text only, not hyperlinks:
+
+// symlink
+                        elseif ( preg_match("/(.)--disabled$/", $current_filename) )
+                        {
                             $result = 1;
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "disabled";
-
-// Here remove postfix pattern from symbolic link, pattern indicating link disabled:
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = preg_replace('/--disabled$/', '', $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT]);
                         }
+
+
+// symlink
                         else
                         {
                             $result = 1;
@@ -1143,7 +1175,9 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "enabled";
                         }
-                    }
+
+                    } // end IF-block which catches and handles symbolic links found in caller's path
+
 
 
 
@@ -1208,7 +1242,12 @@ if ( 0 )
 
 // 2017-10-02 MON - Ted noticing PHP notice of undefined offset from following line . . . ok PHP isset() fixes that notice, now applying same fix to like test on line 1048 this file . . . TMH
 //                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
-                            if ( isset($matches[2]) ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
+                            if ( isset($matches[2]) )
+                            {
+                                $link_text = $matches[2];
+                                $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = $link_text;
+                                $link_text_minus_disabled_postfix = preg_replace('/--disabled$/', '', $link_text);
+                            }
 
 
                             preg_match("@(LINK_STATUS=)(.*)@", $line, $matches);
@@ -1217,6 +1256,47 @@ if ( 0 )
                         } // end WHILE file has lines of text to process,
 
                     } // end IF-block testing whether file is of type regular file,
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+// 2017-10-04 - We have moved hiding of script's current working directory
+//  outside the detailed IF-ELSE tests of pattern-matching symbolic links
+//  and yet before the detailed handling of pattern-matching text files,
+//  so will this logic work here, and is it better to place this 'hide
+//  current dir' logic after both symlink and regular file handling?
+//  That ordering of processing seems better, even if text files would
+//  never normally call out the script's current working directory as
+//  a navibable URL, e.i. menu item . . .
+//
+//  Ah, order here matters as regular files cause script execution to
+//  skip the above IF-ELSE block and so skip an updating of 'link text'
+//  
+//  - TMH
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+if ( $dflag_hide_cwd )
+{
+    show_diag($rname, "loop counter holds $loop_counter,", $dflag_hide_cwd);
+    show_diag($rname, "on this loop iteration processing file '$full_path_to_file',", $dflag_hide_cwd);
+    show_diag($rname, "about to check whether link text matches script's current directory,", $dflag_hide_cwd);
+    show_diag($rname, "link text minus postfix pattern holds '$link_text_minus_disabled_postfix' and current directory detected as '$current_directory_dirname_only',", $dflag_hide_cwd);
+    echo "PHP function strncmp() returns " . strncmp($link_text_minus_disabled_postfix, $current_directory_dirname_only, LENGTH__FILE_NAME) . ",";
+    echo $term;
+}
+
+                    if ( $flag__hide_current_dir )
+                    {
+                        show_diag($rname, "flag to hide current directory from navigable menu set 'true',", $dflag_hide_cwd);
+                    }
+
+//                    elseif ( ( $flag__hide_current_dir ) && ( $link_text_minus_disabled_postfix === $current_directory_dirname_only ) )
+                    if ( ( $flag__hide_current_dir ) && ( 0 == strncmp($link_text_minus_disabled_postfix, $current_directory_dirname_only, LENGTH__FILE_NAME) ) )
+                    {
+                        show_diag($rname, "setting status of nav menu item '" . $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] . "' to 'hidden' . . .", $dflag_hide_cwd);
+                        $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
+                    }
 
 
 
@@ -1271,7 +1351,12 @@ $count = 0;
                 show_diag($rname, "filename doesn't match", $dflag_dev);
                 ++$count_filenames_not_matching;
             }
+
+            ++$loop_counter;
+
+
         } // end WHILE-block iterating over files in caller-specified directory,
+
     } // end IF-block testing file handle assignment of value from opendir(),
 
 
@@ -1303,7 +1388,7 @@ $count = 0;
 
     show_diag($rname, "Some trouble sorting navigation menu items by hash key, PHP print_r() shows hash as follows:", $dflag_dev);
 
-    if ( $dflag_show_van_links_hash )
+    if ( $dflag_show_nav_links_hash )
     {
         echo "<pre>\n";
         print_r($nav_links);
