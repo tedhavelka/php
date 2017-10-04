@@ -764,7 +764,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 //
 //  REFERENCES:
 //
-//   * REF * http://php.net/manual/en/function.is-array.php
+//    * REF *  http://php.net/manual/en/function.is-array.php
 //
 //
 //
@@ -985,15 +985,19 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 // diagnostics and formatting:
 
-    $dmsg = "";                    // . . . local diagnostics message string for development and debugging,
+    $dmsg = "";                          // . . . local diagnostics message string for development and debugging,
 
     $term = "<br />\n";
 
-    $dflag_dev     = 1;            // . . . diagnostics flag for development-related run time comments,
-    $dflag_verbose = 1;            // . . . diagnostics flag for verbose messages during development,
-    $dflag_warning = 1;            // . . . diagnostics flag for development-related run time comments,
+    $dflag_announce = DIAGNOSTICS_OFF;   // . . . diagnostics flag for development-related run time comments,
+    $dflag_dev      = DIAGNOSTICS_OFF;   // . . . diagnostics flag for development-related run time comments,
+    $dflag_verbose  = DIAGNOSTICS_ON;    // . . . diagnostics flag for verbose messages during development,
+    $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
 
-    $dflag_parse_filename = 1;     // . . . diagnostics flag for verbose messages during development,
+// Some flags for diagnostics at specific steps in routine development:
+    $dflag_parse_filename = DIAGNOSTICS_OFF;
+    $dflag_parse_file_text = DIAGNOSTICS_OFF;
+    $dflag_show_van_links_hash = DIAGNOSTICS_OFF;
 
     $rname = "nn_menu_building_hybrid_fashion";
 
@@ -1002,10 +1006,9 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 
 
-    show_diag($rname, "starting,", $dflag_verbose);
-    show_diag($rname, "ROUTINE UNDER DEVELOPMENT", $dflag_verbose);
+    show_diag($rname, "starting,", $dflag_announce);
 
-    echo $term;
+    show_diag($rname, "ROUTINE UNDER DEVELOPMENT<br />\n<br />", $dflag_dev);
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1021,7 +1024,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     if ( $show_usage )
     {
-        echo " &nbsp;$rname:  parameters and use are . . .
+        show_diag($rname, " &nbsp;$rname:  parameters and use are . . .
 
     $rname(\$caller, \$path_to_search, \$filename_infix, \$filename_postfix, \$options)
 
@@ -1029,7 +1032,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
  &nbsp;\$path_to_search . . . names path to search for files which represent navigable web page URLs,
  &nbsp;\$filename_infix . . . text pattern which calling code expects in files which represent desired URL data,
  &nbsp;\$options        . . . this last parameter intended to support comma-separated list of options.
-";
+", MESSAGE_ONLY);
     }
 
 
@@ -1039,10 +1042,10 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     if ( $handle = opendir($path_to_search) )
     {
-        show_diag($rname, "call to opendir() succeeded!", $dflag_verbose, 0);
-//        $pattern_to_match = "@(.*$filename_infix)(.*)@i";
+        show_diag($rname, "call to opendir() succeeded!", $dflag_dev);
+
         $pattern_to_match = "@(.*)($filename_infix)(.*)@i";
-        show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", 0);
+        show_diag($rname, "built regex $pattern_to_match to search for caller's desired files,", $dflag_dev);
 
 
 //  While there are filenames to read from the opened file system directory:
@@ -1062,7 +1065,6 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // filename based way of key naming:
                     $key_name = str_pad($matches[1], KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
 
-//                    echo "- DEV -$term found filename '$current_filename' matching pattern, latest hash key name is '$key_name'," . $term;
                     show_diag($rname, "- DEV - found filename '$current_filename' matching pattern, latest hash key name is '$key_name',", 0);
 
 // this function call gives us a PHP ordered map with keys 'url', 'link_text', 'link_status':
@@ -1086,10 +1088,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //  is_link() and is_file() . . .
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
                     $full_path_to_file = "$path_to_search/$current_filename";
                     $result = 0;
-
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1125,22 +1125,22 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         elseif  ( preg_match("/(.)--disabled$/", $current_filename) )
                         {
 // URLs indicated disabled will appear as text only, not hyperlinks:
-
+                            $result = 1;
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "disabled";
+
+// Here remove postfix pattern from symbolic link, pattern indicating link disabled:
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = preg_replace('/--disabled$/', '', $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT]);
                         }
                         else
                         {
                             $result = 1;
-                            show_diag($rname, "parsing URL and link text from filename  $current_filename,", $dflag_parse_filename);
-                            show_diag($rname, "array of text pattern matches holds:", $dflag_parse_filename);
-                            nn_show_array($rname, $matches, "--no-options");
+                            if ( $dflag_parse_filename )
+                            {
+                                show_diag($rname, "parsing URL and link text from filename  $current_filename,", $dflag_parse_filename);
+                                show_diag($rname, "array of text pattern matches holds:", $dflag_parse_filename);
+                                nn_show_array($rname, $matches, "--no-options");
+                            }
 
-//                            preg_match($pattern_to_match, $current_filename, $matches);
-//                            $link_text = $matches[3];
-//
-//                            $nav_links[$key_name]["url"] = "$path_to_search/$link_text";
-//                            $nav_links[$key_name]["link_text"] = "$link_text";
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "enabled";
                         }
                     }
@@ -1151,7 +1151,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // - STEP - process regular files to add item to navigation menu:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// * REF * https://www.ibm.com/developerworks/library/os-php-readfiles/index.html
+//    * REF *  https://www.ibm.com/developerworks/library/os-php-readfiles/index.html
 
                     if ( is_file($full_path_to_file) )
                     {
@@ -1162,14 +1162,14 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         while ( !feof($handle_to_file))
                         {
                             $line = fgets($handle_to_file);
-echo "<font color=\"green\">";
-                            echo $line . $term;
-echo "</font>";
+                            show_diag($rname, "<font color=\"green\">$line</font>$term", DIAGNOSTICS_OFF);  // 'MESSAGE_ONLY' to turn on this diagnostic
 
                             preg_match("/(^URL=)(.*)/", $line, $matches);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // DIAG START
+if ( 0 )
+{
                             if ( $matches )
                             {
                                 show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:", $dflag_dev);
@@ -1179,6 +1179,7 @@ echo "</font>";
                             {
                                 show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.", 0);
                             }
+}
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1190,6 +1191,8 @@ echo "</font>";
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // DIAG START
+if ( 0 )
+{
                             if ( $matches )
                             {
                                 show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:", 0);
@@ -1199,6 +1202,7 @@ echo "</font>";
                             {
                                 show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.", 0);
                             }
+}
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1227,37 +1231,36 @@ echo "</font>";
 $string = $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT];
 $count = 0;
 
-show_diag($rname, "After handlings symlinks and text files, link text holds \"$link_text\",", $dflag_dev);
+// show_diag($rname, "After handlings symlinks and text files, link text holds \"$link_text\",", $dflag_dev);
+//
+// echo "<pre>\n";
+// show_diag($rname, "-- zztop 1 -- before preg_replace() call, temporary string with copy of link text holds \"$string\",", $dflag_dev);
 
-echo "<pre>\n";
-show_diag($rname, "-- zztop 1 -- before preg_replace() call, temporary string with copy of link text holds \"$string\",", $dflag_dev);
 
-
-//                               $string = preg_replace('/\s/', '&nbsp;', $string);
+//                                 $string = preg_replace('/\s/', '&nbsp;', $string);
 //                    $intermediate_string = preg_replace('/\s/', '&nbsp;', $string);
                     $intermediate_string = preg_replace('/\s/', '&nbsp;', $string, NN_MAXIMUM_PREG_REPLACEMENTS, $count);
 
                     $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] = $intermediate_string;
 
-show_diag($rname, "-- zztop 2 -- after preg_replace('/\s/', '&nbsp;', \$string), link text holds \"$intermediate_string\" and replacement count = $count,", $dflag_dev);
-show_diag($rname, "and HTML non-breakable space code within &lt;pre&gt; tag pair looks like \"&nbsp;\",", $dflag_dev);
-echo "</pre>\n";
-
-
+// show_diag($rname, "-- zztop 2 -- after preg_replace('/\s/', '&nbsp;', \$string), link text holds \"$intermediate_string\" and replacement count = $count,", $dflag_dev);
+// show_diag($rname, "and HTML non-breakable space code within &lt;pre&gt; tag pair looks like \"&nbsp;\",", $dflag_dev);
+// echo "</pre>\n";
 
 
 
                     if ( $result )
                     {
-                        show_diag($rname, "For latest matched filename,", 0);
-                        show_diag($rname, "showing array of to hold attributes of latest added link:", 0);
-echo "<font color=\"#3358ff\">";
-                        nn_show_array($rname, $nav_links[$key_name], "--no-options");
-echo "</font>";
+                        show_diag($rname, "For latest matched filename,", $dflag_parse_file_text);
+                        show_diag($rname, "showing array of to hold attributes of latest added link:", $dflag_parse_file_text);
+                        if ( $dflag_parse_file_text )
+                        {
+                            echo "<font color=\"#3358ff\">";
+                            nn_show_array($rname, $nav_links[$key_name], "--no-options");
+                            echo "</font>";
+                        }
                     }
 
-
-                    echo $term;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1265,7 +1268,7 @@ echo "</font>";
             } // end IF-block testing whether there are any matches to filename infix pattern from caller,
             else
             {
-//                show_diag($rname, "filename doesn't match");
+                show_diag($rname, "filename doesn't match", $dflag_dev);
                 ++$count_filenames_not_matching;
             }
         } // end WHILE-block iterating over files in caller-specified directory,
@@ -1283,8 +1286,6 @@ echo "</font>";
 //  and has at least two elements:
 // ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
 
-//    ksort($nav_links);
-
     if ( is_array($nav_links) )
     {
         show_diag($rname, "\$nav_links is an array (a PHP hash),", $dflag_dev);
@@ -1300,19 +1301,20 @@ echo "</font>";
     present_menu_from_hash_of_hashes($rname, $nav_links, "--no-options");
 
 
+    show_diag($rname, "Some trouble sorting navigation menu items by hash key, PHP print_r() shows hash as follows:", $dflag_dev);
 
-show_diag($rname, "Some trouble sorting navigation menu items by hash key, PHP print_r() shows hash as follows:", $dflag_dev);
-echo "<pre>\n";
-print_r($nav_links);
-echo "</pre>\n";
+    if ( $dflag_show_van_links_hash )
+    {
+        echo "<pre>\n";
+        print_r($nav_links);
+        echo "</pre>\n";
+    }
 
 
-    show_diag($rname, "done.", $dflag_verbose);
-    echo $term;
+    show_diag($rname, "done.", $dflag_announce);
+
 
 } // end function nn_menu_building_hybrid_fashion()
-
-
 
 
 

@@ -4,12 +4,42 @@
 //
 //  FILE:  diagnostics-nn.php
 //
+//
+//  REFERENCES:
+//
+//    * REF *  http://php.net/manual/en/language.operators.bitwise.php
+//
 //======================================================================
 
 
 
-// - 2017-10-02 MON - QUESTION:  Permissible in PHP to have like-named functions with differing parameter lists?  ANSWER:  No - TMH
 
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  - SECTION - PHP defined constants
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    define("DIAGNOSTICS_OFF", 0);
+    define("DIAGNOSTICS_ON", 1);
+    define("DIAGNOSTICS__ROUTINE_NAME_AND_MESSAGE", 2);
+    define("DIAGNOSTICS__MESSAGE_ONLY", 4);
+    define("DIAGNOSTICS__WARNING_STYLE", 8);
+    define("DIAGNOSTICS__ERROR_STYLE", 16);
+
+    define("DEFAULT_DIAGNOSTIC_MESSAGE", (DIAGNOSTICS_ON | DIAGNOSTICS__ROUTINE_NAME_AND_MESSAGE));
+    define("MESSAGE_ONLY", (DIAGNOSTICS_ON | DIAGNOSTICS__MESSAGE_ONLY));
+
+
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  - SECTION - function definitions
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// - 2017-10-02 MON - QUESTION:  Permissible in PHP to have like-named functions with differing parameter lists?  ANSWER:  No - TMH
 
 function show_diag_default_formatting($caller, $message)
 {
@@ -19,7 +49,7 @@ function show_diag_default_formatting($caller, $message)
 
 
 
-function show_diag($caller, $message, $options)
+function show_diag($caller, $message, $bit_wise_message_option)
 {
 //----------------------------------------------------------------------
 //
@@ -46,9 +76,13 @@ function show_diag($caller, $message, $options)
 // Note:  parameter options must be non-zero for calling code's message
 //  to show:
 
-    if ( $options )
+    if ( ( $bit_wise_message_option == DEFAULT_DIAGNOSTIC_MESSAGE ) || ( $bit_wise_message_option == DIAGNOSTICS_ON ) )
     {
-        echo "$caller: &nbsp;$message<br />\n";
+        echo "$caller ($bit_wise_message_option): &nbsp;$message<br />\n";
+    }
+    else if ( $bit_wise_message_option == MESSAGE_ONLY )
+    {
+        echo $message;
     }
     else
     {
