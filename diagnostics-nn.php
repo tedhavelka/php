@@ -32,6 +32,10 @@
     define("MESSAGE_ONLY", (DIAGNOSTICS_ON | DIAGNOSTICS__MESSAGE_ONLY));
 
 
+// File-scoped variables:
+
+    $term = "<br />\n";
+
 
 
 
@@ -39,11 +43,35 @@
 //  - SECTION - function definitions
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+function show_nn_diagnostics_defines($caller)
+{
+
+    global $term;
+
+    echo "<i>\n";
+    echo " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" . $term;
+    echo "                   LOCAL PHP DIAGNOSTICS DEFINES" . $term . $term;
+    echo "DIAGNOSTICS_OFF = " . DIAGNOSTICS_OFF . $term;
+    echo "DIAGNOSTICS_ON  = " . DIAGNOSTICS_ON . $term;
+    echo "DIAGNOSTICS__ROUTINE_NAME_AND_MESSAGE = " . DIAGNOSTICS__ROUTINE_NAME_AND_MESSAGE . $term;
+    echo "DIAGNOSTICS__MESSAGE_ONLY             = " . DIAGNOSTICS__MESSAGE_ONLY . $term;
+    echo "DIAGNOSTICS__WARNING_STYLE            = " . DIAGNOSTICS__WARNING_STYLE . $term;
+    echo "DIAGNOSTICS__ERROR_STYLE              = " . DIAGNOSTICS__ERROR_STYLE . $term;
+    echo $term;
+    echo "DEFAULT_DIAGNOSTIC_MESSAGE            = " . DEFAULT_DIAGNOSTIC_MESSAGE . $term;
+    echo "MESSAGE_ONLY                          = " . MESSAGE_ONLY . $term;
+    echo " - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" . $term;
+    echo "</i>" . $term;
+
+}
+
+
+
 // - 2017-10-02 MON - QUESTION:  Permissible in PHP to have like-named functions with differing parameter lists?  ANSWER:  No - TMH
 
 function show_diag_default_formatting($caller, $message)
 {
-    show_diag($caller, $message, 0);
+    show_diag($caller, $message, DIAGNOSTICS_ON);
 }
 
 
@@ -72,6 +100,8 @@ function show_diag($caller, $message, $bit_wise_message_option)
 //
 //----------------------------------------------------------------------
 
+
+    global $term;
 
 // Note:  parameter options must be non-zero for calling code's message
 //  to show:

@@ -259,6 +259,7 @@ function &navigation_items_via_filenames__dev_version(
     foreach ($items_to_exclude as $key => $value)
     {
         preg_match('@(.*--nn--)(.*)(.*--exclude-from-nav$)@', $value, $matches);  // . . . call preg_match() with pattern, string_to_search, array_of_matches_found
+// 2017-10-20 - NEED TO . . . hey what happens when there are no matches?  Does not PHP interpreter throw error messages which will break normal page building communication with web browser? - TMH
         $items_to_exclude[$key] = $matches[2];
     }
     echo $term;
@@ -1004,6 +1005,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     $dflag_parse_filename = DIAGNOSTICS_OFF;
     $dflag_parse_file_text = DIAGNOSTICS_OFF;
     $dflag_show_nav_links_hash = DIAGNOSTICS_OFF;
+// 2017-10-19 THU QUESTION:  what does cwd stand for in this diagnostic flag variable?
     $dflag_hide_cwd            = DIAGNOSTICS_OFF;
 
     $loop_counter = 0;
@@ -1069,6 +1071,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // Test to avoid PHP 'undefined offset' warning:
             if ( $matches )
             {
+                show_diag($rname, "filename '" . $current_filename. "' matches pattern at least once!", $dflag_dev);
+
                 if ( $matches[0] )
                 {
 // blind, auto-incrementing way of naming nav' menu top level hash keys:
@@ -1086,7 +1090,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //                    show_diag($rname, "showing array of navigation links:");
 //                    nn_show_array($rname, $nav_links);
 
-//                    show_diag($rname, "showing array of to hold attributes of latest added link:");
+//                    show_diag($rname, "showing array to hold attributes of latest added navigation menu link:");
 //                    nn_show_array($rname, $nav_links[$key_name]);
 
 
@@ -1190,7 +1194,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                     if ( is_file($full_path_to_file) )
                     {
                         $result = 1;
-                        show_diag($rname, "file contents, if any, shown line by line in green:", $dflag_dev);
+                        show_diag($rname, "file contents, if any, shown line by line in green:", $dflag_parse_file_text);
 
                         $handle_to_file = fopen($full_path_to_file, "r");
                         while ( !feof($handle_to_file))
@@ -1202,16 +1206,18 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // DIAG START
-if ( 0 )
+if ( $dflag_parse_file_text )
 {
                             if ( $matches )
                             {
-                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:", $dflag_dev);
+                                show_diag($rname, "after matching line from file to \"/(^URL=)(.*)/\", \$matches holds:",
+                                  $dflag_parse_file_text);
                                 nn_show_array($rname, $matches, "--no-options");
                             }
                             else
                             {
-                                show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.", 0);
+                                show_diag($rname, "line holding '$line' does not match regex /(^URL=)(.*)/.",
+                                  $dflag_parse_file_text);
                             }
 }
 // DIAG END
@@ -1225,23 +1231,31 @@ if ( 0 )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // DIAG START
-if ( 0 )
+if ( $dflag_parse_file_text )
 {
                             if ( $matches )
                             {
-                                show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:", 0);
+                                show_diag($rname, "after matching line from file to \"@(LINK_TEXT=)(.*)@\", \$matches holds:",
+                                  $dflag_parse_file_text);
                                 nn_show_array($rname, $matches, "--no-options");
                             }
                             else
                             {
-                                show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.", 0);
+                                show_diag($rname, "line holding '$line' does not match regex @(LINK_TEXT=)(.*)@.",
+                                  $dflag_parse_file_text);
                             }
 }
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// 2017-10-02 MON - Ted noticing PHP notice of undefined offset from following line . . . ok PHP isset() fixes that notice, now applying same fix to like test on line 1048 this file . . . TMH
+
+//
+// 2017-10-02 MON - Ted observes PHP notice of undefined offset from
+//  following line . . . ok PHP isset() fixes that notice, now applying
+//  same fix to like test on line 1048 this file . . . TMH
+
 //                            if ( $matches[2] ) { $nav_links[$key_name]["link_text"] = $matches[2]; }
+
                             if ( isset($matches[2]) )
                             {
                                 $link_text = $matches[2];
@@ -1332,13 +1346,17 @@ $count = 0;
                     if ( $result )
                     {
                         show_diag($rname, "For latest matched filename,", $dflag_parse_file_text);
-                        show_diag($rname, "showing array of to hold attributes of latest added link:", $dflag_parse_file_text);
+                        show_diag($rname, "showing array to hold attributes of newly added nav' menu link,", $dflag_parse_file_text);
+                        show_diag($rname, "\$nav_links[" . $key_name . "] =>", $dflag_parse_file_text);
+
                         if ( $dflag_parse_file_text )
                         {
                             echo "<font color=\"#3358ff\">";
                             nn_show_array($rname, $nav_links[$key_name], "--no-options");
                             echo "</font>";
                         }
+
+                        show_diag($rname, "---<br />\n", ($dflag_parse_file_text | DIAGNOSTICS__MESSAGE_ONLY));
                     }
 
 
@@ -1386,7 +1404,8 @@ $count = 0;
     present_menu_from_hash_of_hashes($rname, $nav_links, "--no-options");
 
 
-    show_diag($rname, "Some trouble sorting navigation menu items by hash key, PHP print_r() shows hash as follows:", $dflag_dev);
+    show_diag($rname, "Just presented navigation menu per built hash, PHP print_r() shows that hash contains:",
+      $dflag_show_nav_links_hash);
 
     if ( $dflag_show_nav_links_hash )
     {
