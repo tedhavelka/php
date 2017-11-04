@@ -24,15 +24,23 @@
 
 // 2017-10-20 - one place to define keynames used for local library routine supported options:
 
-    define("LOCAL_PHP_LIBRARY_OPTION__SHOW_PARAMETERS", "show_parameters");
-    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_HEIGHT_IN_PIXELS", "image_row_height_in_px");
-    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_WIDTH_IN_PIXELS", "image_row_width_in_px");
-    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_BLOCK_ELEMENT_HEIGHT", "image_block_element_height");
-    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_BLOCK_ELEMENT_WIDTH", "image_block_element_width");
+// --- OPTIONS FOR ROUTINE DEVELOPMENT ---
 
-    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_SIZE", "image_size");
+    define("LOCAL_PHP_LIBRARY_OPTION__SHOW_PARAMETERS", "show_parameters");
+
+
+// --- OPTIONS FOR IMAGE GALLERY FORMATTING ---
+
+    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_HEIGHT_IN_PIXELS",   "image_row_height_in_px");
+    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_WIDTH_IN_PIXELS",    "image_row_width_in_px");
+    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_BLOCK_ELEMENT_HEIGHT",   "image_block_element_height");
+    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_BLOCK_ELEMENT_WIDTH",    "image_block_element_width");
+    define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_SIZE",                   "image_size");
     define("LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF", "new_row_after_image_count_of");
 
 
+// --- OPTIONS FOR FORMATTING NAVIGATION MENUS ---
+
+    define("LOCAL_PHP_LIBRARY_OPTION__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color");
 
 ?>

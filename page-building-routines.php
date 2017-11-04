@@ -39,6 +39,12 @@
 
 
 
+/*
+function --
+function -- SECTION -- HTML page basic sections --
+function --
+*/
+
 function send_opening_lines($caller)
 {
     echo "<!doctype html>\n";
@@ -200,7 +206,9 @@ function send_html_body_close($caller)
 
 
 /*
-function -- SECTION -- navigation and content elements
+function --
+function -- SECTION -- early routines with fixed output --
+function --
 */
 
 function nn_build_navigation__top_of_gallery_page__fixed_output($script_name)
@@ -297,6 +305,7 @@ function nn_main_content_formatting__closing_lines__fixed_ouput($script_name)
 
 
 /*
+function --
 function -- SECTION -- image layout routines --
 */
 

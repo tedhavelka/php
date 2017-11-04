@@ -724,7 +724,12 @@ function ___place_holder___
 function &nn_nav_menu_entry($caller)
 {
 
-    $nav_menu_entry = array("url" => "DEFAULT URL", "link_text" => "DEFAULT LINK NAME", "link_status" => "disabled");
+//    $nav_menu_entry = array("url" => "DEFAULT URL", "link_text" => "DEFAULT LINK NAME", "link_status" => "disabled");
+    $nav_menu_entry = array(
+      KEY_NAME_FOR_URL => "DEFAULT URL",
+      KEY_NAME_FOR_LINK_NAME => "DEFAULT LINK NAME",
+      KEY_NAME_FOR_LINK_STATUS => "disabled"
+    );
 
     return $nav_menu_entry;
 
@@ -739,7 +744,26 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 //
 //  PURPOSE:  read a specifcally structured PHP hash of hashes, and
 //    present the values of this hash table as an HTML formatted menu
-//    of URLs.
+//    of URLs and plain text place holders in menu.  As of 2017-11-03
+//    this routine supports enabled and disabled menu items.  Enabled
+//    menu items are formatted as HTML links, while disabled menu
+//    items are formatted as plain text.  Menu items may also be
+//    qualified as 'hidden', and in this case they're not laid out in
+//    the menu at all.
+//
+//
+//  SUPPORTED OPTIONS:
+//
+//    SITE_MENU_DISABLED_LINK_COLOR
+//
+//       If array $options contains a key with the name
+//       SITE_MENU_DISABLED_LINK_COLOR, this color is applied to
+//       disable menu item links.  The value of this attribute is
+//       treated as a string.  It's expected and not checked to be
+//       either a valid HTML color name, or a red-green-blue triplet
+//       of the form #rrggbb.
+//
+//
 //
 //
 //  NOTES ON IMPLEMENTATION:
@@ -761,6 +785,10 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 //         |          . . .
 //         |
 //        nnn
+//
+//
+//  Note that child hash reference key names are PHP constants defined,
+//  as of 2017-11-03 in local PHP library file ___
 //
 //
 //  REFERENCES:
@@ -785,6 +813,9 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 
     $last_item = 0;     // . . . hold count of assumed valud menu items in caller's hash table,
 
+    $site_menu_disabled_link_color = "#707070";
+
+// diagnostics:
 
     $rname = "present_menu_from_hash_of_hashes";
 
@@ -856,7 +887,8 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
                 if ( isset($hash_reference[$key][KEY_NAME_FOR_LINK_TEXT] ) )
                     { $link_text = $hash_reference[$key][KEY_NAME_FOR_LINK_TEXT]; }
 
-                echo "<div class=\"menu-item\">$link_text</div>\n\n";
+//                echo "<div class=\"menu-item\">$link_text</div>\n\n";
+                echo "<div class=\"menu-item\"><font color=$site_menu_disabled_link_color>$link_text</font></div>\n\n";
 
                 if ( $key < ($last_item - 1) )
                 {
@@ -1223,7 +1255,7 @@ if ( $dflag_parse_file_text )
 // DIAG END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-                            if ( isset($matches[2]) ) { $nav_links[$key_name]["url"] = $matches[2]; }
+                            if ( isset($matches[2]) ) { $nav_links[$key_name][KEY_NAME_FOR_URL] = $matches[2]; }
 
 
 
