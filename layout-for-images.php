@@ -55,27 +55,131 @@
 
 function open_row_of_images($caller, $row_attributes)
 {
-    echo "   {image row opening statements}<br />\n";
+
+//    echo "   {image row opening statements}<br />\n";
+
+    echo "
+<div style=\"min-height:100px; min-width:100px; overflow:auto; border:none; background:#c0c0c0\">
+   <div style=\"float:left; min-height:100px; min-width:100px; max-width:1000px; border:none\">\n";
+
+//    echo "
+//      <div style=\"float:left; border:none\">
+//         <div style=\"display:flex; width:134px; margin:auto; border:none\">\n";
+
 }
+
 
 
 function close_row_of_images($caller, $row_attributes)
 {
 
-    echo "   {image row closing statements}<br />\n";
+//    echo "   {image row closing statements}<br />\n";
+
+    echo "  </div>
+</div>\n";
+
 }
 
 
-function build_layout_for_image_and_caption($caller, $image_file, $options_for_layout)
+
+function indent_image_row($caller, $indent_by_n_pixels)
 {
-    echo "      $image_file<br />\n";
+    echo "      <div style=\"float:left; width:{$index_by_n_pixels}px; border:none.\"> &nbsp;
+      </div>";
 }
 
 
 
-function present_image_set($caller, $directory_of_images, $explanatory_text_file, $options)
+
+function build_layout_for_image_and_caption($caller, $image_file, $caption, $options)
+{
+//
+//
+//  PURPOSE:
+//
+//
+//  EXPECTS:
+//
+//
+//  RETURNS:
+//
+//
+//  OPTIONS SUPPORTED:
+//
+//     units_of_measurement . . . [ px | em ]
+//     image_width
+//
+//
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// VAR BEGIN
+
+    $image_width = 134;
+
+    $image_dir = $options[KEY_NAME__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
+
+
+// VAR END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $rname = "build_layout_for_image_and_caption";
+
+
+
+// DEV - single echo statement at point of initial developement:
+//    echo "      $image_file<br />\n";
+
+
+    echo "
+      <div style=\"float:left; border:none\">
+         <div style=\"display:flex; width:${image_width}px; margin:auto; border:none\">
+            <div style=\"min-width:100px; max-width:${image_width}px; min-height:100px; max-height:100px; padding-top:10px; padding-bottom:10px; border:none\">\n";
+
+//              <img src="./images/icons/A52-TrendArrow-Blue-FourDirections.svg" alt="blue arrows, four directions" width="100">
+    echo "                <img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\">";
+
+    echo "
+            </div>
+         </div>
+         <div style=\"float:left; text-align:center; width:" . ($image_width + 20) . "px; padding-top:10px; padding-bottom:10px; border:none\">
+$caption 
+         </div>
+      </div>\n\n";
+
+
+}
+
+
+
+
+function present_image_set($caller, $image_directory, $explanatory_text_file, $options)
 {
 //----------------------------------------------------------------------
+//
+//
+//
+//
+//  Supported indentation styles:
+//
+//     0  . . . no indent
+//
+//     1  . . . alternating indent, zero pixels and n pixels wide
+//
+//
+//      no indent    alternate     staggered 1    sawtooth
+//
+//       | *           | *           | *           | *
+//       | *           |   *         |  *          |  *
+//       | *           | *           | *           |   *
+//       | *           |   *         |   *         | *
+//       | *           | *           | *           |  *
+//       | *           |   *         |  *          |   *
+//       | *           | *           | *           | *
+//       | *           |   *         |   *         |  *
+//
+//
+//
 //
 //----------------------------------------------------------------------
 
@@ -87,7 +191,7 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
 
     $attributes_for_row_of_images = array();
 
-    $options_to_form_caption = array();
+    $options_for_images_and_captions = array();
 
     $image_in_current_row = 0;
 
@@ -101,6 +205,8 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
     $dflag_verbose  = DIAGNOSTICS_ON;
     $dflag_development = DIAGNOSTICS_ON;
 
+    $dflag_image_count_in_row = DIAGNOSTICS_OFF;
+
     $rname = "present_image_set";
 
 // VAR END
@@ -113,7 +219,7 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
     if ( $dflag_summary )
     {
         show_diag($rname, "called by '$caller',", $dflag_verbose);
-        show_diag($rname, "with image directory '$directory_of_images',", $dflag_verbose);
+        show_diag($rname, "with image directory '$image_directory',", $dflag_verbose);
         show_diag($rname, "with explanatory text file '$explanatory_text_file',", $dflag_verbose);
         show_diag($rname, "and with options:", $dflag_verbose);
         echo "<pre>\n";
@@ -121,6 +227,8 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
         echo "</pre>\n";
     }
 
+
+    $options_for_images_and_captions[KEY_NAME__IMAGE_DIR] = $image_directory;
 
 
 // - STEP - grab options from caller:
@@ -139,7 +247,7 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
 // - STEP - build list of image files:
 
     show_diag($rname, "building list of image files . . .", $dflag_verbose);
-    $list_of_images = list_of_filenames_by_pattern($rname, $directory_of_images, "/(.*).jpg/");
+    $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/");
 
     if ( 1 )
     {
@@ -168,9 +276,12 @@ function present_image_set($caller, $directory_of_images, $explanatory_text_file
                 ++$row_count;
                 $images_in_current_row = 0;
             }
-            build_layout_for_image_and_caption($rname, $image_file, $options_to_form_caption);
+            build_layout_for_image_and_caption($rname, $image_file, "caption", $options_for_images_and_captions);
             ++$images_in_current_row;
-echo "there are now $images_in_current_row images in current row, \$new_row_after_n_images set to $new_row_after_n_images,<br />\n";
+
+// echo "there are now $images_in_current_row images in current row, \$new_row_after_n_images set to $new_row_after_n_images,<br />\n";
+
+            show_diag($rname, "there are now $images_in_current_row images in current row, \$new_row_after_n_images set to $new_row_after_n_images,", $dflag_image_count_in_row);
         }
 
 
@@ -186,7 +297,7 @@ echo "there are now $images_in_current_row images in current row, \$new_row_afte
 
 //    echo "zztop";
 
-}
+} // end function present_image_set()
 
 
 

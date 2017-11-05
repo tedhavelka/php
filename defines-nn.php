@@ -43,4 +43,12 @@
 
     define("LOCAL_PHP_LIBRARY_OPTION__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color");
 
+
+
+// - 2017-11-05 SUN -
+
+    define("KEY_NAME__IMAGE_DIR", "directory_of_images");
+
+
+
 ?>
