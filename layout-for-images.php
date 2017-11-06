@@ -170,7 +170,7 @@ function handle_image_row_indents($caller, $count_of_image_rows, $options)
             break;
     }
 
-}
+} // end function handle_image_row_indents()
 
 
 
@@ -190,6 +190,65 @@ function &build_caption_list_from_file($caller, $captions_text_file, $options) /
 
 
 
+
+function &get_caption($caller, $image_filename, $options)
+{
+
+    $caption_source = "default caption";
+    $regex = "";
+    $matches = array();
+    $caption = "";
+
+//diagnostics:
+    $rname = "get_caption";
+
+
+    if ( array_key_exists(KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS, $options) )
+    {
+        $caption_source = $options[KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS];
+    }
+
+
+    switch ($caption_source)
+    {
+        case KEY_VALUE__CAPTIONS_FROM_IMAGE_FILENAMES:
+            if ( array_key_exists(KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX, $options) )
+            {
+               $regex = $options[KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX];
+               preg_match($regex, $image_filename, $matches);
+               if ( $matches )
+               {
+                   if ( $matches[3] )
+                   {
+                       $caption = $matches[3];
+// echo "<pre>matches for caption:";
+// print_r($matches);
+// echo "</pre>";
+                       $caption = preg_replace('/-/',' ', $caption);
+                   }
+               }
+            }
+            break;
+
+        case KEY_VALUE__CAPTIONS_FROM_FLAT_TEXT_FILE:
+// 2017-11-06 - CAPTIONS FROM FLAT TEXT FILE NOT YET IMPLEMENTED
+            break;
+
+        case KEY_VALUE__CAPTIONS_FROM_DATABASE:
+// 2017-11-06 - CAPTIONS FROM DATABASE NOT YET IMPLEMENTED
+            break;
+    }
+
+
+    return $caption;
+
+
+}
+
+
+
+
+
 function build_layout_for_image_and_caption($caller, $image_file, $caption, $options)
 {
 //----------------------------------------------------------------------
@@ -198,17 +257,23 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
 //    one image and when present its optinal caption.
 //
 //  EXPECTS:
-//    *  IMAGE_AND_CAPTION_BLOCK_ELEMENT_HEIGHT
-//    *  IMAGE_AND_CAPTION_BLOCK_ELEMENT_WIDTH
-//    *  image height
-//    *
+//    *  image filename
+//    *  image directory
+//    *  optional caption for image
+//    +  IMAGE_AND_CAPTION_BLOCK_ELEMENT_HEIGHT
+//    +  IMAGE_AND_CAPTION_BLOCK_ELEMENT_WIDTH
+//    +  image height
+//    +  image width
+//    +
 //
 //  RETURNS:
+//
 //
 //
 //  OPTIONS SUPPORTED:
 //
 //     units_of_measurement . . . [ px | em ]
+//  . . . but are there places where we want only to apply px units?
 //     image_height
 //     image_width
 //
@@ -253,7 +318,7 @@ $caption
       </div>\n";
 
 
-} // end routine build_layout_for_image_and_caption()
+} // end function build_layout_for_image_and_caption()
 
 
 
@@ -271,15 +336,15 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 //    *  full path to explanatory notes of and for images
 //    *  PHP array (ordered map) of various formatting options
 //
-//   Formatting options include:
-//     +  width of image row
-//     +  height of image row
-//     +  background of image row, color or style passed here as string
-//     +  images shown per row before wrapping to next row
-//     +  image row indent style
-//     +
-//     +
-//     +
+//  Formatting options include:
+//      +  width of image row
+//      +  height of image row
+//      +  background of image row, color or style passed here as string
+//      +  images shown per row before wrapping to next row
+//      +  image row indent style
+//      +  source of captions
+//      +
+//      +
 //
 //    2017-11-06 - Contributor Ted likely to add some image padding and
 //    caption padding options.
@@ -405,6 +470,9 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 
         foreach ($list_of_images as $key => $image_file )
         {
+
+// STEP - when needed, wrap to the next row:
+
             if ( $images_in_current_row >= $new_row_after_n_images )
             {
                 close_row_of_images($rname, $options);
@@ -415,7 +483,15 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
                 open_row_of_images($rname, $options);
                 handle_image_row_indents($rname, $row_count, $options);
             }
-            build_layout_for_image_and_caption($rname, $image_file, "caption", $options);
+
+// STEP - obtain caption for present image:
+
+            $caption = get_caption($rname, $image_file, $options);
+
+
+// STEP - build and send layout, image and caption to browser:
+
+            build_layout_for_image_and_caption($rname, $image_file, $caption, $options);
             ++$images_in_current_row;
 
 // echo "there are now $images_in_current_row images in current row, \$new_row_after_n_images set to $new_row_after_n_images,<br />\n";

@@ -78,6 +78,17 @@
     define("KEY_NAME__INDENT_4_IN_PIXELS",                     "indent_4_in_pixels");
 
 
+    define("KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS",               "source_of_image_captions");
+
+    define("KEY_VALUE__CAPTIONS_FROM_IMAGE_FILENAMES", "captions from image filenames");
+    define("KEY_VALUE__CAPTIONS_FROM_FLAT_TEXT_FILE", "captions from flat text file");
+    define("KEY_VALUE__CAPTIONS_FROM_DATABASE", "captions from database");
+
+    define("KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX", "parse_captions_from_image_names_via_regex");
+    define("KEY_NAME__TEXT_FILE_HOLDING_IMAGE_CAPTIONS",      "text_file_holding_image_captions");
+    define("KEY_NAME__CAPTIONS_FROM_DATABASE",                "get_captions_from_database");
+
+
 
 // --- OPTIONS FOR FORMATTING NAVIGATION MENUS ---
 
