@@ -41,6 +41,9 @@
 // - SECTION - PHP file-scoped constants
 //----------------------------------------------------------------------
 
+    define("DEFAULT_INDENT_1_VALUE", 40); // <-- image row indents measured in pixels
+    define("DEFAULT_INDENT_2_VALUE", 80); // <-- image row indents measured in pixels
+
 
 
 //----------------------------------------------------------------------
@@ -60,11 +63,7 @@ function open_row_of_images($caller, $row_attributes)
 
     echo "
 <div style=\"min-height:100px; min-width:100px; overflow:auto; border:none; background:#c0c0c0\">
-   <div style=\"float:left; min-height:100px; min-width:100px; max-width:1000px; border:none\">\n";
-
-//    echo "
-//      <div style=\"float:left; border:none\">
-//         <div style=\"display:flex; width:134px; margin:auto; border:none\">\n";
+   <div style=\"float:left; min-height:100px; min-width:100px; max-width:1000px; border:none\">\n\n";
 
 }
 
@@ -76,7 +75,7 @@ function close_row_of_images($caller, $row_attributes)
 //    echo "   {image row closing statements}<br />\n";
 
     echo "  </div>
-</div>\n";
+</div>\n\n\n";
 
 }
 
@@ -84,22 +83,125 @@ function close_row_of_images($caller, $row_attributes)
 
 function indent_image_row($caller, $indent_by_n_pixels)
 {
-    echo "      <div style=\"float:left; width:{$index_by_n_pixels}px; border:none.\"> &nbsp;
-      </div>";
+    echo "      <div style=\"float:left; width:{$indent_by_n_pixels}px; border:none.\"> . <!-- &nbsp; - - block element for image row indent -->
+      </div>\n";
 }
 
 
 
 
-function build_layout_for_image_and_caption($caller, $image_file, $caption, $options)
+function handle_image_row_indents($caller, $count_of_image_rows, $options)
 {
+//----------------------------------------------------------------------
 //
-//
-//  PURPOSE:
-//
+//  PURPOSE:  to handle one or more styles of indents for block element
+//    based rows of images on a web page.
 //
 //  EXPECTS:
+//    *  calling code identifying string
+//    *  count of rows presented plus row in progress
+//    *  image row formatting options which include indent style
 //
+//  RETURNS:
+//    *  nothing, but sends HTML5 mark-up to browser or standard out
+//
+//
+//  NOTES:  See ./lib/php/defines-nn.php for supported row indent 
+//    styles.
+//
+//----------------------------------------------------------------------
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// VAR BEGIN
+
+    $indent_style = "none";
+
+    $indent_1_in_pixels = DEFAULT_INDENT_1_VALUE;
+
+// diagnostics:
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_summary  = DIAGNOSTICS_ON;
+    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_development = DIAGNOSTICS_ON;
+
+    $rname = "handle_image_row_indents";
+
+// VAR END 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+    show_diag($rname, "called by '$caller' with row count of $count_of_image_rows,", $dflag_verbose);
+    show_diag($rname, "\$options[" . KEY_NAME__IMAGE_ROW_INDENT_STYLE . "] => $options[KEY_NAME__IMAGE_ROW_INDENT_STYLE],", $dflag_verbose);
+
+//    if (array_key_exists(
+    if ( array_key_exists(KEY_NAME__IMAGE_ROW_INDENT_STYLE, $options) )
+    {
+        $indent_style = $options[KEY_NAME__IMAGE_ROW_INDENT_STYLE];
+
+        if ( array_key_exists(KEY_NAME__INDENT_1_IN_PIXELS, $options) )
+            { $indent_1_in_pixels = $options[KEY_NAME__INDENT_1_IN_PIXELS]; }
+
+        if ( array_key_exists(KEY_NAME__INDENT_2_IN_PIXELS, $options) )
+            { $indent_2_in_pixels = $options[KEY_NAME__INDENT_2_IN_PIXELS]; }
+
+    }
+
+
+    switch ($indent_style)
+    {
+        case KEY_VALUE__IMAGE_ROW_INDENT_STYLE__NONE:
+            break;
+
+        case KEY_VALUE__IMAGE_ROW_INDENT_STYLE__ALTERNATE:
+            if ( ( $count_of_image_rows % 2 ) == 0 )
+            {
+//                ...
+                indent_image_row($rname, $indent_1_in_pixels);
+            }
+            break;
+
+        case KEY_VALUE__IMAGE_ROW_INDENT_STYLE__STAGGERED_1:
+            break;
+
+        case KEY_VALUE__IMAGE_ROW_INDENT_STYLE__SAWTOOTH:
+            break;
+    }
+
+}
+
+
+
+
+
+function &images_and_captions_list_from_database($caller, $name_of_image_group, $options) // NOT YET IMPLEMENTED
+{
+    echo "- 2017-11-06 - ROUTINE '&images_and_captions_list_from_database' NOT YET IMPLEMENTED." . $term;
+}
+
+
+
+function &build_caption_list_from_file($caller, $captions_text_file, $options) // NOT YET IMPLEMENTED
+{
+    echo "- 2017-11-06 - ROUTINE '&build_caption_list_from_file' NOT YET IMPLEMENTED." . $term;
+}
+
+
+
+function build_layout_for_image_and_caption($caller, $image_file, $caption, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to construct the HTML5 and CSS mark up needed to present
+//    one image and when present its optinal caption.
+//
+//  EXPECTS:
+//    *  IMAGE_AND_CAPTION_BLOCK_ELEMENT_HEIGHT
+//    *  IMAGE_AND_CAPTION_BLOCK_ELEMENT_WIDTH
+//    *  image height
+//    *
 //
 //  RETURNS:
 //
@@ -107,9 +209,12 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
 //  OPTIONS SUPPORTED:
 //
 //     units_of_measurement . . . [ px | em ]
+//     image_height
 //     image_width
 //
 //
+//
+//----------------------------------------------------------------------
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -145,10 +250,10 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
          <div style=\"float:left; text-align:center; width:" . ($image_width + 20) . "px; padding-top:10px; padding-bottom:10px; border:none\">
 $caption 
          </div>
-      </div>\n\n";
+      </div>\n";
 
 
-}
+} // end routine build_layout_for_image_and_caption()
 
 
 
@@ -157,7 +262,27 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 {
 //----------------------------------------------------------------------
 //
+//  PURPOSE:  to present explanatory text, images, and associated
+//   captions in a web page, building layout via HTML5 and CSS.
 //
+//  EXPECTS:
+//    *  calling code identifying string
+//    *  directory holding image files or image list in text file form
+//    *  full path to explanatory notes of and for images
+//    *  PHP array (ordered map) of various formatting options
+//
+//   Formatting options include:
+//     +  width of image row
+//     +  height of image row
+//     +  background of image row, color or style passed here as string
+//     +  images shown per row before wrapping to next row
+//     +  image row indent style
+//     +
+//     +
+//     +
+//
+//    2017-11-06 - Contributor Ted likely to add some image padding and
+//    caption padding options.
 //
 //
 //  Supported indentation styles:
@@ -179,7 +304,12 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 //       | *           |   *         |   *         |  *
 //
 //
-//
+//  NOTES ON IMPLEMENTATION:  options to format a group of images
+//   and their explanatory text and captions are passed to this routine
+//   as an array, technically a PHP ordered map.  This same array of
+//   options is passed on to called routines from this routine, rather
+//   than creating smaller more specific arrays of options for those
+//   more specialized routines.
 //
 //----------------------------------------------------------------------
 
@@ -187,15 +317,20 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // VAR BEGIN
 
+// array of image files which is populated locally:
     $list_of_images = array();
 
-    $attributes_for_row_of_images = array();
+// DO WE NEED THIS?  WE'RE PASSING $options TO SUB-ROUTINES HERE:
+//    $attributes_for_row_of_images = array();
 
-    $options_for_images_and_captions = array();
+// DO WE NEED THIS?  WE'RE PASSING $options TO SUB-ROUTINES HERE:
+//    $options_for_images_and_captions = array();
 
+//
     $image_in_current_row = 0;
 
-    $new_row_after_n_images = 10;  // an arbitrary default number of images to show, if caller sends no value
+// an arbitrary default number of images to show, if caller sends no value
+    $new_row_after_n_images = 10;
 
 
 // diagnostics:
@@ -205,6 +340,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     $dflag_verbose  = DIAGNOSTICS_ON;
     $dflag_development = DIAGNOSTICS_ON;
 
+    $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
 
     $rname = "present_image_set";
@@ -228,18 +364,16 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     }
 
 
-    $options_for_images_and_captions[KEY_NAME__IMAGE_DIR] = $image_directory;
-
-
 // - STEP - grab options from caller:
 
-    if ( array_key_exists(LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF, $options) )
+//    if ( array_key_exists(LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF, $options) )
+    if ( array_key_exists(KEY_NAME__IMAGES_SHOWN_PER_ROW, $options) )
     {
-        $new_row_after_n_images = $options[LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF];
+        $new_row_after_n_images = $options[KEY_NAME__IMAGES_SHOWN_PER_ROW];
     }
     else
     {
-        show_diag($rname, "couldn't find option '" . LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF . "' in caller's array of sent options,", $dflag_verbose);
+        show_diag($rname, "couldn't find option '" . KEY_NAME__IMAGES_SHOWN_PER_ROW . "' in caller's array of sent options,", $dflag_verbose);
     }
 
 
@@ -249,7 +383,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     show_diag($rname, "building list of image files . . .", $dflag_verbose);
     $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/");
 
-    if ( 1 )
+    if ( $dflag_show_image_list )
     {
         echo "<pre>\n";
         sort($list_of_images);
@@ -264,19 +398,24 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     {
         $row_count = 0;
         $images_in_current_row = 0; 
-        open_row_of_images($rname, $attributes_for_row_of_images);
+
         ++$row_count;
+        echo "<!-- image row $row_count begin -->";
+        open_row_of_images($rname, $options);
 
         foreach ($list_of_images as $key => $image_file )
         {
             if ( $images_in_current_row >= $new_row_after_n_images )
             {
-                close_row_of_images($rname, $attributes_for_row_of_images);
-                open_row_of_images($rname, $attributes_for_row_of_images);
+                close_row_of_images($rname, $options);
+
                 ++$row_count;
                 $images_in_current_row = 0;
+                echo "<!-- image row $row_count begin -->";
+                open_row_of_images($rname, $options);
+                handle_image_row_indents($rname, $row_count, $options);
             }
-            build_layout_for_image_and_caption($rname, $image_file, "caption", $options_for_images_and_captions);
+            build_layout_for_image_and_caption($rname, $image_file, "caption", $options);
             ++$images_in_current_row;
 
 // echo "there are now $images_in_current_row images in current row, \$new_row_after_n_images set to $new_row_after_n_images,<br />\n";
@@ -287,7 +426,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 
     }
 
-    close_row_of_images($rname, $attributes_for_row_of_images);
+    close_row_of_images($rname, $options);
 
 
 
