@@ -56,6 +56,56 @@
 // - SECTION - routines for image layout and presentation
 //----------------------------------------------------------------------
 
+/*
+************************************************************************
+- 2017-11-07 - TWO BELOW FUNCTIONS MOVED TO FILE layout-for-documents.php
+
+
+
+function open_document_section_with_margin_block_elements($caller, $options)
+{
+//    echo "<div class=\"container\">
+    echo "<div style=\"display:flex; min-height:30px; max-height:70px\">
+";
+
+//    echo "   <div class=\"column-for-main-content-margin\">
+    echo "   <div class=\"column-for-main-content-margin-with-border\">
+      &nbsp;
+   </div>
+
+
+   <div class=\"column-middle-with-border\">
+";
+
+//   <div class=\"column-middle-with-relative-height\">
+
+}
+
+
+
+function close_document_section_with_margin_block_elements($caller, $options)
+{
+
+    echo "   </div><!-- Closing tag for middle column, primary content div element -->
+
+
+";
+//    echo "   <div class=\"column-for-main-content-margin\">
+    echo "   <div class=\"column-for-main-content-margin-with-border\">
+      &nbsp;
+   </div>
+</div>
+";
+
+}
+
+- 2017-11-07 - TWO ABOVE FUNCTIONS MOVED TO FILE layout-for-documents.php
+************************************************************************
+*/
+
+
+
+
 function open_row_of_images($caller, $row_attributes)
 {
 
@@ -307,7 +357,7 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
             <div style=\"min-width:100px; max-width:${image_width}px; min-height:100px; max-height:100px; padding-top:10px; padding-bottom:10px; border:none\">\n";
 
 //              <img src="./images/icons/A52-TrendArrow-Blue-FourDirections.svg" alt="blue arrows, four directions" width="100">
-    echo "                <img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\">";
+    echo "               <img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\">";
 
     echo "
             </div>
@@ -385,13 +435,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // array of image files which is populated locally:
     $list_of_images = array();
 
-// DO WE NEED THIS?  WE'RE PASSING $options TO SUB-ROUTINES HERE:
-//    $attributes_for_row_of_images = array();
-
-// DO WE NEED THIS?  WE'RE PASSING $options TO SUB-ROUTINES HERE:
-//    $options_for_images_and_captions = array();
-
-//
+// running count of images in present row, for wrapping to next row:
     $image_in_current_row = 0;
 
 // an arbitrary default number of images to show, if caller sends no value
@@ -400,10 +444,10 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 
 // diagnostics:
 
-    $dflag_announce = DIAGNOSTICS_ON;
-    $dflag_summary  = DIAGNOSTICS_ON;
-    $dflag_verbose  = DIAGNOSTICS_ON;
-    $dflag_development = DIAGNOSTICS_ON;
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_OFF;
+    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_development = DIAGNOSTICS_OFF;
 
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;

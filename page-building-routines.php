@@ -165,11 +165,11 @@ function nn_build_footer($caller, $date_last_updated, $options)
 
     if ( $options === "--div-position-fixed" )
     {
-        echo "<div class=\"footer-custom\">\n";
+        echo "<div class=\"footer-custom\">";
     }
     else
     {
-        echo "<div style=\"width:100%; background:none; padding-top:2em; padding-bottom:2em\">\n";
+        echo "<div style=\"width:100%; background:none; padding-top:2em; padding-bottom:2em\">";
     }
 
 

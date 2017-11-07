@@ -99,6 +99,7 @@ function ___place_holder___
 
 function nav_menu_layout__opening_lines($caller) {
 
+// <div class=\"container\">
     echo "<!-- BEGIN LAYOUT for Neela Nurseries top menu, navigation bar -->
 <div class=\"container\">
   <div class=\"menu-bar-top\">
