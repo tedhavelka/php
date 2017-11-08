@@ -16,7 +16,16 @@
 //
 //  REFERENCES:
 //
+//    * REF *  https://stackoverflow.com/questions/11261192/modulus-operator-to-run-1st-and-then-every-3rd-item
+//
+//    * REF *  https://help.github.com/articles/adding-a-remote/
+//
+//    * REF *  https://git-scm.com/docs/git-config
+//
+//    * REF *  https://orga.cat/posts/most-useful-git-commands
+//
 //    * REF *  http:
+//
 //
 //
 //======================================================================
@@ -106,13 +115,28 @@ function close_document_section_with_margin_block_elements($caller, $options)
 
 
 
-function open_row_of_images($caller, $row_attributes)
+function open_row_of_images($caller, $options)
 {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//    echo "   {image row opening statements}<br />\n";
+
+    $background_color = "#c0c0c0";
+
+// diagnostics:
+
+    $rname = "open_row_of_images";
+
+
+    if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_BACKGROUND, $options) )
+    {
+        $background_color = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_BACKGROUND];
+    }
+
 
     echo "
-<div style=\"min-height:100px; min-width:100px; overflow:auto; border:none; background:#c0c0c0\">
+<div style=\"min-height:100px; min-width:100px; overflow:auto; border:none; background:$background_color\">
    <div style=\"float:left; min-height:100px; min-width:100px; max-width:1000px; border:none\">\n\n";
 
 }
@@ -184,18 +208,18 @@ function handle_image_row_indents($caller, $count_of_image_rows, $options)
 
 
     show_diag($rname, "called by '$caller' with row count of $count_of_image_rows,", $dflag_verbose);
-    show_diag($rname, "\$options[" . KEY_NAME__IMAGE_ROW_INDENT_STYLE . "] => $options[KEY_NAME__IMAGE_ROW_INDENT_STYLE],", $dflag_verbose);
+    show_diag($rname, "\$options[" . KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_INDENT_STYLE . "] => $options[KEY_NAME__IMAGE_ROW_INDENT_STYLE],", $dflag_verbose);
 
 //    if (array_key_exists(
-    if ( array_key_exists(KEY_NAME__IMAGE_ROW_INDENT_STYLE, $options) )
+    if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_INDENT_STYLE, $options) )
     {
-        $indent_style = $options[KEY_NAME__IMAGE_ROW_INDENT_STYLE];
+        $indent_style = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_INDENT_STYLE];
 
-        if ( array_key_exists(KEY_NAME__INDENT_1_IN_PIXELS, $options) )
-            { $indent_1_in_pixels = $options[KEY_NAME__INDENT_1_IN_PIXELS]; }
+        if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__INDENT_1_IN_PIXELS, $options) )
+            { $indent_1_in_pixels = $options[KEY_NAME__IMAGE_LAYOUT__INDENT_1_IN_PIXELS]; }
 
-        if ( array_key_exists(KEY_NAME__INDENT_2_IN_PIXELS, $options) )
-            { $indent_2_in_pixels = $options[KEY_NAME__INDENT_2_IN_PIXELS]; }
+        if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__INDENT_2_IN_PIXELS, $options) )
+            { $indent_2_in_pixels = $options[KEY_NAME__IMAGE_LAYOUT__INDENT_2_IN_PIXELS]; }
 
     }
 
@@ -253,18 +277,18 @@ function &get_caption($caller, $image_filename, $options)
     $rname = "get_caption";
 
 
-    if ( array_key_exists(KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS, $options) )
+    if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__SOURCE_OF_IMAGE_CAPTIONS, $options) )
     {
-        $caption_source = $options[KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS];
+        $caption_source = $options[KEY_NAME__IMAGE_LAYOUT__SOURCE_OF_IMAGE_CAPTIONS];
     }
 
 
     switch ($caption_source)
     {
         case KEY_VALUE__CAPTIONS_FROM_IMAGE_FILENAMES:
-            if ( array_key_exists(KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX, $options) )
+            if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX, $options) )
             {
-               $regex = $options[KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX];
+               $regex = $options[KEY_NAME__IMAGE_LAYOUT__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX];
                preg_match($regex, $image_filename, $matches);
                if ( $matches )
                {
@@ -337,7 +361,7 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
 
     $image_width = 134;
 
-    $image_dir = $options[KEY_NAME__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
+    $image_dir = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
 
 
 // VAR END
@@ -476,13 +500,13 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // - STEP - grab options from caller:
 
 //    if ( array_key_exists(LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF, $options) )
-    if ( array_key_exists(KEY_NAME__IMAGES_SHOWN_PER_ROW, $options) )
+    if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW, $options) )
     {
-        $new_row_after_n_images = $options[KEY_NAME__IMAGES_SHOWN_PER_ROW];
+        $new_row_after_n_images = $options[KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW];
     }
     else
     {
-        show_diag($rname, "couldn't find option '" . KEY_NAME__IMAGES_SHOWN_PER_ROW . "' in caller's array of sent options,", $dflag_verbose);
+        show_diag($rname, "couldn't find option '" . KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW . "' in caller's array of sent options,", $dflag_verbose);
     }
 
 

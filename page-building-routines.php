@@ -147,9 +147,6 @@ if ( 0 )
 
 
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-// function nn_build_footer($caller, $date_last_updated)   // . . . as found 2017-09-11 - TMH
 function nn_build_footer($caller, $date_last_updated, $options)
 {
 
@@ -169,7 +166,7 @@ function nn_build_footer($caller, $date_last_updated, $options)
     }
     else
     {
-        echo "<div style=\"width:100%; background:none; padding-top:2em; padding-bottom:2em\">";
+        echo "<div style=\"clear:left; width:100%; padding-top:2em; padding-bottom:2em; background:none\">";
     }
 
 

@@ -100,6 +100,9 @@
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__BORDER_STYLE", "content_margin_block_element_border_style");
     define("KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME", "block_element_name");
 
+// 2017-11-08 - TO BE IMPLEMENTED, KEYS POINTING TO PAGE-LOAD-WISE RUNNING COUNTS OF SPECIFIC ROUTINE CALLS:
+    define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED", "count_of_document_sections_opened");
+    define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_CLOSED", "count_of_document_sections_closed");
 
 
 //----------------------------------------------------------------------
@@ -117,6 +120,9 @@
 // --- OPTIONS FOR IMAGE GALLERY FORMATTING ---
 //----------------------------------------------------------------------
 
+// *** * *** * ***
+// BEGIN Old style names from label naming convention 1:
+
     define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_HEIGHT_IN_PIXELS",   "image_row_height_in_px");
     define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_ROW_WIDTH_IN_PIXELS",    "image_row_width_in_px");
     define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_BLOCK_ELEMENT_HEIGHT",   "image_block_element_height");
@@ -124,27 +130,47 @@
     define("LOCAL_PHP_LIBRARY_OPTION__IMAGE_SIZE",                   "image_size");
     define("LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF", "new_row_after_image_count_of");
 
-    define("KEY_NAME__NEW_ROW_AFTER_IMAGE_COUNT_OF", LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF);
+// END Old style names from label naming convention 1:
+// *** * *** * ***
+
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_HEIGHT_IN_PIXELS",             "image_row_height_in_px");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_WIDTH_IN_PIXELS",              "image_row_width_in_px");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_BLOCK_ELEMENT_HEIGHT",             "image_block_element_height");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_BLOCK_ELEMENT_WIDTH",              "image_block_element_width");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_SIZE",                             "image_size");
+    define("KEY_NAME__IMAGE_LAYOUT__NEW_ROW_AFTER_IMAGE_COUNT_OF",           "new_row_after_image_count_of");
 
 
 // 2017-11-05:
-    define("KEY_NAME__IMAGE_DIR",                              "directory_of_images");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR",                              "directory_of_images");
 // 2017-11-06:
-    define("KEY_NAME__EXPLANATORY_TEXT_FILE_FOR_IMAGES",       "explanatory_text_for_images"); // NOT YET IMPLEMENTED - TMH
-    define("KEY_NAME__UNITS_OF_MEASUREMENT",                   "units_of_measurement");
+    define("KEY_NAME__IMAGE_LAYOUT__EXPLANATORY_TEXT_FILE_FOR_IMAGES",       "explanatory_text_for_images"); // NOT YET IMPLEMENTED - TMH
+    define("KEY_NAME__IMAGE_LAYOUT__UNITS_OF_MEASUREMENT",                   "units_of_measurement");
 
-    define("KEY_NAME__IMAGE_ROW_HEIGHT",                       "image_row_height");
-    define("KEY_NAME__IMAGE_ROW_WIDTH",                        "image_row_width");
-    define("KEY_NAME__IMAGE_ROW_BACKGROUND",                   "image_row_background");
-    define("KEY_NAME__IMAGE_ROW_INDENT_STYLE",                 "image_row_indent_style");
-    define("KEY_NAME__IMAGES_SHOWN_PER_ROW",                   "images_shown_per_row");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_HEIGHT",                       "image_row_height");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_WIDTH",                        "image_row_width");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_BACKGROUND",                   "image_row_background");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW",                   "images_shown_per_row");
 
-    define("KEY_NAME__IMAGE_AND_CAPTION_BLOCK_ELEMENT_HEIGHT", "image_and_caption_element_height");
-    define("KEY_NAME__IMAGE_AND_CAPTION_BLOCK_ELEMENT_WIDTH",  "image_and_caption_element_width");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_ROW_INDENT_STYLE",                 "image_row_indent_style");
+    define("KEY_NAME__IMAGE_LAYOUT__INDENT_1_IN_PIXELS",                     "indent_1_in_pixels");
+    define("KEY_NAME__IMAGE_LAYOUT__INDENT_2_IN_PIXELS",                     "indent_2_in_pixels");
+    define("KEY_NAME__IMAGE_LAYOUT__INDENT_3_IN_PIXELS",                     "indent_3_in_pixels");
+    define("KEY_NAME__IMAGE_LAYOUT__INDENT_4_IN_PIXELS",                     "indent_4_in_pixels");
 
-    define("KEY_NAME__IMAGE_HEIGHT",                           "image_height");
-    define("KEY_NAME__IMAGE_WIDTH",                            "image_width");
-//    define("KEY_NAME__", "");
+// 2017-11-08 - TO BE IMPLEMENTED:
+    define("KEY_NAME__IMAGE_LAYOUT__VERTICAL_SPACE_BETWEEN_IMAGE_ROWS",      "vertical_space_between_images_rows_in_px");
+
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_AND_CAPTION_BLOCK_ELEMENT_HEIGHT", "image_and_caption_element_height");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_AND_CAPTION_BLOCK_ELEMENT_WIDTH",  "image_and_caption_element_width");
+
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_HEIGHT",                           "image_height");
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_WIDTH",                            "image_width");
+
+    define("KEY_NAME__IMAGE_LAYOUT__SOURCE_OF_IMAGE_CAPTIONS",               "source_of_image_captions");
+    define("KEY_NAME__IMAGE_LAYOUT__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX", "parse_captions_from_image_names_via_regex");
+    define("KEY_NAME__IMAGE_LAYOUT__TEXT_FILE_HOLDING_IMAGE_CAPTIONS",       "text_file_holding_image_captions");
+    define("KEY_NAME__IMAGE_LAYOUT__CAPTIONS_FROM_DATABASE",                 "get_captions_from_database");
 
 
 
@@ -158,21 +184,9 @@
     define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__STAGGERED_1", "staggered_style_1");
     define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__SAWTOOTH", "sawtooth");
 
-    define("KEY_NAME__INDENT_1_IN_PIXELS",                     "indent_1_in_pixels");
-    define("KEY_NAME__INDENT_2_IN_PIXELS",                     "indent_2_in_pixels");
-    define("KEY_NAME__INDENT_3_IN_PIXELS",                     "indent_3_in_pixels");
-    define("KEY_NAME__INDENT_4_IN_PIXELS",                     "indent_4_in_pixels");
-
-
-    define("KEY_NAME__SOURCE_OF_IMAGE_CAPTIONS",               "source_of_image_captions");
-
     define("KEY_VALUE__CAPTIONS_FROM_IMAGE_FILENAMES", "captions from image filenames");
     define("KEY_VALUE__CAPTIONS_FROM_FLAT_TEXT_FILE", "captions from flat text file");
     define("KEY_VALUE__CAPTIONS_FROM_DATABASE", "captions from database");
-
-    define("KEY_NAME__PARSE_CAPTIONS_FROM_IMAGE_NAMES_VIA_REGEX", "parse_captions_from_image_names_via_regex");
-    define("KEY_NAME__TEXT_FILE_HOLDING_IMAGE_CAPTIONS",      "text_file_holding_image_captions");
-    define("KEY_NAME__CAPTIONS_FROM_DATABASE",                "get_captions_from_database");
 
 
 

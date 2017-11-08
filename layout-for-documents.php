@@ -48,6 +48,21 @@
 // - SECTION - diagnostics and development
 //----------------------------------------------------------------------
 
+function &document_section_count($caller, $option)
+{
+
+    static $count_document_sections_opened = 0;
+
+
+    if ($option === "increment" )
+    {
+        ++$count_document_sections_opened;
+    }
+
+
+    return $count_document_sections_opened;
+}
+
 
 
 
@@ -84,6 +99,7 @@ function block_element_for_document_section_margin($caller, $options) // 2017-11
     echo "   <div style=\"float:left; width:15%; border:none\">
       ${mark_for_margin}
    </div>
+
 ";
 
 } // end function block_element_for_document_section_margin()
@@ -92,13 +108,31 @@ function block_element_for_document_section_margin($caller, $options) // 2017-11
 
 
 function open_document_section_with_margin_block_elements($caller, $options)
+// function &open_document_section_with_margin_block_elements($caller, $options)
 {
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to send CSS and HTML mark up to open a web document
+//    section . . .
+//
+//  OPTIONS SUPPORTED:
+//
+//
+//  RETURNS:
+//
+//
+//
+//----------------------------------------------------------------------
+
+
+
 
 // default mark is non-breakable space, not visible but must be
 // something for at least some types of CSS block elements to be
 // rendered with their specified height and width values:
 
     $block_element_border = "1px dotted white";
+    $block_element_border = "none";
 
     $block_element_name = "DEFAULT BLOCK ELEMENT NAME";
 
@@ -118,7 +152,8 @@ function open_document_section_with_margin_block_elements($caller, $options)
 //    echo "<div style=\"display:flex; min-height:30px\">
 //    echo "<div style=\"float:left\">
 //    echo "<div style=\"clear:left; border:$block_element_border; background:none\"><!-- document section tag to open -->
-    echo "<div style=\"clear:left; border:$block_element_border; background:none\"><!-- document section tag to open -->
+    echo "<!-- document section tag to open -->
+<div style=\"clear:left; border:$block_element_border; background:none\">
 ";
 
     $option[KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME] = "block element for document section margin left";
@@ -128,6 +163,15 @@ function open_document_section_with_margin_block_elements($caller, $options)
     echo "   <div style=\"float:left; width:70%; border:none\"><!-- document section, middle column -->
 ";
 
+
+// Ahh, too clunky:
+//    ++$count_document_sections_opened;
+//
+//    $metrics[KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED] = $count_document_sections_opened;
+//
+//    return $metrics;
+    document_section_count($rname, "increment");
+
 }
 
 
@@ -135,9 +179,29 @@ function open_document_section_with_margin_block_elements($caller, $options)
 
 function close_document_section_with_margin_block_elements($caller, $options)
 {
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to send CSS and HTML mark up which expresses the closing
+//   block element tags of a web page section.  
+//
+//  SUPPORTED OPTIONS:
+//
+//  METRICS RETURNED:
+//
+//
+//  NOTES ON IMPLEMENTATION:
+//
+//
+//----------------------------------------------------------------------
 
-    echo "   </div><!-- Closing tag for middle column, main content block element -->
 
+
+// diagnostics:
+
+    $rname = "close_document_section_with_margin_block_elements";
+
+//   echo "   </div><!-- document section middle column, tag to close -->
+    echo "   </div>
 
 ";
 
@@ -145,8 +209,8 @@ function close_document_section_with_margin_block_elements($caller, $options)
 
     block_element_for_document_section_margin($rname, $options);
 
-    echo "</div><!-- document section tag to close -->
-
+    echo "</div>
+<!-- document section tag to close -->
 
 
 ";
