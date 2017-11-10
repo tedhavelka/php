@@ -387,7 +387,9 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
             </div>
          </div>
          <div style=\"float:left; text-align:center; width:" . ($image_width + 20) . "px; padding-top:10px; padding-bottom:10px; border:none\">
+            <div class=\"image-caption\">
 $caption 
+            </div>
          </div>
       </div>\n";
 
@@ -547,6 +549,13 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 
                 ++$row_count;
                 $images_in_current_row = 0;
+
+
+// 2017-11-08 - Adding space between rows . . .
+echo "<div style=\"min-height:10px; overflow:auto; border:none; background:none\"><center> &nbsp; </center>
+</div>
+";
+
                 echo "<!-- image row $row_count begin -->";
                 open_row_of_images($rname, $options);
                 handle_image_row_indents($rname, $row_count, $options);
