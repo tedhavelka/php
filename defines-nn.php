@@ -105,16 +105,6 @@
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_CLOSED", "count_of_document_sections_closed");
 
 
-//----------------------------------------------------------------------
-// --- VALUES FOR TEXT ELEMENT ALIGNMENT ---
-//----------------------------------------------------------------------
-
-    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_LEFT", "left");
-    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_CENTER", "center");
-    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_RIGHT", "right");
-
-
-
 
 //----------------------------------------------------------------------
 // --- OPTIONS FOR IMAGE GALLERY FORMATTING ---
@@ -174,14 +164,24 @@
 
 
 
+//----------------------------------------------------------------------
+// ---
+//----------------------------------------------------------------------
+
+    define("KEY_NAME__TEXT_ELEMENT__STYLE", "text_element_style");
+
+
+
+//----------------------------------------------------------------------
 // --- ENUMERATION-LIKE VALUES FOR GALLERY AND IMAGE PRESENTATION FORMATTING:
+//----------------------------------------------------------------------
 
     define("KEY_VALUE__UNITS_IN_EMS", "em");
     define("KEY_VALUE__UNITS_IN_PIXELS", "px");
 
     define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__NONE", "none");
     define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__ALTERNATE", "alternate");
-    define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__STAGGERED_1", "staggered_style_1");
+    define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__STAGGERED_1", "staggered style 1");
     define("KEY_VALUE__IMAGE_ROW_INDENT_STYLE__SAWTOOTH", "sawtooth");
 
     define("KEY_VALUE__CAPTIONS_FROM_IMAGE_FILENAMES", "captions from image filenames");
@@ -189,6 +189,41 @@
     define("KEY_VALUE__CAPTIONS_FROM_DATABASE", "captions from database");
 
 
+// --- VALUES FOR TEXT ELEMENT ALIGNMENT AND STYLES ---
+
+    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_LEFT", "left");
+    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_CENTER", "center");
+    define("KEY_VALUE__TEXT_ELEMENT__ALIGN_RIGHT", "right");
+
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_NORMAL", "normal");
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_ITALIC", "italic");
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_BOLD", "bold");
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_OBLIQUE", "oblique");
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_UNDERLINED", "underlined");
+    define("KEY_VALUE__TEXT_ELEMENT__STYLE_STRIKE_THROUGH", "strike through");
+
+
+
+// * REF * http://www.learnlayout.com/position.html
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC", "static");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_RELATIVE", "relative");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED", "fixed");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_ABSOLUTE", "absolute");
+
+//    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_", "");
+
+
+
+//----------------------------------------------------------------------
+// --- OPTIONS FOR WEB PAGE FOOTERS ---
+//----------------------------------------------------------------------
+
+    define("KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING", "footer_block_element_positioning");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__TEXT_ALIGNMENT", "footer_block_element_text_alignment");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__TEXT_SIZE_AS_PERCENTAGE", "footer_block_element_text_size_as_percentage");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_1", "footer_line_1");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_2", "footer_line_2");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_3", "footer_line_3");
 
 
 

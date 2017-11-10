@@ -185,6 +185,78 @@ Page last updated $date_last_updated by <a href=\"mailto:ariliriswebmaster@gmail
 
 
 
+
+function nn_build_footer_v2($caller, $options)
+{
+//----------------------------------------------------------------------
+// STARTED:  2017-11-10 FRI
+//
+// NOTES:  uses PHP array of options, see defines-nn.php for supported
+//   web page footer options
+//----------------------------------------------------------------------
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// VAR BEGIN
+
+    $block_element_positioning = KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC;
+
+    $text_alignment = KEY_VALUE__TEXT_ELEMENT__ALIGN_CENTER;
+
+// This attribute not yet updated from passed options:
+      $text_size_as_percentage = "80%";
+
+    $text_element_style = KEY_VALUE__TEXT_ELEMENT__STYLE_NORMAL;
+
+    $line_1 = "";
+    $line_2 = "";
+    $line_3 = "";
+
+    $term = "<br />\n";
+
+// VAR END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING, $options) )
+        { $block_element_positioning = $options[KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING]; }
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__TEXT_ALIGNMENT, $options) )
+        { $text_alignment = $options[KEY_NAME__FOOTER_ATTRIBUTES__TEXT_ALIGNMENT]; }
+
+    if ( array_key_exists(KEY_NAME__TEXT_ELEMENT__STYLE, $options) )
+        { $text_element_style = $options[KEY_NAME__TEXT_ELEMENT__STYLE]; }
+
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__LINE_1, $options) )
+        { $line_1 = $options[KEY_NAME__FOOTER_ATTRIBUTES__LINE_1]; }
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__LINE_2, $options) )
+        { $line_2 = $options[KEY_NAME__FOOTER_ATTRIBUTES__LINE_2]; }
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__LINE_3, $options) )
+        { $line_3 = $options[KEY_NAME__FOOTER_ATTRIBUTES__LINE_3]; }
+
+
+    {
+        echo "<div style=\"clear:left; position:$block_element_positioning; width:100%; text-align:$text_alignment; font-size:$text_size_as_percentage; font-style:$text_element_style; padding-top:2em; padding-bottom:2em; background:none\">
+";
+//   <i>build footer version 2 coding underway</i><br />
+
+    if ( strlen($line_1) > 0 ) { echo $line_1 . $term; }
+    if ( strlen($line_2) > 0 ) { echo $line_2 . $term; }
+    if ( strlen($line_3) > 0 ) { echo $line_3 . $term; }
+
+        echo"
+</div>
+";
+    }
+
+}
+
+
+
 function send_html_body_open($caller)
 {
     echo "<body>\n";
@@ -313,7 +385,13 @@ function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $c
 
 //----------------------------------------------------------------------
 //
-//  PURPOSE:
+//  !!! NOTICE !!! - THIS ROUTINE SUPERCEDED BY NEW LIBRARY SOURCE
+//    FILE 'layout-for-images.php'.  CONTRIBUTOR TED TO REMOVE THIS
+///   ROUTINE IN A NEAR-TERM PROJECT COMMIT TO GITHUB . . .
+//
+//
+//  PURPOSE:  to provide CSS-based layout and mark-up for rows
+//    of images.
 //
 //
 //  SUPPORTED OPTIONS:
