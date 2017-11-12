@@ -743,7 +743,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  read a specifcally structured PHP hash of hashes, and
+//  PURPOSE:  to read a specifcally structured PHP hash of hashes, and
 //    present the values of this hash table as an HTML formatted menu
 //    of URLs and plain text place holders in menu.  As of 2017-11-03
 //    this routine supports enabled and disabled menu items.  Enabled
@@ -783,13 +783,21 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 //         |
 //        002 => $hash_reference
 //         |            |
-//         |          . . .
+//         |           url => "given URL"
+//         |           link_text => "link text presented as hyperlink"
+//         |           link_status => "[ enabled | disabled | hidden ]"
+//         |
+//        003 => $hash_reference
+//         |            |
+//         |            .
+//         |            .
+//         |            .
 //         |
 //        nnn
 //
 //
-//  Note that child hash reference key names are PHP constants defined,
-//  as of 2017-11-03 in local PHP library file ___
+//  Most hash key names in this project are defined PHP constants,
+//  as of 2017-11-03 set in local PHP library file 'defines-nn.php'.
 //
 //
 //  REFERENCES:
@@ -921,6 +929,16 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 {
 //----------------------------------------------------------------------
 //
+//  PURPOSE:  to construct site menus from symbolic links and or
+//    text files with a particular three-line format.
+//
+//  EXPECTS:
+//    *  calling code identifying string,
+//    *  full path to directory containing symlinks and text files for navigation menu, 
+//    *  filename infix pattern for initial filtering of files to treat as possible menu item sources,
+//    *  filename postfix pattern used for . . .
+//
+//
 //   Code of this routine acts on matching filenames in three ways,
 //   generally one way per file, depending on the following conditions:
 //
@@ -971,7 +989,8 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //----------------------------------------------------------------------
 
 
-// BEGIN LOCAL VARIABLES
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// VAR BEGIN
 
     $show_usage = false;
 
@@ -1017,10 +1036,9 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // local flags set by presence of options passed by call in last parameter:
 //  ( Note:  general options parsing not yet implemented, flags set manually here . . . TMH )
 
-    $flag__hide_not_ready   = true;
-    $flag__hide_disabled    = false;
-    $flag__hide_current_dir = true;
-
+    $flag__hide_not_ready         = true;
+    $flag__hide_disabled          = false;
+    $flag__hide_current_directory = true;
 
 
 // diagnostics and formatting:
@@ -1035,18 +1053,50 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
 
 // Some flags for diagnostics at specific steps in routine development:
-    $dflag_parse_filename = DIAGNOSTICS_OFF;
-    $dflag_parse_file_text = DIAGNOSTICS_OFF;
+    $dflag_parse_filename      = DIAGNOSTICS_OFF;
+    $dflag_parse_file_text     = DIAGNOSTICS_OFF;
     $dflag_show_nav_links_hash = DIAGNOSTICS_OFF;
-// 2017-10-19 THU QUESTION:  what does cwd stand for in this diagnostic flag variable?
+
+// 2017-10-19 THU QUESTION:  what does cwd stand for in this diagnostic flag variable?  Current working directory
     $dflag_hide_cwd            = DIAGNOSTICS_OFF;
 
     $loop_counter = 0;
 
     $rname = "nn_menu_building_hybrid_fashion";
 
-// END LOCAL VARIABLES
+// VAR END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+// 2017-11-11 added . . .
+
+    if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) )
+    {
+//        show_diag($rname, "caller passing us key holding site navigation diagnostics setting request,", DIAGNOSTICS_ON);
+        if ( $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_ON )
+        {
+            show_diag($rname, "enabling some diagnostics,", DIAGNOSTICS_ON);
+            $dflag_announce = DIAGNOSTICS_ON;
+            $dflag_dev = DIAGNOSTICS_ON;
+            $dflag_parse_filename = DIAGNOSTICS_ON;
+            $dflag_show_nav_links_hash = DIAGNOSTICS_ON;
+            $dflag_hide_cwd = DIAGNOSTICS_ON;
+        }
+    }
+    else
+    {
+        echo "passed options hold no key named '" . KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS . "',$term";
+        
+        echo "
+<pre>
+";
+        print_r($options);
+        echo "
+</pre>
+";
+    }
+
+//    echo "zztop$term";
 
 
 
@@ -1072,10 +1122,11 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     $rname(\$caller, \$path_to_search, \$filename_infix, \$filename_postfix, \$options)
 
- &nbsp;\$caller         . . . identifies calling code, usually by routine or code block name,
- &nbsp;\$path_to_search . . . names path to search for files which represent navigable web page URLs,
- &nbsp;\$filename_infix . . . text pattern which calling code expects in files which represent desired URL data,
- &nbsp;\$options        . . . this last parameter intended to support comma-separated list of options.
+ &nbsp;\$caller           . . . identifies calling code, usually by routine or code block name,
+ &nbsp;\$path_to_search   . . . names path to search for files which represent navigable web page URLs,
+ &nbsp;\$filename_infix   . . . text pattern which calling code expects in files which represent desired URL data,
+ &nbsp;\$filename_postfix . . . text pattern to help exclude certain text files which are yet needed as site developement markers,
+ &nbsp;\$options          . . . array of options whose key names are mostly defined in local library file defines-nn.php
 ", MESSAGE_ONLY);
     }
 
@@ -1115,16 +1166,31 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // filename based way of key naming:
                     $key_name = str_pad($matches[1], KEY_NAME_LENGTH, "0", STR_PAD_LEFT);
 
-                    show_diag($rname, "- DEV - found filename '$current_filename' matching pattern, latest hash key name is '$key_name',", 0);
+                    show_diag($rname, "- DEV - found filename '$current_filename' matching pattern, latest hash key name is '$key_name',", dflag_parse_filename);
 
+
+
+// 2017-11-11 - optionally omit present link to current directory from navigation menu items:
+
+                    if ( ($key_name === $current_directory_dirname_only ) && ( $flag__hide_current_directory == true ) )
+                    {
+                        break;
+                    }
+
+
+
+                    if ( array_key_exists($key_name, $nav_links) )
+                    {
+                        show_diag($rname, "navigation links array key '$key_name' already exists!", $dflag_dev);
+                        show_diag($rname, "leaving this key intact and may update its data in next lines of code . . .", $dflag_dev);
+                    }
+                    else
+                    {
 // this function call gives us a PHP ordered map with keys 'url', 'link_text', 'link_status':
-                    $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
 
-//                    show_diag($rname, "showing array of navigation links:");
-//                    nn_show_array($rname, $nav_links);
+                        $nav_links[$key_name] =& nn_nav_menu_entry($rname); 
+                    }
 
-//                    show_diag($rname, "showing array to hold attributes of latest added navigation menu link:");
-//                    nn_show_array($rname, $nav_links[$key_name]);
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1187,6 +1253,14 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                             $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
                         }
 
+// 2017-11-11 added . . .
+                        if ( ( $flag__hide_current_directory ) and ( preg_match("/(.)--in-current-directory$/", $current_filename) ) )
+                        {
+                            // // do nothing
+                            // show_diag($rname, "note - skipping link $current_filename which is marked not ready,", $dflag_parse_filename);
+                            $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
+                        }
+
 
 // URLs indicated disabled will appear as text only, not hyperlinks:
 
@@ -1229,10 +1303,12 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
                         $result = 1;
                         show_diag($rname, "file contents, if any, shown line by line in green:", $dflag_parse_file_text);
 
+                        $line_count = 0;
                         $handle_to_file = fopen($full_path_to_file, "r");
                         while ( !feof($handle_to_file))
                         {
                             $line = fgets($handle_to_file);
+                            ++$line_count;
                             show_diag($rname, "<font color=\"green\">$line</font>$term", DIAGNOSTICS_OFF);  // 'MESSAGE_ONLY' to turn on this diagnostic
 
                             preg_match("/(^URL=)(.*)/", $line, $matches);
@@ -1302,6 +1378,22 @@ if ( $dflag_parse_file_text )
 
                         } // end WHILE file has lines of text to process,
 
+
+// 2017-11-11 added:
+// BUT IF THE REGULAR FILE IS EMPTY, ITS NAME MAY BE THE MARKER WE NEED TO ACT ON
+// SO HERE DETECT WHEN A FILE IS EMPTY:
+
+                        if ( $lines_read == 0 )
+                        {
+                            show_diag($rname, "matching filename '$full_path_to_file' appears to be an empty file . . .", $dflag_dev);
+
+                            if ( ( $flag__hide_current_directory ) and ( $path_to_search === "." ) and ( preg_match("/(.)--in-current-directory$/", $current_filename) ) )
+                            {
+                                $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";
+                            }
+
+                        }
+
                     } // end IF-block testing whether file is of type regular file,
 
 
@@ -1333,13 +1425,10 @@ if ( $dflag_hide_cwd )
     echo $term;
 }
 
-                    if ( $flag__hide_current_dir )
-                    {
-                        show_diag($rname, "flag to hide current directory from navigable menu set 'true',", $dflag_hide_cwd);
-                    }
+                    show_diag($rname, "flag to hide current directory from navigable menu holds '$flag__hide_current_directory',", $dflag_hide_cwd);
 
-//                    elseif ( ( $flag__hide_current_dir ) && ( $link_text_minus_disabled_postfix === $current_directory_dirname_only ) )
-                    if ( ( $flag__hide_current_dir ) && ( 0 == strncmp($link_text_minus_disabled_postfix, $current_directory_dirname_only, LENGTH__FILE_NAME) ) )
+//                    elseif ( ( $flag__hide_current_directory ) && ( $link_text_minus_disabled_postfix === $current_directory_dirname_only ) )
+                    if ( ( $flag__hide_current_directory ) && ( 0 == strncmp($link_text_minus_disabled_postfix, $current_directory_dirname_only, LENGTH__FILE_NAME) ) )
                     {
                         show_diag($rname, "setting status of nav menu item '" . $nav_links[$key_name][KEY_NAME_FOR_LINK_TEXT] . "' to 'hidden' . . .", $dflag_hide_cwd);
                         $nav_links[$key_name][KEY_NAME_FOR_LINK_STATUS] = "hidden";

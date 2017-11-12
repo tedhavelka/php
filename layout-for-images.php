@@ -157,7 +157,7 @@ function close_row_of_images($caller, $row_attributes)
 
 function indent_image_row($caller, $indent_by_n_pixels)
 {
-    echo "      <div style=\"float:left; width:{$indent_by_n_pixels}px; border:none.\"> . <!-- &nbsp; - - block element for image row indent -->
+    echo "      <div style=\"float:left; width:{$indent_by_n_pixels}px; border:none.\"> &nbsp; <!-- &nbsp; - - block element for image row indent -->
       </div>\n";
 }
 

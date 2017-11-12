@@ -84,8 +84,17 @@
 // --- OPTIONS FOR FORMATTING NAVIGATION MENUS ---
 //----------------------------------------------------------------------
 
+// **  **  **  **  **
+// 2017-11-11 - Old PHP library hash (ordered map) key names to remove from library code:
+
     define("LOCAL_PHP_LIBRARY_OPTION__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color");
-    define("KEY_NAME__SITE_MENU_DISABLED_LINK_COLOR", LOCAL_PHP_LIBRARY_OPTION__SITE_MENU_DISABLED_LINK_COLOR); 
+    define("KEY_NAME__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color"); 
+
+// **  **  **  **  **
+
+    define("KEY_NAME__SITE_NAVIGATION__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color"); 
+    define("KEY_NAME__SITE_NAVIGATION__CURRENT_PAGE_IN_SITE_MENU", "current_page_in_site_menu");
+    define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS", "site_navigation_diagnostics");
 
 
 
