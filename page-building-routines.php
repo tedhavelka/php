@@ -150,7 +150,7 @@ if ( 0 )
 function nn_build_footer($caller, $date_last_updated, $options)
 {
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//----------------------------------------------------------------------
 //
 //    * REF *  http://learnlayout.com/position.html
 //
@@ -158,7 +158,14 @@ function nn_build_footer($caller, $date_last_updated, $options)
 // TO-DO 2017-08-06 SUN -- implement a meaningful or at least better
 //  reference to 'date web page updated' in the footer message below . . .
 //
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//----------------------------------------------------------------------
+
+
+// - 2017-11-14 NOTE - new local PHP library wide standard has $options
+//  declared as an array, whose key-value pairs are able to pass
+//  arbitrarily few and many options.  So this PHP string comparison
+//  is now depricated, and a newer version of this function follows
+//  further or elsewhere in this source file:
 
     if ( $options === "--div-position-fixed" )
     {
@@ -237,6 +244,14 @@ function nn_build_footer_v2($caller, $options)
 
     if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__LINE_3, $options) )
         { $line_3 = $options[KEY_NAME__FOOTER_ATTRIBUTES__LINE_3]; }
+
+
+//  bottom: 0; left: 0;
+
+    if ( $block_element_positioning === KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED )
+    {
+        $block_element_positioning = $block_element_positioning . "; bottom:0; left:0";
+    }
 
 
     {
@@ -375,7 +390,7 @@ function nn_main_content_formatting__closing_lines__fixed_ouput($script_name)
 
 /*
 function --
-function -- SECTION -- image layout routines --
+function -- SECTION -- image layout routines -- THIS SECTION MOVED TO SITE-NAVIGATION_ROUTINES DOT PHP, AND DEPRECATED
 */
 
 function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $caption, $options)
@@ -505,6 +520,60 @@ function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $c
 } // end function parse_image_measures_and_layout_requests_v2()
 
 
+
+
+/*
+function -- SECTION -- 
+*/
+
+/*
+function document_section_for_vertical_spacing($caller, $options)
+{
+//----------------------------------------------------------------------
+//  PURPOSE:  to generate an HTML5 block element which expresses,
+//   causes browser to render vertical space in the parent block
+//   element or web page document.
+//----------------------------------------------------------------------
+
+
+    $border_style = "1px dotted white";  // arbitrary visible border style for debugging
+
+    $mark_for_block_element = "&nbsp;";
+
+    $horizontal_break_width = "100";     // default width of one hundred percent for horizontal breaks,
+
+    $vertical_spacing_in_pixels = 10;    // arbitrary non-zero value for visibility when options not set,
+
+// diagnostics:
+
+    $rname = "document_section_for_vertical_spacing";
+
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE, $options) )
+    {
+        $border_style = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE];
+    }
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX, $options) )
+    {
+        $vertical_spacing_in_pixels = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX];
+    }
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH, $options) )
+    {
+        $horizontal_break_width = $options[KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH];
+        $mark_for_block_element = "<hr style=\"width:${horizontal_break_width}%\">";
+    }
+
+
+    echo "
+   <div style=\"float:left; width:100%; min-height:${vertical_spacing_in_pixels}px; border:${border_style}\"><!-- block element for vertical spacing -->
+      ${mark_for_block_element}
+   </div>
+";
+
+}
+*/
 
 
 

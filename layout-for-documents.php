@@ -219,4 +219,68 @@ function close_document_section_with_margin_block_elements($caller, $options)
 
 
 
+
+
+function document_section_for_vertical_spacing($caller, $options)
+{
+//----------------------------------------------------------------------
+//  PURPOSE:  to generate an HTML5 block element which expresses,
+//   causes browser to render vertical space in the parent block
+//   element or web page document.
+//----------------------------------------------------------------------
+
+
+    $border_style = "1px dotted white";  // arbitrary visible border style for debugging
+
+    $mark_for_block_element = "&nbsp;";
+
+    $horizontal_break_width = "100";     // default width of one hundred percent for horizontal breaks,
+
+    $vertical_spacing_in_pixels = 10;    // arbitrary non-zero value for visibility when options not set,
+
+// diagnostics:
+
+    $rname = "document_section_for_vertical_spacing";
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - handle supported options
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE, $options) )
+    {
+        $border_style = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE];
+    }
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX, $options) )
+    {
+        $vertical_spacing_in_pixels = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX];
+    }
+
+// Note:  support here for HTML horizontal rule element
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH, $options) )
+    {
+        $horizontal_break_width = $options[KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH];
+        $mark_for_block_element = "<hr style=\"width:${horizontal_break_width}%\">";
+    }
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - send HTML5 mark-up to web browser
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    echo "
+   <div style=\"float:left; width:100%; min-height:${vertical_spacing_in_pixels}px; border:${border_style}\"><!-- block element for vertical spacing -->
+      ${mark_for_block_element}
+   </div>
+";
+
+
+} // end function document_section_for_vertical_spacing()
+
+
+
+
+
 ?>

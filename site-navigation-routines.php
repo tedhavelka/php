@@ -1085,19 +1085,16 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     }
     else
     {
-        echo "passed options hold no key named '" . KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS . "',$term";
-        
-        echo "
-<pre>
-";
-        print_r($options);
-        echo "
-</pre>
-";
+//        echo "passed options hold no key named '" . KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS . "',$term";
+//        
+//        echo "
+//<pre>
+//";
+//        print_r($options);
+//        echo "
+//</pre>
+//";
     }
-
-//    echo "zztop$term";
-
 
 
     show_diag($rname, "starting,", $dflag_announce);

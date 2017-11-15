@@ -113,6 +113,10 @@
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED", "count_of_document_sections_opened");
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_CLOSED", "count_of_document_sections_closed");
 
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE", "block_element_border_style");
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX", "block_element_minimum_height_in_pixels");
+    define("KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH", "horizontal_break_of_width");
+
 
 
 //----------------------------------------------------------------------
