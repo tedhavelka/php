@@ -243,6 +243,10 @@
     define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_3", "footer_line_3");
     define("KEY_NAME__FOOTER_ATTRIBUTES__BACKGROUND_STYLE", "footer_block_element_background_style");
 
+    define("KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_NAME", "footer_contact_name");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_EMAIL", "footer_contact_email");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__PAGE_LAST_UPDATED", "footer_page_last_updated");
+
 
 
 ?>

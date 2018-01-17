@@ -221,6 +221,11 @@ function nn_build_footer_v2($caller, $options)
     $line_2 = "";
     $line_3 = "";
 
+    $contact_name = "";
+    $contact_email = "";
+    $page_last_updated = "";
+
+    $contact_line = "";
 
     $term = "<br />\n";
 
@@ -261,11 +266,51 @@ function nn_build_footer_v2($caller, $options)
         { $background_style = $options[KEY_NAME__FOOTER_ATTRIBUTES__BACKGROUND_STYLE]; }
 
 
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_NAME, $options) )
+        { $contact_name = $options[KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_NAME]; }
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_EMAIL, $options) )
+        { $contact_email = $options[KEY_NAME__FOOTER_ATTRIBUTES__CONTACT_EMAIL]; }
+
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__PAGE_LAST_UPDATED, $options) )
+        { $page_last_updated = $options[KEY_NAME__FOOTER_ATTRIBUTES__PAGE_LAST_UPDATED]; }
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - for CSS fixed type positioning of block level elements,
+//          append a couple of needed CSS attributes, 'bottom' and 'left',
+//          see http://learnlayout.com/position.html for information
+//          about CSS position attribute and values.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 //  bottom: 0; left: 0;
 
     if ( $block_element_positioning === KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED )
     {
         $block_element_positioning = $block_element_positioning . "; bottom:0; left:0";
+    }
+
+
+// <a href="mailto:someone@example.com">Send email</a>
+
+    if ( ( strlen($contact_email) > 0 ) && ( strlen($contact_name) > 0 ) )
+        { $contact_line = "<a href=\"mailto:$contact_email\">$contact_name</a>"; }
+
+    elseif ( strlen($contact_email) > 0 ) 
+        { $contact_line = "<a href=\"mailto:$contact_email\">$contact_email</a>"; }
+
+    elseif ( strlen($contact_name) > 0 ) 
+        { $contact_line = $contact_name; }
+
+
+    if ((( strlen($contact_email) > 0 ) || ( strlen($contact_name) > 0 ) ) && ( strlen($page_last_updated) > 0 ) )
+    {
+        $contact_line = "Page last update $page_last_updated by $contact_line";
+    }
+    else
+    {
+        $contact_line = "Contact webmaster $contact_line";
     }
 
 
@@ -278,6 +323,8 @@ function nn_build_footer_v2($caller, $options)
 ";
 //   <i>build footer version 2 coding underway</i><br />
 
+    if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
+
     if ( strlen($line_1) > 0 ) { echo $line_1 . $term; }
     if ( strlen($line_2) > 0 ) { echo $line_2 . $term; }
     if ( strlen($line_3) > 0 ) { echo $line_3 . $term; }
@@ -287,7 +334,8 @@ function nn_build_footer_v2($caller, $options)
 ";
     }
 
-}
+} // end fucntion nn_build_footer_v2()
+
 
 
 
