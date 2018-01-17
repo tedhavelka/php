@@ -163,5 +163,31 @@ function nn_show_array($caller, $array_reference, $options)
 
 
 
+function example_block_element_for_diagnostics($caller, $options)
+{
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - TEST - test of block element with position set to fixed, and fixed
+//   at top of page.  Question:  can we express such a block element
+//   at arbitrary point in document stream, and will it yet render at
+//   the visual top of the web browser's presented page?  - TMH
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    echo "
+<div style=\"position:fixed; right:0; top:0; font-size:75%; text-align:right; border:1px dotted white\">
+<p>
+<i>
+2017-11-15<br />
+Block element positioned fixed at top of page,<br />
+for debugging purposes.
+</i>
+</p>
+
+</div>
+
+
+";
+
+}
 
 ?>

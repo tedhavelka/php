@@ -215,16 +215,27 @@ function nn_build_footer_v2($caller, $options)
 
     $text_element_style = KEY_VALUE__TEXT_ELEMENT__STYLE_NORMAL;
 
+    $background_style = "none";
+
     $line_1 = "";
     $line_2 = "";
     $line_3 = "";
 
+
     $term = "<br />\n";
+
+
+// diagnostics:
+
+    $rname = "nn_build_footer_v2";
 
 // VAR END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - handle supported options
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING, $options) )
         { $block_element_positioning = $options[KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING]; }
@@ -246,6 +257,10 @@ function nn_build_footer_v2($caller, $options)
         { $line_3 = $options[KEY_NAME__FOOTER_ATTRIBUTES__LINE_3]; }
 
 
+    if ( array_key_exists(KEY_NAME__FOOTER_ATTRIBUTES__BACKGROUND_STYLE, $options) )
+        { $background_style = $options[KEY_NAME__FOOTER_ATTRIBUTES__BACKGROUND_STYLE]; }
+
+
 //  bottom: 0; left: 0;
 
     if ( $block_element_positioning === KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED )
@@ -254,8 +269,12 @@ function nn_build_footer_v2($caller, $options)
     }
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - send HTML5 mark-up to web browser
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     {
-        echo "<div style=\"clear:left; position:$block_element_positioning; width:100%; text-align:$text_alignment; font-size:$text_size_as_percentage; font-style:$text_element_style; padding-top:2em; padding-bottom:2em; background:none\">
+        echo "<div style=\"clear:left; position:$block_element_positioning; width:100%; text-align:$text_alignment; font-size:$text_size_as_percentage; font-style:$text_element_style; padding-top:2em; padding-bottom:2em; background:$background_style\">
 ";
 //   <i>build footer version 2 coding underway</i><br />
 
@@ -526,54 +545,6 @@ function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $c
 function -- SECTION -- 
 */
 
-/*
-function document_section_for_vertical_spacing($caller, $options)
-{
-//----------------------------------------------------------------------
-//  PURPOSE:  to generate an HTML5 block element which expresses,
-//   causes browser to render vertical space in the parent block
-//   element or web page document.
-//----------------------------------------------------------------------
-
-
-    $border_style = "1px dotted white";  // arbitrary visible border style for debugging
-
-    $mark_for_block_element = "&nbsp;";
-
-    $horizontal_break_width = "100";     // default width of one hundred percent for horizontal breaks,
-
-    $vertical_spacing_in_pixels = 10;    // arbitrary non-zero value for visibility when options not set,
-
-// diagnostics:
-
-    $rname = "document_section_for_vertical_spacing";
-
-
-    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE, $options) )
-    {
-        $border_style = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE];
-    }
-
-    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX, $options) )
-    {
-        $vertical_spacing_in_pixels = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX];
-    }
-
-    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH, $options) )
-    {
-        $horizontal_break_width = $options[KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH];
-        $mark_for_block_element = "<hr style=\"width:${horizontal_break_width}%\">";
-    }
-
-
-    echo "
-   <div style=\"float:left; width:100%; min-height:${vertical_spacing_in_pixels}px; border:${border_style}\"><!-- block element for vertical spacing -->
-      ${mark_for_block_element}
-   </div>
-";
-
-}
-*/
 
 
 

@@ -70,6 +70,9 @@
 // 2017-10-03 added for use in site-navigation-routines.php:
     define("NN_MAXIMUM_PREG_REPLACEMENTS", 1024);
 
+// 2018-01-16 added for use in site-navigation-routines.php:
+    define("LENGTH__TOKEN", 256);
+
 
 
 // 2017-10-20 - one place to define keynames used for local library routine supported options:
@@ -95,6 +98,7 @@
     define("KEY_NAME__SITE_NAVIGATION__SITE_MENU_DISABLED_LINK_COLOR", "site_menu_disabled_link_color"); 
     define("KEY_NAME__SITE_NAVIGATION__CURRENT_PAGE_IN_SITE_MENU", "current_page_in_site_menu");
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS", "site_navigation_diagnostics");
+    define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED", "site_navigation_diagnostics_detailed");
 
 
 
@@ -237,6 +241,7 @@
     define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_1", "footer_line_1");
     define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_2", "footer_line_2");
     define("KEY_NAME__FOOTER_ATTRIBUTES__LINE_3", "footer_line_3");
+    define("KEY_NAME__FOOTER_ATTRIBUTES__BACKGROUND_STYLE", "footer_block_element_background_style");
 
 
 
