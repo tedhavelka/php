@@ -319,9 +319,10 @@ function nn_build_footer_v2($caller, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     {
+        echo "<!-- document footer open -->\n";
+
         echo "<div style=\"clear:left; position:$block_element_positioning; width:100%; text-align:$text_alignment; font-size:$text_size_as_percentage; font-style:$text_element_style; padding-top:2em; padding-bottom:2em; background:$background_style\">
 ";
-//   <i>build footer version 2 coding underway</i><br />
 
     if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
 
@@ -329,9 +330,8 @@ function nn_build_footer_v2($caller, $options)
     if ( strlen($line_2) > 0 ) { echo $line_2 . $term; }
     if ( strlen($line_3) > 0 ) { echo $line_3 . $term; }
 
-        echo"
-</div>
-";
+        echo"</div>
+<!-- document footer close -->\n\n";
     }
 
 } // end fucntion nn_build_footer_v2()

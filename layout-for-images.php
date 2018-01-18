@@ -478,6 +478,8 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
 
+    $diagnostics_requests = array();
+
     $rname = "present_image_set";
 
 // VAR END
@@ -499,21 +501,39 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     }
 
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - grab options from caller:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 //    if ( array_key_exists(LOCAL_PHP_LIBRARY_OPTION__NEW_ROW_AFTER_IMAGE_COUNT_OF, $options) )
     if ( array_key_exists(KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW, $options) )
-    {
-        $new_row_after_n_images = $options[KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW];
-    }
-    else
-    {
-        show_diag($rname, "couldn't find option '" . KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW . "' in caller's array of sent options,", $dflag_verbose);
-    }
+        { $new_row_after_n_images = $options[KEY_NAME__IMAGE_LAYOUT__IMAGES_SHOWN_PER_ROW]; }
+
+    if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED, $options) )
+        { $detailed_diags = $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED]; }
+
+
+    $split_pattern = hash_of_diagnostics_elements_split_on($rname);
+    show_diag($rname, "calling for detailed diagnostics hash, elements split on $split_pattern . . .", DIAGNOSTICS_ON);
+    $limit = 20;
+//    $diagnostics_requests =& hash_of_diagnostics_requested($rname, "diag1,diag2,diag3", $limit);
+    $diagnostics_requests =& hash_of_diagnostics_requested($rname, $detailed_diags, $limit);
+
+    show_diag($rname, "for 2018-01-18 development requesting specific diagnostics:", DIAGNOSTICS_ON);
+    echo "<pre>
+";
+    print_r($diagnostics_requests);
+    echo "</pre>\n";
 
 
 
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - build list of image files:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     show_diag($rname, "building list of image files . . .", $dflag_verbose);
     $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/");

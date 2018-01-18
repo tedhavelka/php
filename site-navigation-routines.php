@@ -914,10 +914,10 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED, $options) )
     {
-        $one_up_diags = preg_split('/,/', $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED], LIMIT_FOR_DETAILED_DIAGS);
-        echo "Calling code requests detailed diags:" . $term . "<pre>\n";
-        print_r($one_up_diags);
-        echo "</pre>\n\n";
+//        $one_up_diags = preg_split('/,/', $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED], LIMIT_FOR_DETAILED_DIAGS);
+//        echo "Calling code requests detailed diags:" . $term . "<pre>\n";
+//        print_r($one_up_diags);
+//        echo "</pre>\n\n";
 
         if ( 0 == strncmp($one_up_diags[1], "top of loop", LENGTH__TOKEN) )
             { $dflag_top_of_loop = DIAGNOSTICS_ON; }

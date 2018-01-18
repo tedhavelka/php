@@ -31,6 +31,10 @@
     define("DEFAULT_DIAGNOSTIC_MESSAGE", (DIAGNOSTICS_ON | DIAGNOSTICS__ROUTINE_NAME_AND_MESSAGE));
     define("MESSAGE_ONLY", (DIAGNOSTICS_ON | DIAGNOSTICS__MESSAGE_ONLY));
 
+// 2018-01-18 - added:
+    define("DIAGNOSTICS_REQUEST_SPLIT_PATTERN", "/,/");
+
+
 
 // File-scoped variables:
 
@@ -188,6 +192,61 @@ for debugging purposes.
 
 ";
 
+
 }
+
+
+
+//
+//----------------------------------------------------------------------
+// - 2018-01-18 THU - option parsing routines, new development . . .
+//----------------------------------------------------------------------
+//
+
+
+function hash_of_diagnostics_elements_split_on($caller)
+{
+// - 2018-10-18 THU - tested and works - TMH
+
+    return DIAGNOSTICS_REQUEST_SPLIT_PATTERN;
+}
+
+
+
+function &hash_of_diagnostics_requested($caller, $diagnostics_requested, $limit)
+{
+// - 2018-10-18 THU - tested and works - TMH
+
+//----------------------------------------------------------------------
+//  PURPOSE:  take a string and split it into tokens based on split
+//   pattern defined in NN local PHP library diagnostics routines
+//   file.  Provides a way for calling scripts to specify multiple
+//   diagnostics requests without adding $options hash key names for
+//   each diagnostic.  - TMH
+//----------------------------------------------------------------------
+
+    $split_pattern = DIAGNOSTICS_REQUEST_SPLIT_PATTERN;
+
+//    $rname = "hash_of_diagnostics_requested";
+
+//    show_diag($rname, "called by '$caller',", DIAGNOSTICS_ON);
+//    show_diag($rname, "got diagnostics request string '$diagnostics_requested',", DIAGNOSTICS_ON);
+//    show_diag($rname, "splitting pattern on '$split_pattern',", DIAGNOSTICS_ON);
+//    show_diag($rname, "limiting results to '$limit' tokens . . .", DIAGNOSTICS_ON);
+
+    $diags = preg_split($split_pattern, $diagnostics_requested, $limit);
+
+//    show_diag($rname, "preg_split() returns:", DIAGNOSTICS_ON);
+//    echo "<pre>\n";
+//    print_r($diags);
+//    echo "</pre>\n";
+//    show_diag($rname, "returning to caller . . .", DIAGNOSTICS_ON);
+
+    return $diags;
+
+}
+
+
+
 
 ?>
