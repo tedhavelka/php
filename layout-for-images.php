@@ -53,6 +53,8 @@
     define("DEFAULT_INDENT_1_VALUE", 40); // <-- image row indents measured in pixels
     define("DEFAULT_INDENT_2_VALUE", 80); // <-- image row indents measured in pixels
 
+    define("LIMIT__DETAILED_DIAGNOSTICS_REQUESTS", 20);
+
 
 
 //----------------------------------------------------------------------
@@ -517,25 +519,29 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
         { $detailed_diags = $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED]; }
 
 
-    $split_pattern = hash_of_diagnostics_elements_split_on($rname);
-    show_diag($rname, "calling for detailed diagnostics hash, elements split on $split_pattern . . .", DIAGNOSTICS_ON);
-    $limit = 20;
+//    $split_pattern = hash_of_diagnostics_elements_split_on($rname);
+//    show_diag($rname, "calling for detailed diagnostics hash, elements split on $split_pattern . . .", DIAGNOSTICS_ON);
+//    $limit = 20;
 //    $diagnostics_requests =& hash_of_diagnostics_requested($rname, "diag1,diag2,diag3", $limit);
-    $diagnostics_requests =& hash_of_diagnostics_requested($rname, $detailed_diags, $limit);
+    $diagnostics_requests =& hash_of_diagnostics_requested($rname, $detailed_diags, LIMIT__DETAILED_DIAGNOSTICS_REQUESTS);
 
-    show_diag($rname, "for 2018-01-18 development requesting specific diagnostics:", DIAGNOSTICS_ON);
-    echo "<pre>
+    if ( 0 )
+    {
+        show_diag($rname, "for 2018-01-18 development requesting specific diagnostics:", DIAGNOSTICS_ON);
+        echo "<pre>
 ";
-    print_r($diagnostics_requests);
-    echo "</pre>\n";
+        print_r($diagnostics_requests);
+        echo "</pre>\n";
 
-    $result = check_for_request_in_hash($rname, $diagnostics_requests, "zzz");
-    show_diag($rname, "check for request \"zzz\" returns $result,", DIAGNOSTICS_ON);
+        $result = check_for_request_in_hash($rname, $diagnostics_requests, "none set");
+        show_diag($rname, "check for request \"none set\" returns $result,", DIAGNOSTICS_ON);
+    }
 
-    $result = check_for_request_in_hash($rname, $diagnostics_requests, "none set");
-    show_diag($rname, "check for request \"none set\" returns $result,", DIAGNOSTICS_ON);
+    $result = check_for_request_in_hash($rname, $diagnostics_requests, "verbose");
+      if ( $result ) { $dflag_verbose = DIAGNOSTICS_ON; }
 
-
+    $result = check_for_request_in_hash($rname, $diagnostics_requests, "show image list");
+      if ( $result ) { $dflag_show_image_list = DIAGNOSTICS_ON; }
 
 
 
@@ -544,12 +550,12 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     show_diag($rname, "building list of image files . . .", $dflag_verbose);
-    $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/");
+    $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/i");
+    sort($list_of_images);
 
     if ( $dflag_show_image_list )
     {
         echo "<pre>\n";
-        sort($list_of_images);
         print_r($list_of_images);
         echo "</pre>\n";
     }
