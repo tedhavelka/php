@@ -467,6 +467,9 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // an arbitrary default number of images to show, if caller sends no value
     $new_row_after_n_images = 10;
 
+// local variable for pass/fail tests and similar:
+    $result = 0;
+
 
 // diagnostics:
 
@@ -526,6 +529,11 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     print_r($diagnostics_requests);
     echo "</pre>\n";
 
+    $result = check_for_request_in_hash($rname, $diagnostics_requests, "zzz");
+    show_diag($rname, "check for request \"zzz\" returns $result,", DIAGNOSTICS_ON);
+
+    $result = check_for_request_in_hash($rname, $diagnostics_requests, "none set");
+    show_diag($rname, "check for request \"none set\" returns $result,", DIAGNOSTICS_ON);
 
 
 

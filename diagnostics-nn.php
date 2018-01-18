@@ -248,5 +248,46 @@ function &hash_of_diagnostics_requested($caller, $diagnostics_requested, $limit)
 
 
 
+function check_for_request_in_hash($caller, $hash, $request)
+{
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  PURPOSE:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $key = 0;
+    $local_hash_element_limit = 100;
+    $request_found_status = 0;
+
+    $dflag_verbose = DIAGNOSTICS_OFF;
+
+    $rname = "check_for_request_in_hash";
+
+
+    if ( $hash )
+    {
+
+        show_diag($rname, "received hash:", $dflag_verbose);
+        echo "<pre>\n";
+        print_r($diags);
+        echo "</pre>\n";
+
+        show_diag($rname, "iterating over hash key-value pairs:", $dflag_verbose);
+        while ( ( $hash[$key] ) && ( $key < $local_hash_element_limit ) )
+        {
+            show_diag($rname, "looking at \$hash[$key] => $hash[$key]", $dflag_verbose);
+
+            if ( 0 == strncmp($request, $hash[$key], LENGTH__TOKEN) )
+            {
+                $request_found_status = 1;
+            }
+            ++$key;
+        }
+    }
+
+    return $request_found_status;
+
+}
+
+
 
 ?>
