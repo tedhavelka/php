@@ -93,6 +93,7 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
     $term = "<br />\n";
 
 
+    $rname = "list_of_filenames_by_pattern";
 
 
 // DEV - show parameters passed to us from calling code:
@@ -106,7 +107,16 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
 // END DEV
 
 
+    if ( !(isset($path_to_search)) )
+    {
+        warn($rname, "WARNING - calling code sends no path or directory to search!");
+        warn($rname, "WARNING - returning early . . .");
+    }
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     if ( $handle = opendir($path_to_search) )
     {

@@ -66,6 +66,17 @@
     define("LIMIT_FOR_DETAILED_DIAGS", 20);
 
 
+// 2018-01-23 - added to improve source code readability in function
+// tree_browser().
+// NOTE:  these shorter defined names or labels will collide if defined
+// elsewhere in this local PHP library.  - TMH
+
+    define("FILE_NAME", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME);
+    define("FILE_STATUS", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS);
+    define("FILE_TYPE", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE);
+ 
+    define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
+    define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
 
 
 //----------------------------------------------------------------------
@@ -1468,6 +1479,286 @@ if ( $dflag_parse_file_text )
 
 } // end function nn_menu_building_hybrid_fashion()
 
+
+
+
+
+/*
+function ___place_holder___
+*/
+
+function nn_tree_browser_entry($caller)
+{
+
+    $tree_browser_hash_element = array(
+      KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME => KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME,
+      KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS => KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS,
+      KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE => KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE
+    );
+
+    return $tree_browser_hash_element;
+
+}
+
+
+
+
+function tree_browser($caller, $base_directory, $options)
+{
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// VAR BEGIN
+
+//    $show_usage = false;
+
+    $handle = NULL;                      // . . . file handle to directory to search for navigation menu item files,
+
+    $current_dir_has_files_to_process = 'true';
+
+    $files_processed = 0;
+
+    $file_limit_not_reached = 'true';
+
+//    define("FILE_LIMIT", 4096);
+    define("FILE_LIMIT", 300);
+
+
+    $files_in_current_dir = array();
+
+    $key = 0;
+
+    $file = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME;
+
+    $file_type = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE;
+
+    $navigable_tree = array();           // . . . PHP hash of hashes to hold navigation menu items and to return,
+
+
+
+// diagnostics and formatting:
+
+    $dmsg = "";                          // . . . local diagnostics message string for development and debugging,
+
+    $term = "<br />\n";
+
+    $dflag_announce = DIAGNOSTICS_ON;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_dev      = DIAGNOSTICS_ON;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
+    $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
+    $dflag_summary = DIAGNOSTICS_ON;
+
+    $dflag_note_file = DIAGNOSTICS_ON;
+    $dflag_check_file = DIAGNOSTICS_ON;
+
+    $rname = "tree_browser";
+
+// VAR END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+    show_diag($rname, "- 2018-01-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
+
+    show_diag($rname, "starting,", $dflag_dev);
+    show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
+
+
+    $files_in_current_dir =& list_of_filenames_by_pattern($rname, $base_directory, "/(.*)/");
+    sort($files_in_current_dir);
+//    $z = array(FILE_NAME => "---MARKER---", FILE_STATUS => "checked");
+    array_push($files_in_current_dir, "---MARKER---");
+
+    if ( $dflag_dev )
+    {
+        echo "From base directory got file list:<br />\n";
+        echo "<pre>\n";
+        print_r($files_in_current_dir);
+        echo "</pre>\n";
+    }
+
+
+
+
+    $current_dir_has_files_to_process = 'true';
+
+    $files_processed = 0;
+
+    if ( $files_processed < FILE_LIMIT )
+        { $file_limit_not_reached = 'true'; }
+    else
+        { $file_limit_not_reached = 'false'; }
+
+// Variable declared here not at top of this routine:
+    $file_limit = FILE_LIMIT;
+
+    $index_to_latest_not_checked = 0;
+
+
+    while (( $current_dir_has_files_to_process == 'true' ) && ( $file_limit_not_reached == 'true' ))
+    {
+//        show_diag($rname, "flag \$current_dir_has_files_to_process:", $dflag_dev);
+//        var_dump($current_dir_has_files_to_process);
+//        var_dump($file_limit_not_reached);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - add files from latest checked directory in tree to present:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        foreach ( $files_in_current_dir as $key => $file )
+        {
+            if (( $file == "." ) || ( $file == ".." ))
+            {
+                show_diag($rname, "skipping relative directory '$file' . . .", $dflag_note_file);
+                continue;
+            }
+
+            $file_type = KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED;
+
+            if ( is_dir($file) )
+            {
+                show_diag($rname, "noting directory '$file',", $dflag_note_file);
+                $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+            }
+
+            if ( is_file($file) )
+            {
+                show_diag($rname, "noting file '$file',", $dflag_note_file);
+                $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
+            }
+
+            $key_name = $files_processed;
+
+            $navigable_tree[$key_name] = nn_tree_browser_entry($rname);
+            $navigable_tree[$key_name][FILE_NAME] = $file;
+            $navigable_tree[$key_name][FILE_STATUS] = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS;
+            $navigable_tree[$key_name][FILE_TYPE] = $file_type;
+
+            ++$files_processed;
+
+        } // end of file-noting FOREACH loop
+
+        echo $term;
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - review most recently added files, advancing to next
+//          unchecked directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        show_diag($rname, "entering loop to check noted files,",
+          $dflag_check_file);
+        show_diag($rname, "hash element pointer set to $index_to_latest_not_checked,",
+          $dflag_check_file);
+//        show_diag($rname, "file status of file at hash index $index_to_latest_not_checked is '" .
+//          $navigable_tree[$index_to_latest_not_checked][KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS] .
+//          "',", $dflag_check_file);
+
+
+//
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// PROBLEM - Foreach construct puts us back at the start of the growing
+//  array of noted files.  Not a big deal when there are few files, but
+//  will cause poor server/system performance when there are large
+//  numbers of files.  The WHILE construct tests a variable we've
+//  created in this function, which tracks where the next not checked,
+//  not processed file appears in the hash of noted files . . .
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//
+//        foreach ( $navigable_tree as $key => $noted_file )
+
+        $noted_file = $navigable_tree[$index_to_latest_not_checked];
+
+//        while ( $navigable_tree[$index_to_latest_not_checked][FILE_STATUS] == FILE_NOT_CHECKED )
+        while ( $noted_file[FILE_STATUS] == FILE_NOT_CHECKED )
+        {
+            show_diag($rname, "checking file '" . $noted_file[FILE_NAME] . "',",
+              $dflag_check_file);
+            
+            $noted_file[FILE_STATUS] = FILE_CHECKED;
+            ++$index_to_latest_not_checked;
+
+
+            if ( $noted_file[FILE_TYPE] == "directory" )
+            {
+                show_diag($rname, "file " . $noted_file[FILE_NAME] . " is a directory!  breaking out of file review loop . . .",
+                  $dflag_check_file);
+                break;
+            }
+
+            if ( $noted_file[FILE_TYPE] == "file" )
+            {
+                show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is a regular file,",
+                  $dflag_check_file);
+            }
+            else
+            {
+                show_diag($rname, "'" . $noted_file[FILE_NAME] . "'is neither directory nor regular file,",
+                  $dflag_check_file);
+            }
+
+            if ( isset($navigable_tree[$index_to_latest_not_checked]) )
+            {
+                $noted_file = $navigable_tree[$index_to_latest_not_checked];
+            }
+            else
+            {
+                $current_dir_has_files_to_process = 'false';
+            }
+
+        } // end of file-checking WHILE loop
+
+
+
+        show_diag($rname, "after file-review loop hash element pointer set to $index_to_latest_not_checked,",
+          $dflag_check_file);
+
+        $files_in_current_dir =& list_of_filenames_by_pattern($rname, $noted_file[FILE_NAME], "/(.*)/");
+        sort($files_in_current_dir);
+        array_push($files_in_current_dir, "---MARKER---");
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - check whether routine-defined sane file limit reached:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        if ( $files_processed < FILE_LIMIT )
+            { $file_limit_not_reached = 'true'; echo "--- PHP says $files_processed < " . FILE_LIMIT . " ---\n"; }
+        else
+            { $file_limit_not_reached = 'false'; echo "--- PHP says $files_processed => " . FILE_LIMIT . " ---\n"; }
+
+        show_diag($rname, "so far have processed $files_processed files and FILE_LIMIT holds " . FILE_LIMIT . ",", $dflag_dev);
+
+
+
+// NEED TO ADJUST THIS TEST:
+
+//        $current_dir_has_files_to_process = 'false';
+
+    } // end WHILE loop to iterate over files in base directory to present in tree view
+
+
+    echo $term;
+
+    if ( $dflag_summary )
+    {
+        echo $term;
+        echo "After reaching or passing file limit, array navigable_tree() holds:<br />\n";
+        echo "<pre>\n";
+//        print_r($navigable_tree);
+        foreach ( $navigable_tree as $key => $file_entry )
+        {
+            echo "$key => " . $file_entry[FILE_NAME] . "\n";
+        }
+        echo "</pre>\n";
+    }
+
+
+
+
+
+    show_diag($rname, "done.", $dflag_dev);
+
+    echo $term;
+
+} // end function tree_browser()
 
 
 

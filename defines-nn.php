@@ -100,6 +100,21 @@
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS", "site_navigation_diagnostics");
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED", "site_navigation_diagnostics_detailed");
 
+// 2018-01-22 -
+    define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
+    define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
+    define("KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED", "not determined");
+
+    define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
+    define("KEY_VALUE__FILE_STATUS__NOT_CHECKED", "not checked");
+
+    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME", "DEFAULT FILE NAME");
+    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
+    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE", KEY_VALUE__FILE_TYPE__IS_FILE);
+
+    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME", "tree_browser_filename");
+    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS", "tree_browser_file_status");
+    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE", "tree_browser_file_type");
 
 
 

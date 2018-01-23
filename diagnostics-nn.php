@@ -107,6 +107,13 @@ function show_diag($caller, $message, $bit_wise_message_option)
 
     global $term;
 
+
+    if ( !(isset($bit_wise_message_option)) )
+    {
+        $bit_wise_message_option = DIAGNOSTICS_ON;
+    }
+
+
 // Note:  parameter options must be non-zero for calling code's message
 //  to show:
 
