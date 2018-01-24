@@ -1342,6 +1342,8 @@ if ( $dflag_parse_file_text )
 
                         } // end WHILE loop, while navigation menu file has lines of text to process,
 
+                        fclose($handle_to_file);
+
 
 // 2017-11-11 added:
 // BUT IF THE REGULAR FILE IS EMPTY, ITS NAME MAY BE THE MARKER WE NEED TO ACT ON
