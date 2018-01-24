@@ -71,12 +71,12 @@
 // NOTE:  these shorter defined names or labels will collide if defined
 // elsewhere in this local PHP library.  - TMH
 
-    define("FILE_NAME", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME);
-    define("FILE_STATUS", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS);
-    define("FILE_TYPE", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE);
- 
-    define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
-    define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
+//    define("FILE_NAME", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME);
+//    define("FILE_STATUS", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS);
+//    define("FILE_TYPE", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE);
+// 
+//    define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
+//    define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
 
 
 //----------------------------------------------------------------------
@@ -1502,7 +1502,7 @@ function nn_tree_browser_entry($caller)
 
 
 
-
+/*
 function tree_browser($caller, $base_directory, $options)
 {
 
@@ -1515,12 +1515,12 @@ function tree_browser($caller, $base_directory, $options)
 
     $current_dir_has_files_to_process = 'true';
 
-    $files_processed = 0;
+    $files_noted = 0;
 
     $file_limit_not_reached = 'true';
 
 //    define("FILE_LIMIT", 4096);
-    define("FILE_LIMIT", 300);
+//    define("FILE_LIMIT", 300);
 
 
     $files_in_current_dir = array();
@@ -1547,8 +1547,12 @@ function tree_browser($caller, $base_directory, $options)
     $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
     $dflag_summary = DIAGNOSTICS_ON;
 
-    $dflag_note_file = DIAGNOSTICS_ON;
-    $dflag_check_file = DIAGNOSTICS_ON;
+    $dflag_open_dir    = DIAGNOSTICS_ON;
+
+    $dflag_note_file   = DIAGNOSTICS_ON;
+    $dflag_check_file  = DIAGNOSTICS_ON;
+    $dflag_files_limit = DIAGNOSTICS_OFF;
+    $dflag_files_count = DIAGNOSTICS_ON;
 
     $rname = "tree_browser";
 
@@ -1556,12 +1560,31 @@ function tree_browser($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-    show_diag($rname, "- 2018-01-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
-
+    show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
     show_diag($rname, "starting,", $dflag_dev);
     show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - sanity checking base directory from caller:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( !(is_dir($base_directory)) )
+    {
+        show_diag($rname, "- WARNING - caller's base directory doesn't appear to be valid!",
+          $dflag_warning);
+        show_diag($rname, "- WARNING - returning early . . .",
+          $dflag_warning);
+        return;
+    }
+
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    show_diag($rname, "calling for list of files in base directory '$base_directory' . . .", $dflag_open_dir);
     $files_in_current_dir =& list_of_filenames_by_pattern($rname, $base_directory, "/(.*)/");
     sort($files_in_current_dir);
 //    $z = array(FILE_NAME => "---MARKER---", FILE_STATUS => "checked");
@@ -1580,9 +1603,9 @@ function tree_browser($caller, $base_directory, $options)
 
     $current_dir_has_files_to_process = 'true';
 
-    $files_processed = 0;
+    $files_noted = 0;
 
-    if ( $files_processed < FILE_LIMIT )
+    if ( $files_noted < FILE_LIMIT )
         { $file_limit_not_reached = 'true'; }
     else
         { $file_limit_not_reached = 'false'; }
@@ -1612,6 +1635,7 @@ function tree_browser($caller, $base_directory, $options)
             }
 
             $file_type = KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED;
+            show_diag($rname, "checking file type of '$file' . . .", $dflag_note_file);
 
             if ( is_dir($file) )
             {
@@ -1625,14 +1649,14 @@ function tree_browser($caller, $base_directory, $options)
                 $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
             }
 
-            $key_name = $files_processed;
+            $key_name = $files_noted;
 
             $navigable_tree[$key_name] = nn_tree_browser_entry($rname);
             $navigable_tree[$key_name][FILE_NAME] = $file;
             $navigable_tree[$key_name][FILE_STATUS] = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS;
             $navigable_tree[$key_name][FILE_TYPE] = $file_type;
 
-            ++$files_processed;
+            ++$files_noted;
 
         } // end of file-noting FOREACH loop
 
@@ -1691,7 +1715,7 @@ function tree_browser($caller, $base_directory, $options)
             }
             else
             {
-                show_diag($rname, "'" . $noted_file[FILE_NAME] . "'is neither directory nor regular file,",
+                show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is neither directory nor regular file,",
                   $dflag_check_file);
             }
 
@@ -1711,6 +1735,7 @@ function tree_browser($caller, $base_directory, $options)
         show_diag($rname, "after file-review loop hash element pointer set to $index_to_latest_not_checked,",
           $dflag_check_file);
 
+        show_diag($rname, "calling for list of files in '" . $noted_file[FILE_NAME] . "' . . .", $dflag_open_dir);
         $files_in_current_dir =& list_of_filenames_by_pattern($rname, $noted_file[FILE_NAME], "/(.*)/");
         sort($files_in_current_dir);
         array_push($files_in_current_dir, "---MARKER---");
@@ -1719,12 +1744,19 @@ function tree_browser($caller, $base_directory, $options)
 // - STEP - check whether routine-defined sane file limit reached:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        if ( $files_processed < FILE_LIMIT )
-            { $file_limit_not_reached = 'true'; echo "--- PHP says $files_processed < " . FILE_LIMIT . " ---\n"; }
+        if ( $files_noted < FILE_LIMIT )
+        {
+            $file_limit_not_reached = 'true';
+            show_diag($rname, "--- PHP says $files_noted < " . FILE_LIMIT . " ---\n", $dflag_files_limit);
+        }
         else
-            { $file_limit_not_reached = 'false'; echo "--- PHP says $files_processed => " . FILE_LIMIT . " ---\n"; }
+        {
+            $file_limit_not_reached = 'false';
+            show_diag($rname, "--- PHP says $files_noted => " . FILE_LIMIT . " ---\n", $dflag_files_limit);
+        }
 
-        show_diag($rname, "so far have processed $files_processed files and FILE_LIMIT holds " . FILE_LIMIT . ",", $dflag_dev);
+        show_diag($rname, "so far have noted $files_noted files and FILE_LIMIT holds " .
+          FILE_LIMIT . ",", $dflag_files_count);
 
 
 
@@ -1735,11 +1767,10 @@ function tree_browser($caller, $base_directory, $options)
     } // end WHILE loop to iterate over files in base directory to present in tree view
 
 
-    echo $term;
 
     if ( $dflag_summary )
     {
-        echo $term;
+        echo $term . $term;
         echo "After reaching or passing file limit, array navigable_tree() holds:<br />\n";
         echo "<pre>\n";
 //        print_r($navigable_tree);
@@ -1751,15 +1782,13 @@ function tree_browser($caller, $base_directory, $options)
     }
 
 
-
-
-
     show_diag($rname, "done.", $dflag_dev);
 
     echo $term;
 
 } // end function tree_browser()
 
+*/
 
 
 

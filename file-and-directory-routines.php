@@ -68,9 +68,22 @@ function warn($caller, $message)
 
 function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_match)
 {
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//----------------------------------------------------------------------
+//
 //  2017-08-30 WED - This function started by Ted,
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+//  PURPOSE:
+//
+//
+//  EXPECTS:  A valid path to a readable directory of the filesystem
+//    where this code resides and runs.
+//
+//  RETURNS:  an array of strings, each string represents a discovered
+//    filename from the caller's path.
+//
+//
+//
+//----------------------------------------------------------------------
 
 // We'll return an array of all matching filenames to calling code, in
 // this variable:

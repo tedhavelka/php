@@ -115,6 +115,7 @@
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME", "tree_browser_filename");
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS", "tree_browser_file_status");
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE", "tree_browser_file_type");
+    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR", "tree_browser_file_path_in_base_dir");
 
 
 
