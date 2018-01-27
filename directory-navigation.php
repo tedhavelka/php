@@ -101,7 +101,7 @@
 
 
 //----------------------------------------------------------------------
-// - SECTION - PHP file-scoped constants
+// - SECTION - PHP script constants
 //----------------------------------------------------------------------
 
 // 2018-01-23 - added to improve source code readability in function
@@ -125,6 +125,8 @@
 //  called more than once by one and same calling script lead to PHP
 //  interpreter / engine notice of defined value already defined on
 //  line x . . .   - TMH
+
+
 
 
 
@@ -192,6 +194,23 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+    if ( 1 )
+    {
+    $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_dev      = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_format   = DIAGNOSTICS_OFF;
+    $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
+    $dflag_warning  = DIAGNOSTICS_OFF;    // . . . diagnostics flag to toggle warnings in this routine,
+    $dflag_summary  = DIAGNOSTICS_OFF;
+
+    $dflag_open_dir    = DIAGNOSTICS_OFF;
+
+    $dflag_note_file   = DIAGNOSTICS_OFF;
+    $dflag_check_file  = DIAGNOSTICS_OFF;
+    $dflag_files_limit = DIAGNOSTICS_OFF;
+    $dflag_files_count = DIAGNOSTICS_OFF;
+    }
+
     show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
     show_diag($rname, "starting,", $dflag_dev);
     show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
@@ -210,6 +229,17 @@ function &build_tree($caller, $base_directory, $options)
         return;
     }
 
+
+    if ( array_key_exists(KEY_NAME__FILE_DEPTH_IN_BASE_DIR, $_SESSION) )
+        { }
+    else
+        { $_SESSION[KEY_NAME__FILE_DEPTH_IN_BASE_DIR] = 0; }
+
+
+    if ( array_key_exists(KEY_NAME__FILE_DEPTH_GREATEST_VALUE, $_SESSION) )
+        { }
+    else
+        { $_SESSION[KEY_NAME__FILE_DEPTH_GREATEST_VALUE] = 0; }
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -264,11 +294,30 @@ function &build_tree($caller, $base_directory, $options)
 
         foreach ( $files_in_current_dir as $key => $file )
         {
-            if (( $file == "." ) || ( $file == ".." ))
+
+// NEED TO CHANGE NEXT TEN OR SO CODE LINES SO THERE'S ONLY ONE
+// CONTINUE TO OCCUR TO HANDLE '.' and '..' INSTANCES WE WANT TO
+// EXCLUDE:
+
+//            if (( $file == "." ) || ( 0 == preg_match($file, '@(.*)(\/)(\.$)@') ))
+/*
+            if ( $file == "." )
             {
                 show_diag($rname, "skipping relative directory '$file' . . .", $dflag_note_file);
                 continue;
             }
+*/
+
+//            $file_depth_in_base_dir = substr_count($file_path_in_base_dir, "/");
+//            if ( $file_depth_in_base_dir == 0 ) 
+//            {
+                if (( $file == "." ) || ( $file == ".." ))
+//                if ( $file == ".." )
+                {
+                    show_diag($rname, "skipping relative directory '$file' . . .", $dflag_note_file);
+                    continue;
+                }
+//            }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - Check file types . . .
@@ -281,14 +330,12 @@ function &build_tree($caller, $base_directory, $options)
 //            show_diag($rname, "checking file type of '$file' . . .", $dflag_note_file);
             show_diag($rname, "checking file type of '$path_to_latest_file' . . .", $dflag_note_file);
 
-//            if ( is_dir($file) )
             if ( is_dir($path_to_latest_file) )
             {
                 show_diag($rname, "- zz1 - noting directory '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
             }
 
-//            if ( is_file($file) )
             if ( is_file($path_to_latest_file) )
             {
                 show_diag($rname, "- zz2 - noting file '$file',", $dflag_note_file);
@@ -301,7 +348,21 @@ function &build_tree($caller, $base_directory, $options)
                 $file_type = "non-existent";
             }
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - figure file depth in base directory, used to determine
+//          whether to provide link to parent directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
             $file_depth_in_base_dir = substr_count($file_path_in_base_dir, "/");
+
+            $_SESSION[KEY_NAME__FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
+
+            if ( $file_depth_in_base_dir > $_SESSION[KEY_NAME__FILE_DEPTH_GREATEST_VALUE] )
+            {
+                $_SESSION[KEY_NAME__FILE_DEPTH_GREATEST_VALUE] = $file_depth_in_base_dir;
+            }
+
 
             $key_name = $files_noted;
 
@@ -389,12 +450,14 @@ function &build_tree($caller, $base_directory, $options)
 
             if ( isset($navigable_tree[$index_to_latest_not_checked]) )
             {
-echo "\$navigable_tree[$index_to_latest_not_checked] is set,<br />\n";
+                show_diag($rname, "\$navigable_tree[$index_to_latest_not_checked] is set,<br />\n",
+                  $dflag_check_file);
                 $noted_file = $navigable_tree[$index_to_latest_not_checked];
             }
             else
             {
-echo "\$navigable_tree[$index_to_latest_not_checked] is not set,<br />\n";
+                show_diag($rname, "\$navigable_tree[$index_to_latest_not_checked] is not set,<br />\n",
+                  $dflag_check_file);
                 $current_dir_has_files_to_process = 'false';
                 break;
             }
@@ -494,9 +557,19 @@ function present_files($caller, $file_hierarchy, $options)
     $dflag_get = DIAGNOSTICS_ON;
     $dflag_session_var = DIAGNOSTICS_ON;
 
+    $dflag_links = DIAGNOSTICS_ON;
+
     $rname = "present_files";
 
 // VAR END
+
+
+    if ( 1 )
+    {
+    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_get = DIAGNOSTICS_OFF;
+    $dflag_session_var = DIAGNOSTICS_OFF;
+    }
 
 
     show_diag($rname, "- STUB FUNCTION - implementation underway 2018-01-24 -", $dflag_dev);
@@ -518,15 +591,66 @@ function present_files($caller, $file_hierarchy, $options)
 //  to the script which calls this function.  We can add $_GET type
 //  parameters to the URLs.  We can change the URL based on file type.
 //
+//  When a noted file is of type 'directory', a URL will or may be of
+//  the form:
 //
+//     https://[site_name]/path/to/current/dir/[base_directory]/[file_path_in_base_dir]?base_dir=[file_path_in_base_dir]
 //
+//  When a noted file is a directory which contains some regular files
+//  and no directories, then the script-generated URL may point to an
+//  alternate script which presents a file list or photo gallery type
+//  page . . .
 //
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    $key = 0;
+    $noted_file;
+
+    $name = "";
+    $type = "";
+    $path = "";
+    $depth = 0;
+
+    $indent = "";
+    $html_two_space_indent = "&nbsp;&nbsp;";
+    $url = "";
+    $site = "https://neelanurseries.com";
+    $path_from_doc_root = "sandbox";
+    $script_name = $options["script_name"];
+
+    foreach ($file_hierarchy as $key => $noted_file)
+    {
+        $name = $noted_file[FILE_NAME];
+        $type = $noted_file[FILE_TYPE];
+        $path = $noted_file[FILE_PATH_IN_BASE_DIR];
+        $depth = $noted_file[FILE_DEPTH_IN_BASE_DIR];
+
+        $indent = str_repeat($html_two_space_indent, $depth);
+
+        show_diag($rname, "looking at hash as file hierarchy where \$key $key holds filename $name,",
+          $dflag_dev);
+
+        if ( $type == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+        {
+//            $url = $site . "/" . $path_from_doc_root . "/" . $path . "/" . $name;
+            $url = $site . "/" . $path_from_doc_root . "/$script_name?base_dir=$path/$name";
+            echo "($key) <a href=\"$url\">$name</a><br />\n";
+        }
+
+        if ( $type == KEY_VALUE__FILE_TYPE__IS_FILE )
+        {
+            $name = preg_replace('/#/', '%23', $name);
+            $url = $site . "/$path_from_doc_root/$path/$name";
+            echo "($key) <a href=\"$url\">$name</a><br />\n";
+        }
+
+    }
 
 
-}
+
+} // end function present_files()
+
 
 
 
@@ -547,6 +671,14 @@ function present_tree_view($caller, $base_directory, $options)
     $rname = "present_tree_view";
 
 // VAR END
+
+
+    if ( 1 )
+    {
+    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_get = DIAGNOSTICS_OFF;
+    $dflag_session_var = DIAGNOSTICS_OFF;
+    }
 
 
     show_diag($rname, "starting,", $dflag_dev);

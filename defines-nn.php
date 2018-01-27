@@ -123,6 +123,9 @@
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR", "tree_browser_file_path_in_base_dir");
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR", "tree_browser_file_depth_in_base_dir");
 
+    define("KEY_NAME__FILE_DEPTH_IN_BASE_DIR", "file_depth_in_base_dir");
+    define("KEY_NAME__FILE_DEPTH_GREATEST_VALUE", "file_depth_greatest_value");
+
 
 
 //----------------------------------------------------------------------
