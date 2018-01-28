@@ -119,7 +119,7 @@
     define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
 
 //    define("FILE_LIMIT_OF_TREE_BROWSER", 4096);
-    define("FILE_LIMIT_OF_TREE_BROWSER", 300);
+    define("FILE_LIMIT_OF_TREE_BROWSER", 2047);
 
 // Note:  best place PHP defines outside of functions, as functions
 //  called more than once by one and same calling script lead to PHP
@@ -164,6 +164,11 @@ function &build_tree($caller, $base_directory, $options)
     $file_depth_in_base_dir = 0;
 
     $navigable_tree = array();           // . . . PHP hash of hashes to hold navigation menu items and to return,
+
+
+    $count_of_regular_files = 0;
+
+    $count_of_directories = 0;
 
 
 
@@ -334,12 +339,14 @@ function &build_tree($caller, $base_directory, $options)
             {
                 show_diag($rname, "- zz1 - noting directory '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+                ++$count_of_directories;
             }
 
             if ( is_file($path_to_latest_file) )
             {
                 show_diag($rname, "- zz2 - noting file '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
+                ++$count_of_regular_files;
             }
 
             if ( !(file_exists($path_to_latest_file)) )
@@ -535,6 +542,11 @@ function &build_tree($caller, $base_directory, $options)
         }
         echo "</pre>\n";
     }
+
+
+
+    $_SESSION[zzz_count_of_directories] = $count_of_directories;
+    $_SESSION[zzz_count_of_regular_files] = $count_of_regular_files;
 
 
     show_diag($rname, "returning array to calling code . . .", $dflag_dev);
