@@ -134,6 +134,45 @@
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
 
+function show_file_hierarchy_paths($rname, $file_hierarchy)
+{
+
+    $i = 0;
+
+    $file_entry_count = count($file_hierarchy);
+
+    $rname = "show_file_hierarchy_paths";
+
+
+
+    show_diag($rname, "received hash with $file_entry_count file entries,", DIAGNOSTICS_ON);
+    show_diag($rname, "showing full paths and files:", DIAGNOSTICS_ON);
+
+    echo "<pre>\n";
+
+    foreach ( $file_hierarchy as $key => $value )
+    {
+        if ( is_array($value))
+        {
+            show_diag($rname, $value[FILE_PATH_IN_BASE_DIR], DIAGNOSTICS__MESSAGE_ONLY);
+            echo "item $i)" . $value[FILE_PATH_IN_BASE_DIR] . "/" . $value[FILE_NAME] . "\n";
+        }
+        else
+        {
+            print_r($value);
+        }
+
+        ++$i;
+    }
+
+    echo "</pre>\n";
+
+    show_diag($rname, "done.", DIAGNOSTICS_ON);
+}
+
+
+
+
 // function tree_browser($caller, $base_directory, $options)
 function &build_tree($caller, $base_directory, $options)
 {
@@ -706,11 +745,17 @@ function present_tree_view($caller, $base_directory, $options)
     show_diag($rname, "calling stub function to present tree view . . .", $dflag_dev);
     present_files($caller, $file_hierarchy, $options);
 
+
+    show_file_hierarchy_paths($rname, $file_hierarchy);
+
+
     show_diag($rname, "returning to caller . . .", $dflag_dev);
 
 }
 
 
 
+
+// End of file directory-navigation.php
 
 ?>
