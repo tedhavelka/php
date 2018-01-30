@@ -584,8 +584,8 @@ function &build_tree($caller, $base_directory, $options)
 
 
 
-    $_SESSION[zzz_count_of_directories] = $count_of_directories;
-    $_SESSION[zzz_count_of_regular_files] = $count_of_regular_files;
+    $_SESSION["zzz_count_of_directories"] = $count_of_directories;
+    $_SESSION["zzz_count_of_regular_files"] = $count_of_regular_files;
 
 
     show_diag($rname, "returning array to calling code . . .", $dflag_dev);
@@ -705,6 +705,119 @@ function present_files($caller, $file_hierarchy, $options)
 
 
 
+
+function present_files_conventional_view($caller, $file_hierarchy, $options)
+{
+
+// VAR BEGIN
+
+    $i = 0;
+
+    $key = 0;
+    $key_in_nested_foreach = 0;
+    $file_entry = null;
+    $file_entry_in_nested_foreach = null;
+    $path = "";
+
+// diagnostics:
+
+    $dflag_dev     = DIAGNOSTICS_ON;
+    $dflag_warning = DIAGNOSTICS_ON;
+
+    $rname = "present_files_conventional_view";
+
+// VAR END
+
+
+
+    show_diag($rname, "starting,", $dflag_dev);
+
+    if ( !(isset($file_hierarchy)) )
+    {
+        show_diag($rname, "- WARNING - caller sends file hierarchy array which is not set!", $dflag_warning);
+        show_diag($rname, "- WARNING - returning early . . .", $dflag_warning);
+        return;
+    }
+
+    if ( !(is_array($file_hierarchy)) )
+    {
+        show_diag($rname, "- WARNING - caller sends file hierarchy object which is not an array!", $dflag_warning);
+        show_diag($rname, "- WARNING - returning early . . .", $dflag_warning);
+        return;
+    }
+
+
+    if ( 0 )
+    {
+        echo "<pre>\n";
+        foreach ( $file_hierarchy as $key => $file_entry )
+        {
+            print_r($file_entry);
+            ++$i;
+            if ( $i > 40 ) { break; }
+        }
+        echo "</pre>\n";
+    }
+
+
+    show_diag($rname, "showing dirs followed by files in each directory:", $dflag_dev);
+
+    {
+        foreach ( $file_hierarchy as $key => $file_entry )
+        {
+//            echo "(L1) first foreach looking at element $key:<br />\n";
+
+            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+            {
+                $path = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
+//                echo "     current entry notes a directory,<br />\n";
+//                echo "     current entry's path:  '$path'<br />\n";
+//                echo "     current entry's dirname:  '" . $file_entry[FILE_NAME] . "'<br />\n";
+
+                $file_count = 0;
+
+                foreach ( $file_hierarchy as $key_in_nested_foreach => $file_entry_in_nested_foreach )
+                {
+//                    echo "nested foreach looking at element $key_in_nested_foreach with noted path '" .
+//                      $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR] . "':<br />\n";
+                    if ( $file_entry_in_nested_foreach[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
+                    {
+//                        echo "(L2) nested foreach looking at at regular file '" . $file_entry_in_nested_foreach[FILE_NAME] . "',<br />\n";
+//                        echo "     comparing:<br />\n";
+//                        echo "<pre>'$path' with<br />\n";
+//                        echo "'" . $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR] . "'</pre><br />\n";
+
+                        if ( $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR] == $path )
+                        {
+//                            echo "- ZZZ - FOUND file in latest encountered directory!<br />\n";
+                            echo "&nbsp; &nbsp; &nbsp; (T2) " . $file_entry_in_nested_foreach[FILE_NAME] . "<br />\n";
+//                              . " noted in directory " . $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR] . "<br />\n";
+                            ++$file_count;
+                        }
+
+                    } // end IF-block to test whether current file is a regular file
+
+                } // end nested foreach construct, to show files in current directory
+
+                echo "- YYY - $file_count files in directory <i>$path</i><br />\n";
+
+            } // end IF-block to test whether current file is a directory
+
+        } // end foreach construct, to iterate over files in calling code's file hierarchy
+
+    }
+
+
+
+
+    show_diag($rname, "returning . . .", $dflag_dev);
+
+} // end function present_files_conventional_view()
+
+
+
+
+
 function present_tree_view($caller, $base_directory, $options)
 {
 
@@ -712,6 +825,9 @@ function present_tree_view($caller, $base_directory, $options)
 
 
     $count_of_files_noted = 0;
+
+    $term = "<br />\n";
+
 
 // diagnostics:
 
@@ -745,8 +861,13 @@ function present_tree_view($caller, $base_directory, $options)
     show_diag($rname, "calling stub function to present tree view . . .", $dflag_dev);
     present_files($caller, $file_hierarchy, $options);
 
-
+// 2018-01-28 - For development only:
     show_file_hierarchy_paths($rname, $file_hierarchy);
+    echo $term . $term;
+
+// 2018-01-29 - For development only:
+    present_files_conventional_view($caller, $file_hierarchy, $options);
+    echo $term . $term;
 
 
     show_diag($rname, "returning to caller . . .", $dflag_dev);
