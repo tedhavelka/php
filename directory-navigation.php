@@ -114,6 +114,7 @@
     define("FILE_TYPE", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE);
     define("FILE_PATH_IN_BASE_DIR", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR);
     define("FILE_DEPTH_IN_BASE_DIR", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR);
+    define("FILE_COUNT", KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES);
 
     define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
     define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
@@ -194,7 +195,9 @@ function &build_tree($caller, $base_directory, $options)
 
     $key = 0;
 
-    $file = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME;
+    $key_to_present_directory = 0;       // . . . key used to store count of files in containing directory hash entry
+
+    $file = KEY_VALUE__DIRECTORY_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME;
 
     $file_type = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE;
 
@@ -386,6 +389,9 @@ function &build_tree($caller, $base_directory, $options)
                 show_diag($rname, "- zz2 - noting file '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
                 ++$count_of_regular_files;
+echo "incrementing file count in present directory, hash entry $key_to_present_directory to " .
+$navigable_tree[$key_to_present_directory][FILE_COUNT] . ",<br />\n";
+                ++$navigable_tree[$key_to_present_directory][FILE_COUNT];
             }
 
             if ( !(file_exists($path_to_latest_file)) )
@@ -393,6 +399,16 @@ function &build_tree($caller, $base_directory, $options)
                 show_diag($rname, "- zz3 - noting file '$file' does not exist,", $dflag_note_file);
                 $file_type = "non-existent";
             }
+
+
+//
+//----------------------------------------------------------------------
+// - 2018-01-30 - NEED REVIEW:
+// NOTE:  WE MAY WANT TO ADD CODE TO TEST FOR SYMBOLIC LINKS, AND
+//   OPTIONALLY SKIP THEM IN BUILDING FILE TREE HIERARCHIES.  - TMH
+//----------------------------------------------------------------------
+//
+
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -418,6 +434,7 @@ function &build_tree($caller, $base_directory, $options)
             $navigable_tree[$key_name][FILE_TYPE] = $file_type;
             $navigable_tree[$key_name][FILE_PATH_IN_BASE_DIR] = $file_path_in_base_dir;
             $navigable_tree[$key_name][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
+            $navigable_tree[$key_name][FILE_COUNT] = 0;
 
             ++$files_noted;
 
@@ -474,6 +491,10 @@ function &build_tree($caller, $base_directory, $options)
                 show_diag($rname, "file " . $noted_file[FILE_NAME] . " is a directory!  breaking out of file review loop . . .",
                   $dflag_check_file);
                 $file_path_in_base_dir = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
+
+// Here note hash key name of this latest directory, so we can
+// amend this entry with count of regular files found in it:
+                $key_to_present_directory = $key_name;
                 break;
             }
 
@@ -604,9 +625,16 @@ function present_files($caller, $file_hierarchy, $options)
 
 // VAR BEGIN
 
+    $display_limit = 0;
+
+    $count_elements_shown = 0;
+
+// diagnostics:
+
     $dflag_dev = DIAGNOSTICS_ON;
     $dflag_get = DIAGNOSTICS_ON;
     $dflag_session_var = DIAGNOSTICS_ON;
+    $dflag_info = DIAGNOSTICS_ON;
 
     $dflag_links = DIAGNOSTICS_ON;
 
@@ -670,6 +698,19 @@ function present_files($caller, $file_hierarchy, $options)
     $path_from_doc_root = "sandbox";
     $script_name = $options["script_name"];
 
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW, $_SESSION) )
+    {
+        $display_limit = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW];
+    }
+
+    if ( $display_limit > 0 )
+    {
+        show_diag($rname, "- INFO - display limit throttled so we'll show just",
+          $dflag_info);
+        show_diag($rname, "- INFO - $display_limit elements from file hierarchy hash table:",
+          $dflag_info);
+    }
+
     foreach ($file_hierarchy as $key => $noted_file)
     {
         $name = $noted_file[FILE_NAME];
@@ -696,6 +737,11 @@ function present_files($caller, $file_hierarchy, $options)
             echo "($key) <a href=\"$url\">$name</a><br />\n";
         }
 
+        if ( $display_limit > 0 )
+        {
+            ++$count_elements_shown;
+            if ( $count_elements_shown >= $display_limit ) { break; }
+        }
     }
 
 
@@ -708,7 +754,7 @@ function present_files($caller, $file_hierarchy, $options)
 
 function present_files_conventional_view($caller, $file_hierarchy, $options)
 {
-
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // VAR BEGIN
 
     $i = 0;
@@ -723,10 +769,12 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
     $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
+    $dflag_legend  = DIAGNOSTICS_ON;
 
     $rname = "present_files_conventional_view";
 
 // VAR END
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 
@@ -759,6 +807,12 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         echo "</pre>\n";
     }
 
+
+    show_diag($rname, "Legend:", $dflag_legend);
+    show_diag($rname, "(L1) identifies messages from main iterating loop, foreach construct 1", $dflag_legend);
+    show_diag($rname, "(T1) identifies messages are from conditional test 1, in body of loop 1", $dflag_legend);
+    show_diag($rname, "(L2) identifies messages from iterating once-nested foreach construct", $dflag_legend);
+    show_diag($rname, "(T2) identifies messages conditional test in body of nested foreach.", $dflag_legend);
 
     show_diag($rname, "showing dirs followed by files in each directory:", $dflag_dev);
 
@@ -842,7 +896,7 @@ function present_tree_view($caller, $base_directory, $options)
 
     if ( 1 )
     {
-    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_dev = DIAGNOSTICS_ON;
     $dflag_get = DIAGNOSTICS_OFF;
     $dflag_session_var = DIAGNOSTICS_OFF;
     }
