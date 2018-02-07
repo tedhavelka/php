@@ -103,6 +103,7 @@
 // 2018-01-22 -
     define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
     define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
+    define("KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK", "symlink");
     define("KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED", "not determined");
 
     define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
@@ -125,12 +126,14 @@
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE", "tree_browser_file_type");
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR", "tree_browser_file_path_in_base_dir");
     define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR", "tree_browser_file_depth_in_base_dir");
-    define("KEY_NAME__DIRECTORY_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR", "count_of_regular_files");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES", "count_of_regular_files");
 
     define("KEY_NAME__FILE_DEPTH_IN_BASE_DIR", "file_depth_in_base_dir");
     define("KEY_NAME__FILE_DEPTH_GREATEST_VALUE", "file_depth_greatest_value");
 
     define("KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW", "limit_elements_to_show_set_to_n");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_EMPTY_DIRS", "hide_empty_dirs");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES", "hide_files");
 
 
 //----------------------------------------------------------------------
