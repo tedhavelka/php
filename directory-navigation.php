@@ -2,7 +2,13 @@
 
 //----------------------------------------------------------------------
 //
-//  FILE:  directory-navigation.php"
+//  PROJECT:  local PHP library functions, CMS focused
+//
+//  FILE:  directory-navigation.php
+//
+//  STANDING:  2018-02-12 THIS FILE UNDER DEVELOPMENT, NOT YET WORKING
+//    NOR RELEASED FOR PRODUCTION USE! - TMH
+//
 //
 //
 //  TO-DO:
@@ -82,8 +88,31 @@
 //      file 2
 //
 //
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+//  NOTES ON DEVELOPMENT / IMPLEMENTATION:
+//   As of 2018 late January the basic directory 'walking' works,
+//   with the code not written to keep track of file counts per
+//   directory visited.  All directories are shown and all files are
+//   alternately shown or hidden, but there is no summary count of files
+//   per directory.  A total count of files across directories in the
+//   given tree walked or mapped is implemented.
 //
+//   NEED:  create PHP defines to turn on and off named script
+//     +  behaviors, such as total file count.
 //
+//   Counting files per directory is turning out to be non-trivial,
+//   given that this PHP code sees files one at a time, and without
+//   much relational information to one another.  Ted has so far opted
+//   to solve this task in a non-recursive way, execution wise, and a
+//   file tree flattened way data structure wise.  It may be that to
+//   avoid the possible performance hit of recursion, that the "file
+//   tree flattening" code is more complicated than it's worth.  But
+//   there must be some clever way to build what's basically a list
+//   of files (both regular files and directories) which is by its
+//   data structure nature flat, and have that sufficiently present
+//   the original tree structure of the files.
 //
 
 
@@ -129,9 +158,13 @@
 
 
 // 2018-02-06 - For development work:
-    define ("KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES", "non-empty-directory-entries");
-    define ("KEY_NAME__DIRECTORY_ENTRIES", "directory-entries");
+    define ("KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES", "non_empty_directory_entries");
+    define ("KEY_NAME__DIRECTORY_ENTRIES", "directory_entries");
 
+// 2018-02-13 - File count per directory work:
+    define ("KEY_NAME__FILE_COUNT_PER_LOOP_1", "file_count_per_loop_1");
+    define ("KEY_NAME__FILE_COUNT_PER_LOOP_2", "file_count_per_loop_2");
+//    define ("KEY_NAME__", "");
 
 
 
@@ -219,7 +252,9 @@ function &build_tree($caller, $base_directory, $options)
 //  NOTES ON IMPLEMENTATION:  this routine a non-recursive algorithm
 //   which builds a flattened hash of a directory and file structure.
 //
-//
+//   See also large approximate forty line comment block above loop 1
+//   code block for details of this routines algorithm versions 1 and
+//   2 . . . .
 //
 //----------------------------------------------------------------------
 
@@ -239,21 +274,34 @@ function &build_tree($caller, $base_directory, $options)
 
     $files_in_current_dir = array();
 
+
+// "file tree" hash related:
     $key = 0;
 
     $key_to_present_directory = 0;       // . . . key used to store count of files in containing directory hash entry
 
+    $index_to_latest_not_checked = 0;    // . . . used by loop 2 in algorithm version 1, see notes on routine implementation
+
+    $index_to_earliest_not_checked = 0;  // . . . used by loop 2 in algorithm version 2
+
+
+// 2018-02-09 - poorly named given name of PHP define:
     $file = KEY_VALUE__DIRECTORY_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME;
 
     $file_type = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE;
 
+// Used to hold starting directory and all subdirectories as routine maps caller's file tree:
     $current_path = ".";   // . . . this var was named 'file_path_in_base_dir' - TMH
 
     $file_depth_in_base_dir = 0;
 
-    $navigable_tree = array();           // . . . PHP hash of hashes to hold navigation menu items and to return,
 
 
+// PHP "file tree" hash to return to calling code:
+    $navigable_tree = array();
+
+
+// Summary and reportable info not distilled in the hash itself:
     $count_of_regular_files = 0;
 
     $count_of_directories = 0;
@@ -282,6 +330,8 @@ function &build_tree($caller, $base_directory, $options)
 
     $dflag_file_count_per_directory = DIAGNOSTICS_ON;
     $dflag_base_directory_file_list = DIAGNOSTICS_ON;
+    $dflag_loop_1 = DIAGNOSTICS_ON;
+    $dflag_loop_2 = DIAGNOSTICS_ON;
 
 //    $rname = "tree_browser";
     $rname = "build_tree";
@@ -359,11 +409,11 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
     }
 
 
-// Loop set up:
+// main WHILE-loop set up:
 
     $current_dir_has_files_to_process = 'true';
 
-    $index_to_latest_not_checked = 0;
+    $index_to_latest_not_checked = 0;    // . . . loop set up, this value may already by assigned in var block top of routine
 
     $files_noted = 0;
 
@@ -384,19 +434,19 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
 
 // Primary file-processing loop:
 
+//    $j = 0;
     while (( $current_dir_has_files_to_process == 'true' ) && ( $file_limit_not_reached == 'true' ))
+//    while ( ($current_dir_has_files_to_process == 'true') && ($file_limit_not_reached == 'true') && ($j < 20) )
     {
-//        show_diag($rname, "flag \$current_dir_has_files_to_process:", $dflag_dev);
-//        var_dump($current_dir_has_files_to_process);
-//        var_dump($file_limit_not_reached);
+//        ++$j;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - STEP - add files from latest checked directory in tree to present:
+// - STEP - add files from latest checked directory
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        show_diag($rname, "Loop 1 - Noting file types in path '$current_path':", $dflag_note_file);
+        show_diag($rname, "Loop 1 - Noting file types in path '$current_path':", $dflag_loop_1);
 
-        if ( $dflag_base_directory_file_list )
+        if ( $dflag_loop_1 ) // base directory file list and subdir file lists too - TMH
         {
             echo "From current path got file list:<br />\n";
             echo "<pre>\n";
@@ -405,53 +455,20 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
         }
 
 
-//----------------------------------------------------------------------
-// - NOTES - Nested loop 1 implementation
-//----------------------------------------------------------------------
+// 2018-02-13 QUESTION:  is there one good variable name which we can
+//  employ here, for the variable which is the key to the next file tree
+//  hash entry?  How about 'next_file_tree_hash_entry' or
+//  'file_tree_hash_pointer'?   - TMH
+//
 
-// The first nested loop takes a given path or directory and notes all
-// files in this path by adding them as data structure entries to a PHP
-// hash, also known as an 'ordered map'.  Loop 1 gives numeric keys to
-// the entries of this hash, which increment from 0 inclusive once for
-// each file noted.
-//
-// When all files have been noted by loop 1 then script execution moves
-// to loop 2, which searched the hash of files for directories.  For
-// each directory loop 2 finds it returns script execution to loop 1 so
-// that those directory's files are added to the hash.
-//
-// Loop 1 and loop 2 can see which files have been reviewed or checked 
-// by loop 2.  Loop 1 always adds all files in the current path, but
-// loop 2 does not always check all files in the file tree hash.
-// Loop 2 is designed to direct script execution back to loop one at
-// the first un-checked directory loop 2 finds in the hash.
-//
-// Because of this, on the second and successive times when loop 2
-// executes it may be checking a group of files which fall under two
-// or more distinct paths.  To update file counts per directory in
-// this scenario, loop 2 must compare strings -- file paths -- of each
-// file it checks.  It must compare file paths to noted directores
-// until a matchis found.  This is inefficient.  For loop 2 to know
-// up front in which directory its regular files are found, loop 2
-// needs to review all unchecked files every time it is visited.  Then
-// and only then is the case assured that loop 2 will have unchecked
-// files from one directory.
-//
-// To achieve this, loop 2 need keep track of which unchecked directory
-// it first encounters after loop 2 begins execution.  Loop 2 may find
-// multiple directories while checking hash entries during one of its
-// executions.  That is ok, so long as loop 2 is sure to check all
-// unchecked files, all directories, where the first un-checked
-// directory found is the path which is set before script execution
-// resumes at loop 1.
-//
-// To improve efficiency, loop 2 can skip hash entries before the
-// latest un-checked directory.  That is, loop 2 need not ask whether
-// files have been checked earlier in the hash than the latest
-// un-checked directory, because loop 2 checks all non-directory files
-// plus the latest un-checked directory, before the PHP interpreter
-// passes script control back to loop 1.
-//
+//        $key_name = $files_noted;   // <-- prepare file hash tree pointer for loop 1,
+        $file_tree_hash_entry = $files_noted;   // <-- prepare file hash tree pointer for loop 1,
+
+//        $key_to_present_directory = 0;
+
+        show_diag($rname, "entering loop 1 with file tree hash entry = $file_tree_hash_entry,", $dflag_loop_1);
+        show_diag($rname, "and key to present directory = $key_to_present_directory,", $dflag_loop_1);
+
 
 //----------------------------------------------------------------------
 // - FEATURE - Nested loop 1:
@@ -459,6 +476,7 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
 
         foreach ( $files_in_current_dir as $key => $file )
         {
+            show_diag($rname, "- TOP OF LOOP 1 -", $dflag_loop_1);
 
             if (( $file == "." ) || ( $file == ".." ))
             {
@@ -472,23 +490,23 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
 
             $file_type = KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED;
 
-            $path_to_latest_file = $current_path . "/" . $file;
+            $current_path_and_file = $current_path . "/" . $file;
 
-            show_diag($rname, "checking file type of '$path_to_latest_file' . . .", $dflag_note_file);
+            show_diag($rname, "checking file type of '$current_path_and_file' . . .", $dflag_note_file);
 
-//            if ( is_dir($path_to_latest_file) )
-            if ( is_dir($path_to_latest_file) && !is_link($path_to_latest_file) )
+//            if ( is_dir($current_path_and_file) )
+            if ( is_dir($current_path_and_file) && !is_link($current_path_and_file) )
             {
                 show_diag($rname, "- zz1 - noting directory '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
                 ++$count_of_directories;
 
-                show_diag($rname, "for development purposes noting directory hash entry in PHP session variable,", $dflag_dev);
-                array_push($_SESSION[KEY_NAME__DIRECTORY_ENTRIES], $key_name);
+                show_diag($rname, "for development purposes noting directory hash entry '$file_tree_hash_entry' in PHP session variable,", $dflag_dev);
+                array_push($_SESSION[KEY_NAME__DIRECTORY_ENTRIES], $file_tree_hash_entry);
 
             }
 
-            if ( is_file($path_to_latest_file) )
+            if ( is_file($current_path_and_file) )
             {
                 show_diag($rname, "- zz2 - noting file '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
@@ -506,7 +524,7 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
             }
 
 
-            if ( is_link($path_to_latest_file) )
+            if ( is_link($current_path_and_file) )
             {
                 show_diag($rname, "- zz3 - noting symlink '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK;
@@ -517,9 +535,9 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
 
 
 
-            if ( !(file_exists($path_to_latest_file)) )
+            if ( !(file_exists($current_path_and_file)) )
             {
-                show_diag($rname, "- zz3 - noting file '$path_to_latest_file' does not exist,", $dflag_note_file);
+                show_diag($rname, "- zz3 - noting file '$current_path_and_file' does not exist,", $dflag_note_file);
                 $file_type = "non-existent";
             }
 
@@ -549,22 +567,36 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
             }
 
 
-            $key_name = $files_noted;
+//            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
 
-            $navigable_tree[$key_name] = nn_tree_browser_entry($rname);
-            $navigable_tree[$key_name][FILE_NAME] = $file;
-            $navigable_tree[$key_name][FILE_STATUS] = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS;
-            $navigable_tree[$key_name][FILE_TYPE] = $file_type;
-            $navigable_tree[$key_name][FILE_PATH_IN_BASE_DIR] = $current_path;
-            $navigable_tree[$key_name][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
-            $navigable_tree[$key_name][FILE_COUNT] = 0;
+            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
+
+            $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
+            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS;
+            $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = $file_type;
+            $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = $current_path;
+            $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
+            $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
 
             ++$files_noted;
+            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
 
         } // end of loop 1 to note files in current directory
 
-        if ( $dflag_format )
+
+        show_diag($rname, "after loop 1 execution array of noted files holds:", $dflag_note_file);
+        if ( $dflag_note_file )
+        {
+            echo "<pre>\n";
+            print_r($navigable_tree);
+            echo "</pre>\n";
+        }
+
+        if ( $dflag_note_file )
             { echo $term; }
+
+        
+
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -572,160 +604,203 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
 //          unchecked directory:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        show_diag($rname, "Loop 2 - Checking noted files for directories to map:", $dflag_check_file);
-        show_diag($rname, "-----------------------------------------------------", $dflag_check_file);
-        show_diag($rname, "hash element pointer set to $index_to_latest_not_checked,",
+        show_diag($rname, "Loop 2 - Checking noted files for next directory to map:", $dflag_check_file);
+        show_diag($rname, "--------------------------------------------------------", $dflag_check_file);
+        show_diag($rname, "hash element pointer set to latest file not checked = $index_to_latest_not_checked,",
+          $dflag_check_file);
+        show_diag($rname, "hash element pointer set to earliest file not checked = $index_to_earliest_not_checked,",
           $dflag_check_file);
 
-//
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// PROBLEM - Foreach construct puts us back at the start of the growing
-//  array of noted files.  Not a big deal when there are few files, but
-//  will cause poor server/system performance when there are large
-//  numbers of files.  The WHILE construct tests a variable we've
-//  created in this function, which tracks where the next not checked,
-//  not processed file appears in the hash of noted files . . .
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//
-//        foreach ( $navigable_tree as $key => $noted_file )
 
-        if ( isset($navigable_tree[$index_to_latest_not_checked]) )
+
+// 2018-02-08 - change algorithm 1 to algorithm 2:
+//        if ( isset($navigable_tree[$index_to_latest_not_checked]) )
+
+        $hash_pointer_loop_2 = $index_to_earliest_not_checked;
+
+        $unchecked_directory_found = 'false';
+
+        if ( isset($navigable_tree[$index_to_earliest_not_checked]) )
         {
-            $noted_file = $navigable_tree[$index_to_latest_not_checked];
-            $path_to_latest_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
+//            $noted_file = $navigable_tree[$index_to_latest_not_checked];
+            $noted_file = $navigable_tree[$index_to_earliest_not_checked];
+            $current_path_and_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
         }
         else
         {
+            show_diag($rname, "- WARNING - Odd, but found file tree hash element $index_to_earliest_not_checked not set!",
+              $dflag_warning);
+            show_diag($rname, "- WARNING - this hash element pointer normally points to elements in middle of hash.",
+              $dflag_warning);
+            show_diag($rname, "- WARNING - this event may indicate a PHP coding error . . . - TMH",
+              $dflag_warning);
             $current_dir_has_files_to_process = 'false';
         }
 
 
+//----------------------------------------------------------------------
 // - FEATURE - Nested loop 2:
+//
+//  Loop 2 purpose:  
+//     *  capture hash key of the latest not-checked directory,
+//     *  mark this directory checked
+//     *  check all remaining not-directory-type files
+//
+//  The noted file at this entry point to loop 2 is the file at hash
+//  entry '$index_to_earliest_not_checked'.
+//
+//  Loop 2 must check files from file tree hash entry $index_to_earliest_not_checked
+//  to hash entry $file_tree_hash_entry.
+//----------------------------------------------------------------------
 
-        while ( ($noted_file[FILE_STATUS] == FILE_NOT_CHECKED) && ($current_dir_has_files_to_process == 'true') )
+// removing algorithm 1 test:
+//        while ( ($noted_file[FILE_STATUS] == FILE_NOT_CHECKED) && ($current_dir_has_files_to_process == 'true') )
+//        while ( $current_dir_has_files_to_process == 'true' )
+
+        $loop_2_iteration = 0;   // Variable $i quick and dirty limit setter on loop iterations - TMH
+
+        while ( ($hash_pointer_loop_2 < $file_tree_hash_entry) && ($loop_2_iteration < 50) )
         {
-            show_diag($rname, "checking file '" . $path_to_latest_file . "',", $dflag_check_file);
-            $navigable_tree[$index_to_latest_not_checked][FILE_STATUS] = FILE_CHECKED;
-            show_diag($rname, "marked file '" . $path_to_latest_file . "' as '" . $navigable_tree[$index_to_latest_not_checked][FILE_STATUS] . "',",
-              $dflag_check_file);
-            ++$index_to_latest_not_checked;
+            ++$loop_2_iteration;
+
+            show_diag($rname, "- TOP OF LOOP 2 - iteration $loop_2_iteration, file_tree_hash_entry = $file_tree_hash_entry, hash_pointer_loop_2 = $hash_pointer_loop_2,", $dflag_check_file);
+            show_diag($rname, "checking file '" . $current_path_and_file . "',", $dflag_check_file);
 
 
-            if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+// So we have this shortr-hand variable name 'noted_file' which is a
+// copy of the present entry in the file tree hash, the entry that we're
+// processing.  But this variable is in a sense read-only in that we
+// cannot update the file tree hash by writing this short-hand copy
+// of the present hash entry.
+//
+// Above as primer step to loop 2 we set:
+//
+//    $hash_pointer_loop_2 = $index_to_earliest_not_checked;
+//
+//    $noted_file = $navigable_tree[$index_to_earliest_not_checked];
+//
+//
+//  At end of loop 2 we set:
+//
+//    $noted_file = $navigable_tree[$hash_pointer_loop_2];
+//
+
+            if ( $noted_file[FILE_STATUS] == FILE_NOT_CHECKED )
             {
-
-//
-// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
-// Here note hash key name of this latest directory, so we can
-// amend this entry with count of regular files found in it:
-//
-// 2018-02-07 - SOMETHING IS INCORRECT WITH THE SETTING OF 'KEY_TO_PRESENT_DIRECTORY',
-//   +  This hash entry pointer is somehow not pointing to the directores
-//   +  which contain files and need their file counts incremented.
-//   +  Ted debugging this problem now . . .
-//
-//   Noting that $key_name is assigned a value just one place -- good --
-//   and that place is at the point of loop 2 adding a file to the 
-//   file tree hash.  Loop 1 executes until all files in $current_path
-//   have been noted.  Therefore $key_name will sometimes point too far
-//   along the hash of files to indicate the directory which loop 2
-//   is ...
-//
-//
-// ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
-//
-
-                $key_to_present_directory = $key_name;
-
-
-                show_diag($rname, "in loop 2 file " . $noted_file[FILE_NAME] . " is a directory at hash entry $key_name,", $dflag_check_file);
-                show_diag($rname, "in loop 2 breaking out of file review loop . . .", $dflag_check_file);
-//                $current_path = $current_path . "/" . $noted_file[FILE_NAME];
-                $current_path = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
-
-                break;
-            }
-
-
-// 2018-02-07 - this block looks exclusively diagnostic . . . and logic is faulty here
-//  +  with regular files also testing true for the second outcome of the final
-//  +  IF-test:
-
-            if ( 0 )
-            {
-                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
+//                if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY) && ($unchecked_directory_found == 'false') )
+                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
                 {
-                    show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is a regular file,",
-                      $dflag_check_file);
+                    if ( $unchecked_directory_found == 'false' )
+                    {
+                        show_diag($rname, "at hash entry $hash_pointer_loop_2 looking at first un-checked directory '" . $noted_file[FILE_NAME] .
+                          "',", $dflag_check_file);
+                        show_diag($rname, "note:  this will be next directory whose contents loop 1 maps.", $dflag_check_file);
+
+                        $unchecked_directory_found = 'true';
+//                        $navigable_tree[$index_to_earliest_not_checked][FILE_STATUS] = FILE_CHECKED;
+                        $navigable_tree[$hash_pointer_loop_2][FILE_STATUS] = FILE_CHECKED;
+// - NOTE - Here set the path from which loop 1 will next read files:
+                        $current_path = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
+                        $index_to_earliest_not_checked = $hash_pointer_loop_2;
+show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to_earliest_not_checked,", $dflag_check_file);
+
+                        $key_to_present_directory = $hash_pointer_loop_2;
+//                        break;
+                    }
+                    else
+                    {
+                        show_diag($rname, "at hash entry $file_tree_hash_entry passing over successive un-checked directory '" . $noted_file[FILE_NAME] .
+                          "' for time being,", $dflag_check_file);
+                    }
                 }
 
-                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
+                elseif ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
                 {
-                    show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is a symbolic link,",
-                      $dflag_check_file);
+                    show_diag($rname, "marking hash entry $hash_pointer_loop_2 checked, points to regular file,", $dflag_check_file);
+                    $navigable_tree[$hash_pointer_loop_2][FILE_STATUS] = FILE_CHECKED;
                 }
 
-                if ( $noted_file[FILE_TYPE] == "non-existent" )
+                elseif ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
                 {
-                    show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is non-existent,",
-                      $dflag_check_file);
+                    show_diag($rname, "marking hash entry $hash_pointer_loop_2 checked, points to symbolic link,", $dflag_check_file);
+                    $navigable_tree[$hash_pointer_loop_2][FILE_STATUS] = FILE_CHECKED;
                 }
+
                 else
                 {
-                    show_diag($rname, "'" . $noted_file[FILE_NAME] . "' is neither directory nor regular file, (though PHP is_dir() returns 'true' for symlinks which point to directories)",
-                      $dflag_check_file);
+                    show_diag($rname, "marking hash entry $hash_pointer_loop_2 checked, points to unrecognized file type,", $dflag_check_file);
+                    $navigable_tree[$hash_pointer_loop_2][FILE_STATUS] = FILE_CHECKED;
                 }
-            }
 
-//
-// 2018-02-07 - index to latest not checked hash entry was updated
-//  +  early in this second-in-series nested loop, and here we use that
-//  +  index again in test:
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-            if ( isset($navigable_tree[$index_to_latest_not_checked]) )
-            {
-                show_diag($rname, "\$navigable_tree[$index_to_latest_not_checked] is set,<br />\n",
-                  $dflag_check_file);
-                $noted_file = $navigable_tree[$index_to_latest_not_checked];
-            }
+// diagnostics:
+//                if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY)
+//                  && ($noted_file[FILE_STATUS] == FILE_NOT_CHECKED)
+//                  && ($unchecked_directory_found == 1) )
+//                {
+//                    show_diag($rname, "passing over hash entry $hash_pointer_loop_2, points to directory to check later,", $dflag_check_file);
+//                }
+
+            } // end IF-block to process files not yet checked
             else
             {
-                show_diag($rname, "\$navigable_tree[$index_to_latest_not_checked] is not set,<br />\n",
-                  $dflag_check_file);
-                $current_dir_has_files_to_process = 'false';
-                break;
+                show_diag($rname, "passing over checked file,", $dflag_dev);
             }
+ 
 
-            $noted_file = $navigable_tree[$index_to_latest_not_checked];
-            $path_to_latest_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - Update loop 2 test variable and variable used in loop body:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+            ++$hash_pointer_loop_2;
+            $noted_file = $navigable_tree[$hash_pointer_loop_2];
+            $current_path_and_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Note:  until in loop 2 we find an unchecked directory, we move the
+//  pointer to the latest unchecked file tree hash entry up, setting
+//  this variable equal to the hash pointer intended to belong to this
+//  loop number 2:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+            if ( $unchecked_directory_found == 'false' )
+            {
+                $index_to_latest_unchecked = $hash_pointer_loop_2;
+            }
 
         } // end of loop 2 to check noted files
 
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - STEP - if latest noted file is directory, read its contents:
+// Note:  If we got through loop 2 and no unchecked directories are
+//  found that means we're done noting files to the file tree hash:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        show_diag($rname, "-", $dflag_check_file);
-        show_diag($rname, "After loop 2 the \"file review\" loop, hash element pointer set to $index_to_latest_not_checked,",
-          $dflag_check_file);
-
-        $path_to_latest_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
-
-        if ( is_dir($path_to_latest_file) )
+        if ( $unchecked_directory_found == 'false' )
         {
-            show_diag($rname, "code execution to return to loop 1 to note files in '$path_to_latest_file',", $dflag_open_dir);
-            $files_in_current_dir =& list_of_filenames_by_pattern($rname, $path_to_latest_file, "/(.*)/");
-            show_diag($rname, "back from routine to read files in current directory \$path_to_lastest_file holds '$path_to_latest_file',", $dflag_open_dir);
-            sort($files_in_current_dir);
-//            array_push($files_in_current_dir, "---MARKER---");
+            $current_dir_has_files_to_process = 'false';
+        }
+
+
+//
+// At this point by design of file mapping algorithm 2, we have checked
+// all non-directory type files noted in the file tree hash.  The most
+// recent checked directory resides at the end of the path at which we
+// want loop 1 to read:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+        if ( $current_dir_has_files_to_process == 'true' )
+        {
+            show_diag($rname, "After loop 2 updating array named 'files_in_current_dir' using path '$current_path' . . .",
+              $dflag_dev);
+            $files_in_current_dir =& list_of_filenames_by_pattern($rname, $current_path, "/(.*)/");
         }
         else
         {
-            show_diag($rname, "path to latest file checked in loop 2, file '$path_to_latest_file' is not a directory,", $dflag_open_dir);
-            $current_dir_has_files_to_process = 'false';
+            show_diag($rname, "loop 2 finds no unchecked directories, therefore no more files to add to file tree hash!",
+              $dflag_dev);
         }
 
 
@@ -748,11 +823,6 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
           FILE_LIMIT_OF_TREE_BROWSER . ",${term}${term}", $dflag_files_count);
 
 
-
-// NEED TO ADJUST THIS TEST:
-
-//        $current_dir_has_files_to_process = 'false';
-
     } // end WHILE loop to iterate over files in calling code's base directory
 
 
@@ -760,7 +830,7 @@ echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
     if ( $dflag_summary )
     {
         echo $term . $term;
-        echo "After reaching or passing file limit, array navigable_tree() holds:<br />\n";
+        echo "Following execution of file tree mapping loop, hash of files and file attributes holds:<br />\n";
         echo "<pre>\n";
         print_r($navigable_tree);
         echo "</pre>\n";
@@ -1228,6 +1298,63 @@ function present_tree_view($caller, $base_directory, $options)
     show_diag($rname, "returning to caller . . .", $dflag_dev);
 
 }
+
+
+
+
+// 2018-02-13 - Implementation notes from function build_tree() . . .
+
+//----------------------------------------------------------------------
+// - NOTES - Nested loop 1 implementation
+//----------------------------------------------------------------------
+
+// The first nested loop takes a given path or directory and notes all
+// files in this path by adding them as data structure entries to a PHP
+// hash, also known as an 'ordered map'.  Loop 1 gives numeric keys to
+// the entries of this hash, which increment from 0 inclusive once for
+// each file noted.
+//
+// When all files have been noted by loop 1 then script execution moves
+// to loop 2, which searches the hash of files for directories.  For
+// each directory loop 2 finds it returns script execution to loop 1 so
+// that those directory's files are added to the hash.  Upon finding a
+// noted directory in the hash, however, loop 2 does not immediately
+// end and return control to loop 1, but rather checks all remaining
+// noted but not checked files in the hash.
+//
+// Loop 1 and loop 2 can see which files have been reviewed or checked 
+// by loop 2.  Loop 1 always adds all files in the current path.  The
+// key word here is 'all'.  In the first algorithm design,
+// loop 2 did not always check all files in the file tree hash.
+// Loop 2 wass designed to direct script execution back to loop one at
+// the first un-checked directory loop 2 finds in the hash.
+//
+// Because of this, on the second and successive times when loop 2
+// executes it may be checking a group of files which fall under two
+// or more distinct paths.  To update file counts per directory in
+// this scenario, loop 2 must compare strings -- file paths -- of each
+// file it checks.  It must compare file paths to noted directores
+// until a matchis found.  This is inefficient.  For loop 2 to know
+// up front in which directory its regular files are found, loop 2
+// needs to review all unchecked files every time it is visited.  Then
+// and only then is the case assured that loop 2 will have unchecked
+// files from one directory.
+//
+// To achieve this, loop 2 need keep track of which unchecked directory
+// it first encounters after loop 2 begins execution.  Loop 2 may find
+// multiple directories while checking hash entries during one of its
+// executions.  That is ok, so long as loop 2 is sure to check all
+// unchecked files, all directories, where the first un-checked
+// directory found is the path which is set before script execution
+// resumes at loop 1.
+//
+// To improve efficiency, loop 2 can skip hash entries before the
+// latest un-checked directory.  That is, loop 2 need not ask whether
+// files have been checked earlier in the hash than the latest
+// un-checked directory, because loop 2 checks all non-directory files
+// plus the latest un-checked directory, before the PHP interpreter
+// passes script control back to loop 1.
+//
 
 
 
