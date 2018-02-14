@@ -1077,10 +1077,11 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // diagnostics:
 
     $lbuf = "";
-    $dflag_dev        = DIAGNOSTICS_ON;
-    $dflag_warning    = DIAGNOSTICS_ON;
+    $dflag_dev     = DIAGNOSTICS_ON;
+    $dflag_warning = DIAGNOSTICS_ON;
+
     $dflag_first_hash_entry = DIAGNOSTICS_OFF;
-    $dflag_path_elements = DIAGNOSTICS_ON;
+    $dflag_path_elements    = DIAGNOSTICS_ON;
 
     $rname = "present_path_elements_and_files_of_cwd";
 
@@ -1104,7 +1105,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
-//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - obtain path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1122,7 +1123,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     $lbuf = "'" . $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR] . "'";
     show_diag($rname, $lbuf , $dflag_dev);
 
-//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - get elements of path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1144,7 +1145,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     echo "<br />\n";
 
-//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - show directories from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1157,7 +1158,22 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     if ( ($path_element_count > 0) && ($path_element_count > $hide_top_most_path_elements) )
     {
         $path_depth = 0;
-        $path = $path_elements[0];  // and so we must skip the zero'th entry in the path elements hash
+
+// This won't work when base directory has two or more path elements:
+//        $path = $path_elements[0];  // and so we must skip the zero'th entry in the path elements hash
+
+        if ( array_key_exists(KEY_NAME__BASE_DIRECTORY, $_SESSION) )
+        {
+            $path = $_SESSION[KEY_NAME__BASE_DIRECTORY];
+        }
+        else
+        {
+            show_diag($rname, "- WARNING - unable to determine base directory of calling code's", $dflag_warning);
+            show_diag($rname, "- WARNING - file tree!  returning early . . .", $dflag_warning);
+            return;
+        }
+
+
         foreach ( $path_elements as $key => $path_element )
         {
             if ( $key == 0 )
@@ -1169,12 +1185,14 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
             }
             else
             {
+show_diag($rname, "building indent string and path depth at present is $path_depth . . .", $dflag_dev);
+
                 $indent = nbsp_based_indent($rname, $path_depth, 0);
                 $url = "$site/$path_from_doc_root/$script_name?base_dir=$path";
                 $file_type_note = "(directory)";
 
                 $link_text = $path_element;
-                $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+                $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
                 echo "$line_to_browser<br />\n";
 
                 $path = $path . "/" . $path_element;
@@ -1185,7 +1203,13 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     } // end IF-block to determine whether there are path elements above files in cwd to show
 
+    ++$path_depth;
 
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - show files in current working directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     {
         foreach ( $files_in_cwd as $key => $file_entry )
@@ -1222,8 +1246,9 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
+            $indent = nbsp_based_indent($rname, $path_depth, 0);
             $link_text = $filename;
-            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+            $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
 
             if ( $flag__show_file_type == 'true' )
             {
@@ -1352,7 +1377,7 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         $hide_empty_dirs = 1;
     }
 
-    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILE, $_SESSION) )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES, $_SESSION) )
     {
         $hide_files = 1;
     }
