@@ -172,7 +172,7 @@
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
 
-function show_file_hierarchy_paths($rname, $file_hierarchy)
+function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy)
 {
 //----------------------------------------------------------------------
 //
@@ -192,7 +192,7 @@ function show_file_hierarchy_paths($rname, $file_hierarchy)
     $dflag_announce = DIAGNOSTICS_ON;
     $dflag_dev = DIAGNOSTICS_OFF;
 
-    $rname = "show_file_hierarchy_paths";
+    $rname = "show_select_attributes_of_file_tree_hash_entries";
 
 
     show_diag($rname, "-", $dflag_announce);
@@ -252,8 +252,8 @@ function &build_tree($caller, $base_directory, $options)
 //  NOTES ON IMPLEMENTATION:  this routine a non-recursive algorithm
 //   which builds a flattened hash of a directory and file structure.
 //
-//   See also large approximate forty line comment block above loop 1
-//   code block for details of this routines algorithm versions 1 and
+//   See also large approximate forty line comment block at end of
+//   this file for details of this routines algorithm versions 1 and
 //   2 . . . .
 //
 //----------------------------------------------------------------------
@@ -319,6 +319,7 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_format   = DIAGNOSTICS_ON;
     $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
     $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
+    $dflag_minimal  = DIAGNOSTICS_ON;
     $dflag_summary  = DIAGNOSTICS_ON;
 
     $dflag_open_dir    = DIAGNOSTICS_ON;
@@ -340,24 +341,27 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-    if ( 0 )
+    if ( 1 )
     {
-echo "ZZZ $rname ZZZ turning off most diagnostics!<br />\n";
-//    $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
-    $dflag_dev      = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
-    $dflag_format   = DIAGNOSTICS_OFF;
-    $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
-    $dflag_warning  = DIAGNOSTICS_OFF;    // . . . diagnostics flag to toggle warnings in this routine,
-    $dflag_summary  = DIAGNOSTICS_OFF;
+        show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
+//        $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+        $dflag_dev      = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+        $dflag_format   = DIAGNOSTICS_OFF;
+        $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
+        $dflag_warning  = DIAGNOSTICS_OFF;    // . . . diagnostics flag to toggle warnings in this routine,
+        $dflag_summary  = DIAGNOSTICS_OFF;
 
-    $dflag_open_dir    = DIAGNOSTICS_OFF;
+        $dflag_open_dir    = DIAGNOSTICS_OFF;
 
-    $dflag_note_file   = DIAGNOSTICS_OFF;
-    $dflag_check_file  = DIAGNOSTICS_OFF;
-    $dflag_files_limit = DIAGNOSTICS_OFF;
-    $dflag_files_count = DIAGNOSTICS_OFF;
+        $dflag_note_file   = DIAGNOSTICS_OFF;
+        $dflag_check_file  = DIAGNOSTICS_OFF;
+        $dflag_files_limit = DIAGNOSTICS_OFF;
+        $dflag_files_count = DIAGNOSTICS_OFF;
 
-//    $dflag_file_count_per_directory = DIAGNOSTICS_OFF;
+        $dflag_file_count_per_directory = DIAGNOSTICS_OFF;
+        $dflag_base_directory_file_list = DIAGNOSTICS_OFF;
+        $dflag_loop_1 = DIAGNOSTICS_OFF;
+        $dflag_loop_2 = DIAGNOSTICS_OFF;
     }
 
     show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
@@ -1012,25 +1016,46 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 //  PURPOSE:  to present the directories and files in the top level
 //    of the passed file hierarchy hash. . . .
 //
+//  EXPECTS:
 //
-
+//  RETURNS:
+//
+//  PRODUCES:  HTML hyperlinks to directories and or files, to  be formatted 
+//    per page visitor's selection of a given directory or file,
+//   and possibly per some file and image gallery display options
+//   provided on the web page.  All this formatting yet underway as
+//   of 2018-02-13 Tuesday . . .  - TMH
+//
+//  NOTES ON IMPLEMENTATION:
+//   The default "conventional" file tree view which this function
+//   produces shows all files in the page visitor's current working
+//   directory.
+//
+//   This function shows directories from the file hierarchy hash as
+//   symlinks to the same given page this script helps to create, with
+//   with each directory passed to the web server as the new current
+//   working directory.  This script uses HTTP 'get' method to do this.
+//
+//
+//
+//
 //----------------------------------------------------------------------
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // VAR BEGIN
 
-    $i = 0;
-
-    $key = 0;
-    $key_in_nested_foreach = 0;
-    $file_entry = null;
-    $file_entry_in_nested_foreach = null;
-    $path = "";
-
     $hide_empty_dirs = 0;
 
     $hide_files = 0;
+
+// 2018-02-13 - added:
+    $files_in_cwd = array();
+
+    $url = "";
+    $site = "https://neelanurseries.com";
+    $path_from_doc_root = "sandbox";
+    $script_name = $options["script_name"];
 
 
 // diagnostics:
@@ -1041,12 +1066,14 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
     $dflag_dev        = DIAGNOSTICS_ON;
     $dflag_warning    = DIAGNOSTICS_ON;
-    $dflag_legend     = DIAGNOSTICS_ON;
+    $dflag_legend     = DIAGNOSTICS_OFF;
     $dflag_summary    = DIAGNOSTICS_ON;
 
     $dflag_empty_dirs = DIAGNOSTICS_ON;
     $dflag_nested_loop_l1 = DIAGNOSTICS_ON;
     $dflag_nested_loop_l2 = DIAGNOSTICS_ON;
+
+    $dflag_source_of_cwd = DIAGNOSTICS_ON;
 
     $rname = "present_files_conventional_view";
 
@@ -1087,110 +1114,86 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     }
 
 
+// Look for current working directory in a couple of places:
 
-
-// For development purposes:
-
-    if ( 0 )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_GET) )
     {
-        echo "<pre>\n";
-        foreach ( $file_hierarchy as $key => $file_entry )
-        {
-            print_r($file_entry);
-            ++$i;
-            if ( $i > 40 ) { break; }
-        }
-        echo "</pre>\n";
+        show_diag($rname, "got current working directory via HTTP get() method!", $dflag_source_of_cwd);
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
+    {
+        show_diag($rname, "got current working directory via PHP session variable!", $dflag_source_of_cwd);
+        $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else    
+    {
+        show_diag($rname, "falling back to current working directory from first entry in file tree hash:", $dflag_source_of_cwd);
+        $cwd = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
     }
 
+    show_diag($rname, "\$cwd set to '$cwd',", $dflag_dev);
 
 
 
-    show_diag($rname, "Legend:", $dflag_legend);
-    show_diag($rname, "(L1) identifies messages from main iterating loop, foreach construct 1", $dflag_legend);
-    show_diag($rname, "(T1) identifies messages are from conditional test 1, in body of loop 1", $dflag_legend);
-    show_diag($rname, "(L2) identifies messages from nested foreach construct", $dflag_legend);
-    show_diag($rname, "(T2) identifies messages conditional test in body of nested foreach.", $dflag_legend);
+    $basedir = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
 
-    show_diag($rname, "-", $dflag_summary);
-    show_diag($rname, "flag 'hide empty dirs' set to $hide_empty_dirs,", $dflag_summary);
-    show_diag($rname, "flag 'hide files' set to $hide_files,", $dflag_summary);
-    show_diag($rname, "-", $dflag_summary);
 
-    show_diag($rname, "showing dirs followed by files in each directory:", $dflag_dev);
-    show_diag($rname, "-", $dflag_dev);
 
     {
+//
+//  Loop 1 to gather files in current working directory, for sorting:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         foreach ( $file_hierarchy as $key => $file_entry )
         {
-//            echo "(L1) first foreach looking at element $key:<br />\n";
+//            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+            if ( basename($file_entry[FILE_PATH_IN_BASE_DIR]) == $cwd )
+            {
+//                echo "<i>file '" . $file_entry[FILE_NAME] . "' in directory '" . $file_entry[FILE_PATH_IN_BASE_DIR] . "',</i><br />\n";
+//                $files_in_cwd[$file_entry[FILE_NAME]] = $key;
+//                $files_in_cwd[$key] = $file_entry[FILE_NAME];
+                $files_in_cwd[$file_entry[FILE_NAME]] = $file_entry;
+
+            } // end IF-block to test whether current file is located in current working directory
+
+        } // end foreach construct, to iterate over files in calling code's file hierarchy
+
+
+        if ( 0 )
+        {
+        show_diag($rname, "unsorted files in current directory include:", $dflag_dev);
+        echo "<pre>\n";
+        print_r($files_in_cwd);
+        echo "</pre>\n";
+
+        sort($files_in_cwd);
+
+        show_diag($rname, "same files sorted:", $dflag_dev);
+        echo "<pre>\n";
+        print_r($files_in_cwd);
+        echo "</pre>\n";
+        }
+
+        foreach ( $files_in_cwd as $key => $file_entry )
+        {
+            $path = $file_entry[FILE_PATH_IN_BASE_DIR];
+            $filename = $file_entry[FILE_NAME];
+            $file_count = $file_entry[FILE_COUNT];
 
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
             {
-                if (( $hide_empty_dirs == 1 ) && ( $file_entry[FILE_COUNT] == 0 ))
-                {
-// do nothing
-                    $lbuf = "'hash entry $key holds '" . $file_entry[FILE_NAME] . "' noted as directory with no files,";
-                    show_diag($rname, $lbuf, $dflag_empty_dirs);
-                }
-                else
-                {
-                    show_diag($rname, "-zz- found directory which is not empty at hash entry $key,", $dflag_populated_dirs);
-                    show_diag($rname, "-zz- path to this dir plus name of this dir are:", $dflag_populated_dirs);
-                    $path = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
-                    $file_count = 0;
-                    show_diag($rname, "-zz- <font color=\"green\">'$path'</font>,", $dflag_populated_dirs);
+                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
+            }
+            else
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+            }
 
+            $link_text = $filename;
+            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a><br />\n";
+            echo $line_to_browser;
+        }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// NESTED FOREACH CONSTRUCT:
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-                    foreach ( $file_hierarchy as $key_in_nested_foreach => $file_entry_in_nested_foreach )
-                    {
-                        $lbuf = "$indent (L2) top of nested loop looking at hash entry $key_in_nested_foreach . . .";
-                        show_diag($rname, $lbuf, $dflag_nested_loop_l2);
-
-                        if ( $file_entry_in_nested_foreach[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
-                        {
-                            if ( $hide_files == 1 )
-                            {
-// do nothing
-echo "-yyyy- hiding file,<br />\n";
-                            }
-                            else
-                            {
-                                $lbuf = "$indent (L2) file '" . $file_entry_in_nested_foreach[FILE_NAME] . "',";
-                                show_diag($rname, $lbuf, $dflag_nested_loop_l2);
-
-                                show_diag($rname, "$indent (L2) comparing paths:", $dflag_nested_loop_l2);
-
-                                $lbuf = "$indent (L2) 1) $path";
-                                show_diag($rname, $lbuf, $dflag_nested_loop_l2);
-                                $lbuf = "$indent (L2) 2) " . $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR]; 
-                                show_diag($rname, $lbuf, $dflag_nested_loop_l2);
-                                show_diag($rname, "-", $dflag_nested_loop_l2);
-
-
-
-                                if ( $file_entry_in_nested_foreach[FILE_PATH_IN_BASE_DIR] == $path )
-                                {
-echo "*** PATHS MATCH ***<br />\n";
-                                    echo "&nbsp; &nbsp; &nbsp; (T2) " . $file_entry_in_nested_foreach[FILE_NAME] . "<br />\n";
-                                    ++$file_count;
-                                }
-                            }
-
-                        } // end IF-block to test whether current file is a regular file
-
-                    } // end nested foreach construct, to show files in current directory
-
-                    echo "- YYY - $file_count files in directory <i>$path</i><br />\n";
-                }
-
-            } // end IF-block to test whether current file is a directory
-
-        } // end foreach construct, to iterate over files in calling code's file hierarchy
 
     }
 
@@ -1205,7 +1208,7 @@ echo "*** PATHS MATCH ***<br />\n";
 
 
 
-function present_tree_view($caller, $base_directory, $options)
+function present_tree_view($caller, $base_directory, $options)  // <-- present tree view of directories and files
 {
 //----------------------------------------------------------------------
 //
@@ -1267,18 +1270,22 @@ function present_tree_view($caller, $base_directory, $options)
     show_diag($rname, "function build_tree() returns $count_of_files_noted files noted,", $dflag_dev);
 
 // - 2018-02-06 TUE - FOR DEVELOPMENT PURPOSES:
-    show_diag($rname, "file_hierarchy hash table entries of directories holding one or more files:", $dflag_dev);
-    if ( 1 )
+    if ( 0 )
     {
+        show_diag($rname, "\"file tree\" hash entries of non-empty directories:", $dflag_dev);
         echo "<pre>\n";
         print_r($_SESSION[KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES]);
         echo "</pre>\n";
 
-        echo "hash entries of all directories, those with and without files:";
+        show_diag($rname, "all hash entries which note directories:", $dflag_dev);
         echo "<pre>\n";
         print_r($_SESSION[KEY_NAME__DIRECTORY_ENTRIES]);
         echo "</pre>\n";
 
+        show_diag($rname, "file tree hash in full:", $dflag_dev);
+        echo "<pre>\n";
+        print_r($file_hierarchy);
+        echo "</pre>\n";
     }
 
 
@@ -1286,11 +1293,11 @@ function present_tree_view($caller, $base_directory, $options)
 //    present_files($caller, $file_hierarchy, $options);
 
 // 2018-01-28 - For development only:
-    show_file_hierarchy_paths($rname, $file_hierarchy);
-    echo $term . $term;
+//    show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy);
+//    echo $term . $term;
 
 // 2018-01-29 - For development only:
-    show_diag($rname, "calling function to present directories and files in conventional tree view . . .", $dflag_dev);
+    show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
     present_files_conventional_view($caller, $file_hierarchy, $options);
     echo $term . $term;
 
@@ -1299,6 +1306,10 @@ function present_tree_view($caller, $base_directory, $options)
 
 }
 
+
+
+
+// --- END OF CODE ---
 
 
 

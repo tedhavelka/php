@@ -134,6 +134,7 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW", "limit_elements_to_show_set_to_n");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_EMPTY_DIRS", "hide_empty_dirs");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES", "hide_files");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD", "cwd");
 
 
 //----------------------------------------------------------------------
