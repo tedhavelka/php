@@ -315,11 +315,9 @@ function &get_caption($caller, $image_filename, $options)
             break;
     }
 
-
     return $caption;
 
-
-}
+} // end function get_caption()
 
 
 

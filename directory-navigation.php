@@ -127,6 +127,8 @@
 
     require_once '/opt/nn/lib/php/file-and-directory-routines.php';
 
+    require_once '/opt/nn/lib/php/text-manipulation.php';
+
 
 
 //----------------------------------------------------------------------
@@ -757,7 +759,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
             ++$hash_pointer_loop_2;
-            $noted_file = $navigable_tree[$hash_pointer_loop_2];
+            $noted_file = $navigable_tree[$hash_pointer_loop_2];  // 2018-02-14 - undefined offset warnings this line - TMH
             $current_path_and_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -999,9 +1001,8 @@ function present_files($caller, $file_hierarchy, $options)
             ++$count_elements_shown;
             if ( $count_elements_shown >= $display_limit ) { break; }
         }
+
     }
-
-
 
 } // end function present_files()
 
@@ -1057,6 +1058,10 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     $path_from_doc_root = "sandbox";
     $script_name = $options["script_name"];
 
+    $flag__show_file_type = 'false';
+
+    $file_type_note = "";
+
 
 // diagnostics:
 
@@ -1069,11 +1074,12 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     $dflag_legend     = DIAGNOSTICS_OFF;
     $dflag_summary    = DIAGNOSTICS_ON;
 
-    $dflag_empty_dirs = DIAGNOSTICS_ON;
+    $dflag_empty_dirs     = DIAGNOSTICS_ON;
     $dflag_nested_loop_l1 = DIAGNOSTICS_ON;
     $dflag_nested_loop_l2 = DIAGNOSTICS_ON;
 
-    $dflag_source_of_cwd = DIAGNOSTICS_ON;
+    $dflag_source_of_cwd  = DIAGNOSTICS_ON;
+    $dflag_tracking_cwd   = DIAGNOSTICS_OFF;
 
     $rname = "present_files_conventional_view";
 
@@ -1132,9 +1138,13 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         $cwd = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
     }
 
+
     show_diag($rname, "\$cwd set to '$cwd',", $dflag_dev);
 
+    show_diag($rname, "enabling note about file type for development,", $dflag_dev);
+    $flag__show_file_type = 'true';
 
+    show_diag($rname, "about to show file hierarchy which has " . count($file_hierarchy) . " elements:", $dflag_dev);
 
     $basedir = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
 
@@ -1146,8 +1156,10 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         foreach ( $file_hierarchy as $key => $file_entry )
         {
-//            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
-            if ( basename($file_entry[FILE_PATH_IN_BASE_DIR]) == $cwd )
+            show_diag($rname, "looking for files in '$cwd', present file noted with path in base dir '" .
+              $file_entry[FILE_PATH_IN_BASE_DIR] . "',", $dflag_tracking_cwd);
+//            if ( basename($file_entry[FILE_PATH_IN_BASE_DIR]) == $cwd )
+            if ( $file_entry[FILE_PATH_IN_BASE_DIR] == $cwd )
             {
 //                echo "<i>file '" . $file_entry[FILE_NAME] . "' in directory '" . $file_entry[FILE_PATH_IN_BASE_DIR] . "',</i><br />\n";
 //                $files_in_cwd[$file_entry[FILE_NAME]] = $key;
@@ -1174,26 +1186,59 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         echo "</pre>\n";
         }
 
+
+        echo "<br />\n";
+
+
         foreach ( $files_in_cwd as $key => $file_entry )
         {
             $path = $file_entry[FILE_PATH_IN_BASE_DIR];
-            $filename = $file_entry[FILE_NAME];
+//            $filename = $file_entry[FILE_NAME];
+            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
             $file_count = $file_entry[FILE_COUNT];
 
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
             {
-                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
+//                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
+                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
+                $file_type_note = "(directory)";
             }
+
+            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(file)";
+            }
+
+            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(symlink)";
+            }
+
             else
             {
                 $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(unrecognized file type)";
             }
 
+
+
             $link_text = $filename;
-            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a><br />\n";
+            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+
+            if ( $flag__show_file_type == 'true' )
+            {
+                $line_to_browser = "$line_to_browser $file_type_note";
+            }
+
+            $line_to_browser = "$line_to_browser<br />\n";
+
             echo $line_to_browser;
         }
 
+
+        echo "<br />\n";
 
     }
 
@@ -1281,7 +1326,10 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
         echo "<pre>\n";
         print_r($_SESSION[KEY_NAME__DIRECTORY_ENTRIES]);
         echo "</pre>\n";
+    }
 
+    if ( 0 )
+    {
         show_diag($rname, "file tree hash in full:", $dflag_dev);
         echo "<pre>\n";
         print_r($file_hierarchy);
