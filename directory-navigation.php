@@ -114,6 +114,14 @@
 //   data structure nature flat, and have that sufficiently present
 //   the original tree structure of the files.
 //
+//
+//  REFERENCES:
+//
+//    *  http://php.net/manual/en/function.reset.php . . . set internal pointer of array to its first element
+//
+//    *  http://php.net/manual/en/function.array-keys.php
+//
+//
 
 
 
@@ -128,6 +136,8 @@
     require_once '/opt/nn/lib/php/file-and-directory-routines.php';
 
     require_once '/opt/nn/lib/php/text-manipulation.php';
+
+    require_once '/opt/nn/lib/php/page-building-routines.php';
 
 
 
@@ -168,6 +178,7 @@
     define ("KEY_NAME__FILE_COUNT_PER_LOOP_2", "file_count_per_loop_2");
 //    define ("KEY_NAME__", "");
 
+    define ("LIMIT_TO_100", 100);
 
 
 //----------------------------------------------------------------------
@@ -868,7 +879,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
 
 
 
-function present_files($caller, $file_hierarchy, $options)
+function present_files($caller, $file_hierarchy, $options)  // older function, Ted not sure of correctness of this function
 {
 
 // VAR BEGIN
@@ -1006,6 +1017,233 @@ function present_files($caller, $file_hierarchy, $options)
 
 } // end function present_files()
 
+
+
+
+
+function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to encapsulate the details of generating mark-up for
+//   web pages, and to present a file path's elements from its root
+//   to its final directory, which in this context is the user's
+//   current working directory, and to show all files in given current
+//   working directory.
+//
+//
+//
+//----------------------------------------------------------------------
+
+// VAR BEGIN
+
+// local string and integer variables used to build URL to file:
+    $path = "";
+    $filename = "";
+    $file_count = 0;
+
+// additional local strings used to build URL, these need to be defineds
+// and passed to this function in a sensible library way, where calling
+// code knows about and sets these appropriately.  Right now just
+// hard-coded values for a couple of these:                        - TMH
+    $site = "https://neelanurseries.com";
+    $path_from_doc_root = "sandbox";
+    $script_name = $options["script_name"];
+    $url = "";
+
+    $link_text = "";
+    $line_to_browser = "";
+
+    $flag__show_file_type = 'false';
+    $file_type_note = "";
+
+// variable used to reach first file hierarchy hash entry, as we
+// don't know the key names of the passed hash, in this function's
+// scope:
+    $first_file_tree_hash_entry = null;
+
+// variable used to indent successive directory elements in cwd's path:
+    $path_depth = 0;
+
+// variable to hold mark-up:
+    $indent = "";
+
+// variable to hide one or more elements of cwd's path:
+    $path_elements = null;
+    $path_element_count = 0;
+    $hide_top_most_path_elements = 1;
+
+
+// diagnostics:
+
+    $lbuf = "";
+    $dflag_dev        = DIAGNOSTICS_ON;
+    $dflag_warning    = DIAGNOSTICS_ON;
+    $dflag_first_hash_entry = DIAGNOSTICS_OFF;
+    $dflag_path_elements = DIAGNOSTICS_ON;
+
+    $rname = "present_path_elements_and_files_of_cwd";
+
+// VAR END
+
+
+
+    show_diag($rname, "starting,", $dflag_dev);
+
+//    show_diag($rname, "have following path to parse and show its elements:", $dflag_first_hash_entry);
+//    $lbuf = "'" . $files_in_cwd[0][FILE_PATH_IN_BASE_DIR] . "'";
+//    show_diag($rname, $lbuf , $dflag_first_hash_entry);
+//
+//    if ( $dflag_first_hash_entry )
+//    {
+//        show_diag($rname, "files in current working directory:" , $dflag_first_hash_entry);
+//        echo "<pre>\n";
+//        print_r($files_in_cwd);
+//        echo "</pre>\n";
+//    }
+
+
+
+//
+// - STEP - obtain path from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $first_file_tree_hash_entry = reset($files_in_cwd);
+
+    if ( $dflag_first_hash_entry )
+    {
+        show_diag($rname, "call to PHP reset() function returns:" , $dflag_first_hash_entry);
+        echo "<pre>\n";
+        print_r($first_file_tree_hash_entry);
+        echo "</pre>\n";
+    }
+
+    show_diag($rname, "path from base directory to current working directory \$cwd:", $dflag_dev);
+    $lbuf = "'" . $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR] . "'";
+    show_diag($rname, $lbuf , $dflag_dev);
+
+//
+// - STEP - get elements of path from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $path_elements = explode("/", $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR], LIMIT_TO_100);
+
+    $path_element_count = count($path_elements);
+
+    show_diag($rname, "path entails $path_element_count elements:" , $dflag_path_elements);
+    if ( $dflag_path_elements )
+    {
+        foreach ( $path_elements as $key => $path_element )
+        {
+            echo "&nbsp; &nbsp;$path_element<br />\n";
+        }
+    }
+
+
+
+
+    echo "<br />\n";
+
+//
+// - STEP - show directories from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $hide_top_most_path_elements = 1;
+
+// NOTE:  hidden path elements won't appear on the page but will
+//  necessarily appear in the URLs of shown path elements and files
+//  of the current working directory:
+
+    if ( ($path_element_count > 0) && ($path_element_count > $hide_top_most_path_elements) )
+    {
+        $path_depth = 0;
+        $path = $path_elements[0];  // and so we must skip the zero'th entry in the path elements hash
+        foreach ( $path_elements as $key => $path_element )
+        {
+            if ( $key == 0 )
+                { continue; }
+
+            if ( $hide_top_most_path_elements > 0 )
+            {
+                --$hide_top_most_path_elements;
+            }
+            else
+            {
+                $indent = nbsp_based_indent($rname, $path_depth, 0);
+                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path";
+                $file_type_note = "(directory)";
+
+                $link_text = $path_element;
+                $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+                echo "$line_to_browser<br />\n";
+
+                $path = $path . "/" . $path_element;
+                ++$path_depth;
+            }
+
+        } // end FOREACH construct to iterate over elements of path from base dir to cwd
+
+    } // end IF-block to determine whether there are path elements above files in cwd to show
+
+
+
+    {
+        foreach ( $files_in_cwd as $key => $file_entry )
+        {
+            $path = $file_entry[FILE_PATH_IN_BASE_DIR];
+//            $filename = $file_entry[FILE_NAME];
+            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
+            $file_count = $file_entry[FILE_COUNT];
+
+            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+            {
+//                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
+                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
+                $file_type_note = "(directory)";
+            }
+
+            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(file)";
+            }
+
+            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(symlink)";
+            }
+
+            else
+            {
+                $url = "$site/$path_from_doc_root/$path/$filename";
+                $file_type_note = "(unrecognized file type)";
+            }
+
+
+
+            $link_text = $filename;
+            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+
+            if ( $flag__show_file_type == 'true' )
+            {
+                $line_to_browser = "$line_to_browser $file_type_note";
+            }
+
+            $line_to_browser = "$line_to_browser<br />\n";
+
+            echo $line_to_browser;
+
+        } // end FOREACH construct to iterate over files in caller's file tree hash
+
+    } // end local scope
+
+    echo "<br />\n";
+
+    show_diag($rname, "returning . . .", $dflag_dev);
+
+
+} // end function present_path_elements_and_files_of_cwd()
 
 
 
@@ -1151,9 +1389,11 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
 
     {
-//
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //  Loop 1 to gather files in current working directory, for sorting:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
         foreach ( $file_hierarchy as $key => $file_entry )
         {
             show_diag($rname, "looking for files in '$cwd', present file noted with path in base dir '" .
@@ -1190,51 +1430,63 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         echo "<br />\n";
 
 
-        foreach ( $files_in_cwd as $key => $file_entry )
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//  Loop 2 to generate mark-up to present files in current working directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        if ( 0 )
         {
-            $path = $file_entry[FILE_PATH_IN_BASE_DIR];
+            foreach ( $files_in_cwd as $key => $file_entry )
+            {
+                $path = $file_entry[FILE_PATH_IN_BASE_DIR];
 //            $filename = $file_entry[FILE_NAME];
-            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
-            $file_count = $file_entry[FILE_COUNT];
+                $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
+                $file_count = $file_entry[FILE_COUNT];
 
-            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
-            {
+                if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+                {
 //                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
-                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
-                $file_type_note = "(directory)";
+                    $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
+                    $file_type_note = "(directory)";
+                }
+
+                elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
+                {
+                    $url = "$site/$path_from_doc_root/$path/$filename";
+                    $file_type_note = "(file)";
+                }
+
+                elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
+                {
+                    $url = "$site/$path_from_doc_root/$path/$filename";
+                    $file_type_note = "(symlink)";
+                }
+
+                else
+                {
+                    $url = "$site/$path_from_doc_root/$path/$filename";
+                    $file_type_note = "(unrecognized file type)";
+                }
+
+
+
+                $link_text = $filename;
+                $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+
+                if ( $flag__show_file_type == 'true' )
+                {
+                    $line_to_browser = "$line_to_browser $file_type_note";
+                }
+
+                $line_to_browser = "$line_to_browser<br />\n";
+
+                echo $line_to_browser;
             }
+        }
 
-            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
-            {
-                $url = "$site/$path_from_doc_root/$path/$filename";
-                $file_type_note = "(file)";
-            }
-
-            elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
-            {
-                $url = "$site/$path_from_doc_root/$path/$filename";
-                $file_type_note = "(symlink)";
-            }
-
-            else
-            {
-                $url = "$site/$path_from_doc_root/$path/$filename";
-                $file_type_note = "(unrecognized file type)";
-            }
-
-
-
-            $link_text = $filename;
-            $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
-
-            if ( $flag__show_file_type == 'true' )
-            {
-                $line_to_browser = "$line_to_browser $file_type_note";
-            }
-
-            $line_to_browser = "$line_to_browser<br />\n";
-
-            echo $line_to_browser;
+        else
+        {
+            present_path_elements_and_files_of_cwd($rname, $files_in_cwd, $options);
         }
 
 

@@ -458,6 +458,7 @@ function nn_main_content_formatting__closing_lines__fixed_ouput($script_name)
 /*
 function --
 function -- SECTION -- image layout routines -- THIS SECTION MOVED TO SITE-NAVIGATION_ROUTINES DOT PHP, AND DEPRECATED
+function --
 */
 
 function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $caption, $options)
@@ -590,11 +591,37 @@ function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $c
 
 
 /*
-function -- SECTION -- 
+function --
+function -- SECTION -- small strings functions
+function --
 */
 
+function &nbsp_based_indent($caller, $depth, $options)
+{
+
+    $mark_up = "&nbsp;";
+
+    $indent;
+
+    $rname = "nbsp_based_indent";
 
 
+    if ( $depth > 1 )
+    {
+        $indent = $mark_up . str_repeat(" $mark_up", ($depth - 1));
+    }
+    elseif ( $depth == 1 )
+    {
+        $indent = $mark_up;
+    }
+    else
+    {
+        $indent = "";
+    }
+
+    return $indent;
+
+}
 
 
 ?>

@@ -281,5 +281,10 @@
     define("KEY_NAME__FOOTER_ATTRIBUTES__PAGE_LAST_UPDATED", "footer_page_last_updated");
 
 
+// 2018-02-14 - added:
+
+    define("KEY_NAME__TEXT_MANIPULATION__SPLIT_STRING_INTO_N_STRINGS", 100);
+
+
 
 ?>
