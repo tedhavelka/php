@@ -1025,13 +1025,11 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  to encapsulate the details of generating mark-up for
-//   web pages, and to present a file path's elements from its root
-//   to its final directory, which in this context is the user's
-//   current working directory, and to show all files in given current
-//   working directory.
+//  PURPOSE:  to present files of a file tree hierarchy which are in
+//   an indicated current working directory of that hierarchy.
 //
-//
+//   This is one of multiple file presentation modes of nn local PHP
+//   library source file named 'directory-navigation.php'.
 //
 //----------------------------------------------------------------------
 
@@ -1093,6 +1091,9 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     $dflag_var_cwd                = DIAGNOSTICS_OFF;
     $dflag_var_hide_path_elements = DIAGNOSTICS_OFF;
     $dflag_indent_string          = DIAGNOSTICS_OFF;
+
+    $dflag_hide_path_element      = DIAGNOSTICS_OFF;
+    $dflag_intermediate_path_mark_up = DIAGNOSTICS_OFF;
 
     $rname = "present_path_elements_and_files_of_cwd";
 
@@ -1174,7 +1175,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     $path_element_count = count($path_elements);
 
-    show_diag($rname, "path entails $path_element_count elements:" , $dflag_path_elements);
+    show_diag($rname, "path entails $path_element_count elements and we're asked to hide first $hide_first_n_path_elements elements of these:" , $dflag_path_elements);
     if ( $dflag_path_elements )
     {
         foreach ( $path_elements as $key => $path_element )
@@ -1196,18 +1197,23 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 //  necessarily appear in the URLs of shown path elements and files
 //  of the current working directory:
 
+    show_diag($rname, "- BEGIN INTERMEDIATE PATHS MARK-UP GENERATION -", $dflag_intermediate_path_mark_up);
+
     if ( ($path_element_count > 0) && ($path_element_count > $hide_first_n_path_elements) )
     {
         $path_depth = 0;
-        $path_intermediate = $path_elements[0];
 
         foreach ( $path_elements as $key => $path_element )
         {
-            if ( $key == 0 )
-                { continue; }
+            if ( strlen($path_intermediate) == 0 )
+                { $path_intermediate = $path_element; }
+            else
+                { $path_intermediate = $path_intermediate . "/" . $path_element; }
+
 
             if ( $hide_first_n_path_elements > 0 )
             {
+                show_diag($rname, "hiding path element '$path_element',", $dflag_hide_path_element);
                 --$hide_first_n_path_elements;
             }
             else
@@ -1220,8 +1226,6 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
                   . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
                   . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path_intermediate";
 
-// echo "<pre>- ZZTOP - built URL string '$url',</pre><br />\n";
-
                 $file_type_note = "(directory)";
 
                 $link_text = $path_element;
@@ -1231,19 +1235,30 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 //                $path_intermediate = $path_intermediate . "/" . $path_element;
                 ++$path_depth;
             }
-            $path_intermediate = $path_intermediate . "/" . $path_element;
 
         } // end FOREACH construct to iterate over elements of path from base dir to cwd
 
     } // end IF-block to determine whether there are path elements above files in cwd to show
 
-    ++$path_depth;
+//    ++$path_depth;
 
+    show_diag($rname, "- END INTERMEDIATE PATHS MARK-UP GENERATION -", $dflag_intermediate_path_mark_up);
+
+    if ( $dflag_intermediate_path_mark_up )
+    {
+        echo "<br />\n"; // <-- for diagnostics readability
+    }
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - show files in current working directory:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( count($files_in_cwd) == 0 )
+    {
+        echo "<i>current directory contains no files!</i><br >\n";
+    }
+
 
     {
         foreach ( $files_in_cwd as $key => $file_entry )
@@ -1314,8 +1329,13 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  to present the directories and files in the top level
-//    of the passed file hierarchy hash. . . .
+//  PURPOSE:  to present the files in the passed file hierarchy hash,
+//    in one of multiple ways.  File presentation ways include:
+//
+//    *  present files in current working directory (1)
+//    *  present all directories and files fully expanded tree format
+//    *  present files to a path element depth of n
+//
 //
 //  EXPECTS:
 //    *  a base directory for building correct URLs to path elements
@@ -1325,13 +1345,17 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 //    *  a number of path elements to hide from the base directory
 //       and further into the branches of the file tree to present
 //
+//
+//
 //  RETURNS:
+//
 //
 //  PRODUCES:  HTML hyperlinks to directories and or files, to  be formatted 
 //    per page visitor's selection of a given directory or file,
 //   and possibly per some file and image gallery display options
 //   provided on the web page.  All this formatting yet underway as
 //   of 2018-02-13 Tuesday . . .  - TMH
+//
 //
 //  NOTES ON IMPLEMENTATION:
 //   The default "conventional" file tree view which this function
@@ -1383,7 +1407,8 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
     $indent="&nbsp; &nbsp; &nbsp;";
 
-    $dflag_dev        = DIAGNOSTICS_ON;
+    $dflag_announce   = DIAGNOSTICS_ON;
+    $dflag_dev        = DIAGNOSTICS_OFF;
     $dflag_warning    = DIAGNOSTICS_ON;
     $dflag_legend     = DIAGNOSTICS_OFF;
     $dflag_summary    = DIAGNOSTICS_ON;
@@ -1392,7 +1417,8 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     $dflag_nested_loop_l1 = DIAGNOSTICS_ON;
     $dflag_nested_loop_l2 = DIAGNOSTICS_ON;
 
-    $dflag_source_of_cwd  = DIAGNOSTICS_ON;
+    $dflag_var_basedir    = DIAGNOSTICS_OFF;
+    $dflag_source_of_cwd  = DIAGNOSTICS_OFF;
     $dflag_tracking_cwd   = DIAGNOSTICS_OFF;
 
     $rname = "present_files_conventional_view";
@@ -1402,7 +1428,7 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
 
 
-    show_diag($rname, "starting,", $dflag_dev);
+    show_diag($rname, "starting,", $dflag_announce);
 
     if ( !(isset($file_hierarchy)) )
     {
@@ -1550,7 +1576,6 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         }
 
 
-        echo "<br />\n";
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1559,6 +1584,7 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
         if ( 0 )
         {
+            echo "<br />\n";
             foreach ( $files_in_cwd as $key => $file_entry )
             {
                 $path = $file_entry[FILE_PATH_IN_BASE_DIR];
@@ -1605,22 +1631,19 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
                 echo $line_to_browser;
             }
+            echo "<br />\n";
         }
 
         else
         {
             present_path_elements_and_files_of_cwd($rname, $files_in_cwd, $options);
-        }
+
+        } // end IF-ELSEIF-ELSE block to select among file presentation formats
+
+    } // end local scope
 
 
-        echo "<br />\n";
-
-    }
-
-
-
-
-    show_diag($rname, "returning . . .", $dflag_dev);
+    show_diag($rname, "returning . . .", $dflag_announce);
 
 } // end function present_files_conventional_view()
 
@@ -1726,17 +1749,12 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     }
 
 
-//    show_diag($rname, "calling stub function to present tree view . . .", $dflag_dev);
-//    present_files($caller, $file_hierarchy, $options);
-
 // 2018-01-28 - For development only:
 //    show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy);
 //    echo $term . $term;
 
-// 2018-01-29 - For development only:
     show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
     present_files_conventional_view($caller, $file_hierarchy, $options);
-    echo $term . $term;
 
 
     show_diag($rname, "returning to caller . . .", $dflag_dev);

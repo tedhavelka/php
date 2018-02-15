@@ -607,17 +607,17 @@ function &nbsp_based_indent($caller, $depth, $options)
     $rname = "nbsp_based_indent";
 
 
-    if ( $depth > 1 )
+//    if ( $depth > 1 )
+    if ( $depth > 0 )
     {
 //        $indent = $mark_up . str_repeat(" $mark_up", ($depth - 1));
 //        $indent = $mark_up . str_repeat("*$mark_up", ($depth - 1));
-        $indent = str_repeat(" $mark_up", ($depth - 1));
+        $indent = str_repeat($mark_up, $depth);
     }
-    elseif ( $depth == 1 )
-    {
-        $indent = $mark_up;
-//        $indent = "*$mark_up";
-    }
+//    elseif ( $depth == 1 )
+//    {
+//        $indent = $mark_up;
+//    }
     else
     {
         $indent = "";
