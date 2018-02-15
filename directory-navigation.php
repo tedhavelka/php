@@ -1281,6 +1281,12 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 //    of the passed file hierarchy hash. . . .
 //
 //  EXPECTS:
+//    *  a base directory for building correct URLs to path elements
+//       in the current working directory,
+//    *  a current working directory with which to filter files to
+//       present and omit noted files which are in other directories,
+//    *  a number of path elements to hide from the base directory
+//       and further into the branches of the file tree to present
 //
 //  RETURNS:
 //
@@ -1293,7 +1299,11 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 //  NOTES ON IMPLEMENTATION:
 //   The default "conventional" file tree view which this function
 //   produces shows all files in the page visitor's current working
-//   directory.
+//   directory.  This PHP routine has a notion of a base directory at
+//   the "top" of the file tree being presented, a current working
+//   directory to which the user has navigated thus far, and a number
+//   of path elements to omit from the presented tree view of files
+//   and their containing directories, up to the base directory.
 //
 //   This function shows directories from the file hierarchy hash as
 //   symlinks to the same given page this script helps to create, with
@@ -1315,6 +1325,10 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
 // 2018-02-13 - added:
     $files_in_cwd = array();
+
+    $base_directory = "";  // NOTE THERE IS A VARIABLE NAMED 'basedir' IN THIS FUNCION - TMH
+
+    $cwd = "";
 
     $url = "";
     $site = "https://neelanurseries.com";
@@ -1404,10 +1418,23 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
     show_diag($rname, "\$cwd set to '$cwd',", $dflag_dev);
 
+
+// Copy current working directory to local $options hash, to provide
+// to various file presenting formatters:
+
+    $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD] = $cwd;
+
+
     show_diag($rname, "enabling note about file type for development,", $dflag_dev);
     $flag__show_file_type = 'true';
 
     show_diag($rname, "about to show file hierarchy which has " . count($file_hierarchy) . " elements:", $dflag_dev);
+
+
+// NOTE:
+// At this point when this function called, the hash $file_hierarchy
+// has numeric keys starting at zero (0), yet we can't always assume
+// numeric hash keys . . .  - TMH
 
     $basedir = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
 
@@ -1438,17 +1465,17 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
         if ( 0 )
         {
-        show_diag($rname, "unsorted files in current directory include:", $dflag_dev);
-        echo "<pre>\n";
-        print_r($files_in_cwd);
-        echo "</pre>\n";
+            show_diag($rname, "unsorted files in current directory include:", $dflag_dev);
+            echo "<pre>\n";
+            print_r($files_in_cwd);
+            echo "</pre>\n";
 
-        sort($files_in_cwd);
+            sort($files_in_cwd);
 
-        show_diag($rname, "same files sorted:", $dflag_dev);
-        echo "<pre>\n";
-        print_r($files_in_cwd);
-        echo "</pre>\n";
+            show_diag($rname, "same files sorted:", $dflag_dev);
+            echo "<pre>\n";
+            print_r($files_in_cwd);
+            echo "</pre>\n";
         }
 
 
@@ -1629,7 +1656,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 
     show_diag($rname, "returning to caller . . .", $dflag_dev);
 
-}
+} // end function present_tree_view()
 
 
 
