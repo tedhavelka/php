@@ -54,8 +54,9 @@
 //
 //  REFERENCES:
 //
-//    * REF *  http:
+//    * REF *  http://php.net/manual/en/function.define.php
 //
+//    * REF *  http://php.net/manual/en/function.reset.php
 //
 //
 //----------------------------------------------------------------------
@@ -84,7 +85,24 @@
 
 
 //----------------------------------------------------------------------
-// --- OPTIONS FOR FORMATTING NAVIGATION MENUS ---
+// -- SECTION -- general file attributes
+//----------------------------------------------------------------------
+
+// 2018-01-22 -
+    define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
+    define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
+    define("KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK", "symlink");
+    define("KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED", "not determined");
+
+    define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
+    define("KEY_VALUE__FILE_STATUS__NOT_CHECKED", "not checked");
+
+    define("KEY_VALUE__DEFAULT_FILENAME", "DEFAULT FILE NAME");
+
+
+
+//----------------------------------------------------------------------
+// -- SECTION -- site navigation keynames and values
 //----------------------------------------------------------------------
 
 // **  **  **  **  **
@@ -100,32 +118,26 @@
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS", "site_navigation_diagnostics");
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED", "site_navigation_diagnostics_detailed");
 
-// 2018-01-22 -
-    define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
-    define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
-    define("KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK", "symlink");
-    define("KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED", "not determined");
-
-    define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
-    define("KEY_VALUE__FILE_STATUS__NOT_CHECKED", "not checked");
 
 
-    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME", "DEFAULT FILE NAME");
-
+//----------------------------------------------------------------------
+// -- SECTION -- directory navigation keynames and values
+//----------------------------------------------------------------------
 
 // 2018-01-23 - NOTE:  WE MAY NEED TO CHANGE 'SITE_NAVIGATION' TO
 // 'DIRECTORY_NAVIGATION' IF DIRECTORY TREE BROWSING ROUTINES REMAIN
 // FACTORED IN PHP FILE NAMED 'directory-navigation.php' . . .
 
-    define("KEY_VALUE__DIRECTORY_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME", KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME);
-    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
-    define("KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE", KEY_VALUE__FILE_TYPE__IS_FILE);
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_TYPE", KEY_VALUE__FILE_TYPE__IS_FILE);
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILENAME", KEY_VALUE__DEFAULT_FILENAME);
 
-    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME", "tree_browser_filename");
-    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS", "tree_browser_file_status");
-    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE", "tree_browser_file_type");
-    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR", "tree_browser_file_path_in_base_dir");
-    define("KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR", "tree_browser_file_depth_in_base_dir");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_NAME", "tree_browser_filename");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_STATUS", "tree_browser_file_status");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TYPE", "tree_browser_file_type");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_PATH_IN_BASE_DIR", "tree_browser_file_path_in_base_dir");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_DEPTH_IN_BASE_DIR", "tree_browser_file_depth_in_base_dir");
     define("KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES", "count_of_regular_files");
 
     define("KEY_NAME__FILE_DEPTH_IN_BASE_DIR", "file_depth_in_base_dir");
@@ -134,6 +146,7 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW", "limit_elements_to_show_set_to_n");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_EMPTY_DIRS", "hide_empty_dirs");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES", "hide_files");
+
 
     define("KEY_NAME__DIRECTORY_NAVIGATION__CWD", "cwd");
     define("KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR", "cwd");
@@ -144,9 +157,13 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS", "hide_first_n_path_elements");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS_ABBR", "hide_path_elems");
 
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE", "file_tree_view_mode");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR", "view_mode");
+
+
 
 //----------------------------------------------------------------------
-// --- OPTIONS FOR LAYOUT AND FORMAT OF WEB PAGE, DOCUMENT SECTIONS ---
+// -- SECTION -- document layout keynames and values
 //----------------------------------------------------------------------
 
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK", "content_margin_block_element_mark_with");
@@ -165,7 +182,7 @@
 
 
 //----------------------------------------------------------------------
-// --- OPTIONS FOR IMAGE GALLERY FORMATTING ---
+// -- SECTION -- image gallery formatting
 //----------------------------------------------------------------------
 
 // *** * *** * ***
@@ -223,16 +240,16 @@
 
 
 //----------------------------------------------------------------------
-// ---
+// -- SECTION -- text element keynames and values
 //----------------------------------------------------------------------
 
     define("KEY_NAME__TEXT_ELEMENT__STYLE", "text_element_style");
 
 
 
-//----------------------------------------------------------------------
-// --- ENUMERATION-LIKE VALUES FOR GALLERY AND IMAGE PRESENTATION FORMATTING:
-//----------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Enumeration-like values for gallery and image presentation formatting:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     define("KEY_VALUE__UNITS_IN_EMS", "em");
     define("KEY_VALUE__UNITS_IN_PIXELS", "px");
@@ -262,6 +279,10 @@
 
 
 
+//----------------------------------------------------------------------
+// -- SECTION -- HTML block element keynames and values
+//----------------------------------------------------------------------
+
 // * REF * http://www.learnlayout.com/position.html
     define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC", "static");
     define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_RELATIVE", "relative");
@@ -273,7 +294,7 @@
 
 
 //----------------------------------------------------------------------
-// --- OPTIONS FOR WEB PAGE FOOTERS ---
+// -- SECTION -- web page footer attributes
 //----------------------------------------------------------------------
 
     define("KEY_NAME__FOOTER_ATTRIBUTES__BLOCK_ELEMENT_POSITIONING", "footer_block_element_positioning");

@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------
 //
-//  PROJECT:  local PHP library functions, CMS focused
+//  PROJECT:  local PHP library functions, content management focused
 //
 //  FILE:  directory-navigation.php
 //
@@ -13,8 +13,16 @@
 //
 //  TO-DO:
 //
-//     [ ]  add symbolic link file type detection, and optional skipping
-//          of symbolic links in build_tree() function, 2018-01-24.
+//  2018-01-24:
+//    [ ]  add symbolic link file type detection, and optional skipping
+//          of symbolic links in build_tree() function,
+//
+//  2018-02-15:
+//    [ ]  add a search feature to provide search for files by name
+//          or text patterns,
+//
+//    [ ]  add
+//
 //
 //
 //
@@ -150,12 +158,12 @@
 // NOTE:  these shorter defined names or labels will collide if defined
 // elsewhere in this local PHP library.  - TMH
 
-    define("FILE_NAME", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_NAME);
-    define("FILE_STATUS", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_STATUS);
-    define("FILE_TYPE", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_TYPE);
-    define("FILE_PATH_IN_BASE_DIR", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_PATH_IN_BASE_DIR);
-    define("FILE_DEPTH_IN_BASE_DIR", KEY_NAME__SITE_NAVIGATION__TREE_BROWSER_FILE_DEPTH_IN_BASE_DIR);
-    define("FILE_COUNT", KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES);
+    define("FILE_NAME",              KEY_NAME__DIRECTORY_NAVIGATION__FILE_NAME);
+    define("FILE_STATUS",            KEY_NAME__DIRECTORY_NAVIGATION__FILE_STATUS);
+    define("FILE_TYPE",              KEY_NAME__DIRECTORY_NAVIGATION__FILE_TYPE);
+    define("FILE_PATH_IN_BASE_DIR",  KEY_NAME__DIRECTORY_NAVIGATION__FILE_PATH_IN_BASE_DIR);
+    define("FILE_DEPTH_IN_BASE_DIR", KEY_NAME__DIRECTORY_NAVIGATION__FILE_DEPTH_IN_BASE_DIR);
+    define("FILE_COUNT",             KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES);
 
     define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
     define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
@@ -256,6 +264,27 @@ function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarch
 
 
 
+function nn_tree_browser_entry($caller)
+{
+//
+// 2018-02-15 - NEED to add a few key+value pairs to the array built here,
+//   see call to this function in function named &build_tree():
+//
+
+    $tree_browser_hash_element = array(
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_NAME => KEY_VALUE__DEFAULT_FILENAME,
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_STATUS => KEY_VALUE__FILE_STATUS__NOT_CHECKED,
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_TYPE => KEY_VALUE__FILE_TYPE__IS_FILE
+    );
+
+    return $tree_browser_hash_element;
+
+}
+
+
+
+
+
 function &build_tree($caller, $base_directory, $options)
 {
 //----------------------------------------------------------------------
@@ -301,9 +330,9 @@ function &build_tree($caller, $base_directory, $options)
 
 
 // 2018-02-09 - poorly named given name of PHP define:
-    $file = KEY_VALUE__DIRECTORY_NAVIGATION__TREE_BROWSER__DEFAULT_FILENAME;
+    $file = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILENAME;
 
-    $file_type = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_TYPE;
+    $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
 
 // Used to hold starting directory and all subdirectories as routine maps caller's file tree:
     $current_path = ".";   // . . . this var was named 'file_path_in_base_dir' - TMH
@@ -362,10 +391,11 @@ function &build_tree($caller, $base_directory, $options)
     {
         show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
 //        $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
-        $dflag_dev      = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+        $dflag_dev      = DIAGNOSTICS_OFF;
         $dflag_format   = DIAGNOSTICS_OFF;
-        $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
-        $dflag_warning  = DIAGNOSTICS_OFF;    // . . . diagnostics flag to toggle warnings in this routine,
+        $dflag_verbose  = DIAGNOSTICS_OFF;
+        $dflag_warning  = DIAGNOSTICS_OFF;
+        $dflag_minimal  = DIAGNOSTICS_OFF;
         $dflag_summary  = DIAGNOSTICS_OFF;
 
         $dflag_open_dir    = DIAGNOSTICS_OFF;
@@ -597,7 +627,7 @@ function &build_tree($caller, $base_directory, $options)
             $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
 
             $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
-            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__SITE_NAVIGATION__TREE_BROWSER__DEFAULT_FILE_STATUS;
+            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
             $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = $file_type;
             $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = $current_path;
             $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
@@ -876,9 +906,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
     $_SESSION["zzz_count_of_regular_files"] = $count_of_regular_files;
 
 
-    show_diag($rname, "returning array to calling code . . .", $dflag_dev);
-
-    echo $term;
+    show_diag($rname, "returning . . .", $dflag_dev);
 
     return $navigable_tree;
 
@@ -1089,8 +1117,10 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // diagnostics:
 
     $lbuf = "";
-    $dflag_dev     = DIAGNOSTICS_ON;
-    $dflag_warning = DIAGNOSTICS_ON;
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev      = DIAGNOSTICS_ON;
+    $dflag_warning  = DIAGNOSTICS_ON;
 
     $dflag_first_hash_entry       = DIAGNOSTICS_OFF;
     $dflag_path_elements          = DIAGNOSTICS_ON;
@@ -1108,8 +1138,25 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // VAR END
 
 
+    if ( 1 )
+    {
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_OFF;
 
-    show_diag($rname, "starting,", $dflag_dev);
+    $dflag_first_hash_entry       = DIAGNOSTICS_OFF;
+    $dflag_path_elements          = DIAGNOSTICS_OFF;
+
+    $dflag_var_basedir            = DIAGNOSTICS_OFF;
+    $dflag_var_cwd                = DIAGNOSTICS_OFF;
+    $dflag_var_hide_path_elements = DIAGNOSTICS_OFF;
+    $dflag_indent_string          = DIAGNOSTICS_OFF;
+
+    $dflag_hide_path_element      = DIAGNOSTICS_OFF;
+    $dflag_intermediate_path_mark_up = DIAGNOSTICS_OFF;
+    }
+
+    show_diag($rname, "starting,", $dflag_announce);
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
