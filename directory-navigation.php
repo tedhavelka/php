@@ -179,6 +179,8 @@
 //    define ("KEY_NAME__", "");
 
     define ("LIMIT_TO_100", 100);
+    define ("LIMIT__BUILD_TREE__LOOP_2_ITERATION", 300);
+
 
 
 //----------------------------------------------------------------------
@@ -258,8 +260,8 @@ function &build_tree($caller, $base_directory, $options)
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  . . .
-//
+//  PURPOSE:  to map and flatten a file tree hierarchy, and store
+//   this mapped data in a PHP hash.
 //
 //
 //  NOTES ON IMPLEMENTATION:  this routine a non-recursive algorithm
@@ -339,13 +341,15 @@ function &build_tree($caller, $base_directory, $options)
 
     $dflag_note_file   = DIAGNOSTICS_ON;
     $dflag_check_file  = DIAGNOSTICS_ON;
-    $dflag_files_limit = DIAGNOSTICS_OFF;
+    $dflag_files_limit = DIAGNOSTICS_ON;
     $dflag_files_count = DIAGNOSTICS_ON;
 
     $dflag_file_count_per_directory = DIAGNOSTICS_ON;
     $dflag_base_directory_file_list = DIAGNOSTICS_ON;
     $dflag_loop_1 = DIAGNOSTICS_ON;
     $dflag_loop_2 = DIAGNOSTICS_ON;
+
+    $dflag_file_limit_reached = DIAGNOSTICS_ON;
 
 //    $rname = "tree_browser";
     $rname = "build_tree";
@@ -437,7 +441,11 @@ function &build_tree($caller, $base_directory, $options)
     if ( $files_noted < FILE_LIMIT_OF_TREE_BROWSER )
         { $file_limit_not_reached = 'true'; }
     else
-        { $file_limit_not_reached = 'false'; }
+    {
+        show_diag($rname, "- LIMIT REACHED - detecting that we reached file limit " . FILE_LIMIT_OF_TREE_BROWSER
+          . "!", $dflag_file_limit_reached);
+        $file_limit_not_reached = 'false';
+    }
 
 //
 // Variable 'current_path' which used to be 'file_path_in_base_dir'
@@ -676,7 +684,7 @@ function &build_tree($caller, $base_directory, $options)
 
         $loop_2_iteration = 0;   // Variable $i quick and dirty limit setter on loop iterations - TMH
 
-        while ( ($hash_pointer_loop_2 < $file_tree_hash_entry) && ($loop_2_iteration < 50) )
+        while ( ($hash_pointer_loop_2 < $file_tree_hash_entry) && ($loop_2_iteration < LIMIT__BUILD_TREE__LOOP_2_ITERATION) )
         {
             ++$loop_2_iteration;
 
@@ -1680,25 +1688,27 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 // diagnostics:
 
     $dflag_dev = DIAGNOSTICS_ON;
-    $dflag_get = DIAGNOSTICS_ON;
-    $dflag_session_var = DIAGNOSTICS_ON;
-    $dflag_options     = DIAGNOSTICS_ON;
+    $dflag_get = DIAGNOSTICS_OFF;
+    $dflag_session_var = DIAGNOSTICS_OFF;
+    $dflag_options     = DIAGNOSTICS_OFF;
     $dflag_announce_function_calls = DIAGNOSTICS_ON;
+    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
 
     $rname = "present_tree_view";
 
 // VAR END
 
 
-    if ( 1 )
+    if ( 0 )
     {
-        $dflag_dev = DIAGNOSTICS_ON;
+        $dflag_dev = DIAGNOSTICS_OFF;
         $dflag_get = DIAGNOSTICS_OFF;
 
         $dflag_session_var = DIAGNOSTICS_OFF;
         $dflag_options     = DIAGNOSTICS_OFF;
 
-        $dflag_announce_function_calls = DIAGNOSTICS_ON;
+        $dflag_announce_function_calls = DIAGNOSTICS_OFF;
+        $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
     }
 
 
@@ -1740,9 +1750,9 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
         echo "</pre>\n";
     }
 
-    if ( 0 )
+    if ( $dflag_file_hash_tree_in_full )
     {
-        show_diag($rname, "file tree hash in full:", $dflag_dev);
+        show_diag($rname, "file tree hash in full:", $dflag_file_hash_tree_in_full);
         echo "<pre>\n";
         print_r($file_hierarchy);
         echo "</pre>\n";
