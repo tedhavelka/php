@@ -134,7 +134,15 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__LIMIT_ELEMENTS_TO_SHOW", "limit_elements_to_show_set_to_n");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_EMPTY_DIRS", "hide_empty_dirs");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES", "hide_files");
+
     define("KEY_NAME__DIRECTORY_NAVIGATION__CWD", "cwd");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR", "cwd");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY", "base_directory");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR", "basedir");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS", "hide_first_n_path_elements");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS_ABBR", "hide_path_elems");
 
 
 //----------------------------------------------------------------------

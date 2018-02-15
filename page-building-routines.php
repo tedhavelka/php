@@ -599,7 +599,8 @@ function --
 function &nbsp_based_indent($caller, $depth, $options)
 {
 
-    $mark_up = "&nbsp;";
+//    $mark_up = "&nbsp;";
+    $mark_up = "*&nbsp;";
 
     $indent;
 
@@ -608,11 +609,14 @@ function &nbsp_based_indent($caller, $depth, $options)
 
     if ( $depth > 1 )
     {
-        $indent = $mark_up . str_repeat(" $mark_up", ($depth - 1));
+//        $indent = $mark_up . str_repeat(" $mark_up", ($depth - 1));
+//        $indent = $mark_up . str_repeat("*$mark_up", ($depth - 1));
+        $indent = str_repeat(" $mark_up", ($depth - 1));
     }
     elseif ( $depth == 1 )
     {
         $indent = $mark_up;
+//        $indent = "*$mark_up";
     }
     else
     {

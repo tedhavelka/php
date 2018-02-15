@@ -1037,6 +1037,17 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 // VAR BEGIN
 
+// variables this function expects from external sources, e.g. PHP
+// session var or HTTP get method, or other:
+    $basedir = "";
+    $cwd = "";
+    $hide_first_n_path_elements = 1;
+
+// variable to build correct URLs for directories from base dir to cwd:
+    $path_elements = null;
+    $path_element_count = 0;
+    $path_intermediate = "";
+
 // local string and integer variables used to build URL to file:
     $path = "";
     $filename = "";
@@ -1054,7 +1065,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     $link_text = "";
     $line_to_browser = "";
 
-    $flag__show_file_type = 'false';
+    $flag__show_file_type = 'true';
     $file_type_note = "";
 
 // variable used to reach first file hierarchy hash entry, as we
@@ -1068,11 +1079,6 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // variable to hold mark-up:
     $indent = "";
 
-// variable to hide one or more elements of cwd's path:
-    $path_elements = null;
-    $path_element_count = 0;
-    $hide_top_most_path_elements = 1;
-
 
 // diagnostics:
 
@@ -1080,8 +1086,13 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
 
-    $dflag_first_hash_entry = DIAGNOSTICS_OFF;
-    $dflag_path_elements    = DIAGNOSTICS_ON;
+    $dflag_first_hash_entry       = DIAGNOSTICS_OFF;
+    $dflag_path_elements          = DIAGNOSTICS_ON;
+
+    $dflag_var_basedir            = DIAGNOSTICS_OFF;
+    $dflag_var_cwd                = DIAGNOSTICS_OFF;
+    $dflag_var_hide_path_elements = DIAGNOSTICS_OFF;
+    $dflag_indent_string          = DIAGNOSTICS_OFF;
 
     $rname = "present_path_elements_and_files_of_cwd";
 
@@ -1091,43 +1102,75 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     show_diag($rname, "starting,", $dflag_dev);
 
-//    show_diag($rname, "have following path to parse and show its elements:", $dflag_first_hash_entry);
-//    $lbuf = "'" . $files_in_cwd[0][FILE_PATH_IN_BASE_DIR] . "'";
-//    show_diag($rname, $lbuf , $dflag_first_hash_entry);
-//
-//    if ( $dflag_first_hash_entry )
-//    {
-//        show_diag($rname, "files in current working directory:" , $dflag_first_hash_entry);
-//        echo "<pre>\n";
-//        print_r($files_in_cwd);
-//        echo "</pre>\n";
-//    }
-
-
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - STEP - obtain path from base dir to current working dir:
+// - STEP - obtain base directory, current working directory, first via
+//          HTTP get method, then via PHP session variable . . .
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $first_file_tree_hash_entry = reset($files_in_cwd);
-
-    if ( $dflag_first_hash_entry )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR, $_GET) )
     {
-        show_diag($rname, "call to PHP reset() function returns:" , $dflag_first_hash_entry);
-        echo "<pre>\n";
-        print_r($first_file_tree_hash_entry);
-        echo "</pre>\n";
+        show_diag($rname, "obtaining base directory via HTTP 'get' method . . .", $dflag_var_basedir);
+        $basedir = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $_SESSION) )
+    {
+        show_diag($rname, "obtaining base directory via PHP session variable . . .", $dflag_var_basedir);
+        $basedir = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $options) )
+    {
+        show_diag($rname, "obtaining base directory via passed options variable . . .", $dflag_var_basedir);
+        $basedir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    else
+    {
+//        show_diag($rname, "obtaining base directory passed hash of files in current working directory . . .", $dflag_var_basedir);
+//        $first_file_tree_hash_entry = reset($files_in_cwd);
+//        $basedir = $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR];
+        show_diag($rname, "- WARNING - unable to determine base directory of files to show", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
     }
 
-    show_diag($rname, "path from base directory to current working directory \$cwd:", $dflag_dev);
-    $lbuf = "'" . $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR] . "'";
-    show_diag($rname, $lbuf , $dflag_dev);
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR, $_GET) )
+    {
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
+    {
+        $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else
+    {
+        show_diag($rname, "- WARNING - unable to determine current working directory from", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+    $hide_first_n_path_elements = 1;
+
+
+    show_diag($rname, "\$basedir = '$basedir'", $dflag_var_basedir);
+    show_diag($rname, "\$cwd = '$cwd'", $dflag_var_cwd);
+    show_diag($rname, "'hide path elements' var set manually to $hide_first_n_path_elements", $dflag_var_hide_path_elements);
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - get elements of path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $path_elements = explode("/", $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR], LIMIT_TO_100);
+//    $path_elements = explode("/", $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR], LIMIT_TO_100);
+    $path_elements = explode("/", $cwd, LIMIT_TO_100);
 
     $path_element_count = count($path_elements);
 
@@ -1143,61 +1186,52 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
-    echo "<br />\n";
+    echo "<br />\n"; // <-- for diagnostics readability
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - show directories from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $hide_top_most_path_elements = 1;
-
 // NOTE:  hidden path elements won't appear on the page but will
 //  necessarily appear in the URLs of shown path elements and files
 //  of the current working directory:
 
-    if ( ($path_element_count > 0) && ($path_element_count > $hide_top_most_path_elements) )
+    if ( ($path_element_count > 0) && ($path_element_count > $hide_first_n_path_elements) )
     {
         $path_depth = 0;
-
-// This won't work when base directory has two or more path elements:
-//        $path = $path_elements[0];  // and so we must skip the zero'th entry in the path elements hash
-
-        if ( array_key_exists(KEY_NAME__BASE_DIRECTORY, $_SESSION) )
-        {
-            $path = $_SESSION[KEY_NAME__BASE_DIRECTORY];
-        }
-        else
-        {
-            show_diag($rname, "- WARNING - unable to determine base directory of calling code's", $dflag_warning);
-            show_diag($rname, "- WARNING - file tree!  returning early . . .", $dflag_warning);
-            return;
-        }
-
+        $path_intermediate = $path_elements[0];
 
         foreach ( $path_elements as $key => $path_element )
         {
             if ( $key == 0 )
                 { continue; }
 
-            if ( $hide_top_most_path_elements > 0 )
+            if ( $hide_first_n_path_elements > 0 )
             {
-                --$hide_top_most_path_elements;
+                --$hide_first_n_path_elements;
             }
             else
             {
-show_diag($rname, "building indent string and path depth at present is $path_depth . . .", $dflag_dev);
+                show_diag($rname, "building indent string and path depth at present is $path_depth . . .",
+                  $dflag_indent_string);
 
                 $indent = nbsp_based_indent($rname, $path_depth, 0);
-                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path";
+                $url = "$site/$path_from_doc_root/$script_name?"
+                  . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
+                  . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path_intermediate";
+
+// echo "<pre>- ZZTOP - built URL string '$url',</pre><br />\n";
+
                 $file_type_note = "(directory)";
 
                 $link_text = $path_element;
                 $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
                 echo "$line_to_browser<br />\n";
 
-                $path = $path . "/" . $path_element;
+//                $path_intermediate = $path_intermediate . "/" . $path_element;
                 ++$path_depth;
             }
+            $path_intermediate = $path_intermediate . "/" . $path_element;
 
         } // end FOREACH construct to iterate over elements of path from base dir to cwd
 
@@ -1222,7 +1256,10 @@ show_diag($rname, "building indent string and path depth at present is $path_dep
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
             {
 //                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
-                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
+//                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
+                $url = "$site/$path_from_doc_root/$script_name?"
+                  . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
+                  . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path/$filename";
                 $file_type_note = "(directory)";
             }
 
@@ -1263,7 +1300,7 @@ show_diag($rname, "building indent string and path depth at present is $path_dep
 
     } // end local scope
 
-    echo "<br />\n";
+    echo "<br />\n"; // <-- for diagnostics readability
 
     show_diag($rname, "returning . . .", $dflag_dev);
 
@@ -1397,25 +1434,67 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     }
 
 
+// NOTE:
+// At this point when this function called, the hash $file_hierarchy
+// has numeric keys starting at zero (0), yet we can't always assume
+// numeric hash keys . . .  - TMH
+
+//    $basedir = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR, $_GET) )
+    {
+        show_diag($rname, "obtaining base directory via HTTP 'get' method . . .", $dflag_var_basedir);
+        $basedir = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $_SESSION) )
+    {
+        show_diag($rname, "obtaining base directory via PHP session variable . . .", $dflag_var_basedir);
+        $basedir = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $options) )
+    {
+        show_diag($rname, "obtaining base directory via passed options variable . . .", $dflag_var_basedir);
+        $basedir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    else
+    {
+//        show_diag($rname, "obtaining base directory passed hash of files in current working directory . . .", $dflag_var_basedir);
+//        $first_file_tree_hash_entry = reset($files_in_cwd);
+//        $basedir = $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR];
+        show_diag($rname, "- WARNING - unable to determine base directory of files to show", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
 // Look for current working directory in a couple of places:
 
-    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_GET) )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR, $_GET) )
     {
-        show_diag($rname, "got current working directory via HTTP get() method!", $dflag_source_of_cwd);
-        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+        show_diag($rname, "obtaining current working directory via HTTP get method . . .", $dflag_source_of_cwd);
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR];
     }
     else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
     {
-        show_diag($rname, "got current working directory via PHP session variable!", $dflag_source_of_cwd);
+        show_diag($rname, "obtaining current working directory via PHP session variable . . .", $dflag_source_of_cwd);
         $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        show_diag($rname, "obtaining current working directory via options from caller . . .!", $dflag_source_of_cwd);
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
     }
     else    
     {
-        show_diag($rname, "falling back to current working directory from first entry in file tree hash:", $dflag_source_of_cwd);
+        show_diag($rname, "- WARNING - couldn't find current working directory via HTTP get method,", $dflag_warning);
+        show_diag($rname, "  +  or other means.  Falling back to current working directory from first", $dflag_warning);
+        show_diag($rname, "  +  entry in file tree hash:", $dflag_warning);
         $cwd = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
     }
 
 
+    show_diag($rname, "\$basedir set to '$basedir',", $dflag_dev);
     show_diag($rname, "\$cwd set to '$cwd',", $dflag_dev);
 
 
@@ -1431,14 +1510,6 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     show_diag($rname, "about to show file hierarchy which has " . count($file_hierarchy) . " elements:", $dflag_dev);
 
 
-// NOTE:
-// At this point when this function called, the hash $file_hierarchy
-// has numeric keys starting at zero (0), yet we can't always assume
-// numeric hash keys . . .  - TMH
-
-    $basedir = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
-
-
 
     {
 
@@ -1448,7 +1519,7 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 
         foreach ( $file_hierarchy as $key => $file_entry )
         {
-            show_diag($rname, "looking for files in '$cwd', present file noted with path in base dir '" .
+            show_diag($rname, "looking for files in '$cwd', path from base dir to present file is '" .
               $file_entry[FILE_PATH_IN_BASE_DIR] . "',", $dflag_tracking_cwd);
 //            if ( basename($file_entry[FILE_PATH_IN_BASE_DIR]) == $cwd )
             if ( $file_entry[FILE_PATH_IN_BASE_DIR] == $cwd )
@@ -1588,6 +1659,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     $dflag_dev = DIAGNOSTICS_ON;
     $dflag_get = DIAGNOSTICS_ON;
     $dflag_session_var = DIAGNOSTICS_ON;
+    $dflag_options     = DIAGNOSTICS_ON;
     $dflag_announce_function_calls = DIAGNOSTICS_ON;
 
     $rname = "present_tree_view";
@@ -1597,13 +1669,26 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 
     if ( 1 )
     {
-    $dflag_dev = DIAGNOSTICS_ON;
-    $dflag_get = DIAGNOSTICS_OFF;
-    $dflag_session_var = DIAGNOSTICS_OFF;
+        $dflag_dev = DIAGNOSTICS_ON;
+        $dflag_get = DIAGNOSTICS_OFF;
+
+        $dflag_session_var = DIAGNOSTICS_OFF;
+        $dflag_options     = DIAGNOSTICS_OFF;
+
+        $dflag_announce_function_calls = DIAGNOSTICS_ON;
     }
 
 
     show_diag($rname, "starting,", $dflag_dev);
+
+    show_diag($rname, "calling code '$caller' sends options:", $dflag_options);
+    if ( $dflag_options )
+    {
+        echo "<pre>\n";
+        print_r($options);
+        echo "</pre>\n";
+    }
+
 
     $file_hierarchy = array();
 
@@ -1718,6 +1803,35 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 // plus the latest un-checked directory, before the PHP interpreter
 // passes script control back to loop 1.
 //
+
+
+
+// - 2018-02-15 - from function present_path_elements_and_files_of_cwd() . . .
+
+//    show_diag($rname, "have following path to parse and show its elements:", $dflag_first_hash_entry);
+//    $lbuf = "'" . $files_in_cwd[0][FILE_PATH_IN_BASE_DIR] . "'";
+//    show_diag($rname, $lbuf , $dflag_first_hash_entry);
+//
+//    if ( $dflag_first_hash_entry )
+//    {
+//        show_diag($rname, "files in current working directory:" , $dflag_first_hash_entry);
+//        echo "<pre>\n";
+//        print_r($files_in_cwd);
+//        echo "</pre>\n";
+//    }
+
+
+
+//        if ( array_key_exists(KEY_NAME__BASE_DIRECTORY, $_SESSION) )
+//        {
+//            $path = $_SESSION[KEY_NAME__BASE_DIRECTORY];
+//        }
+//        else
+//        {
+//            show_diag($rname, "- WARNING - unable to determine base directory of calling code's", $dflag_warning);
+//            show_diag($rname, "- WARNING - file tree!  returning early . . .", $dflag_warning);
+//            return;
+//        }
 
 
 
