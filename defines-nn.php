@@ -161,23 +161,45 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR", "view_mode");
 
 
+// 2018-02-15 - to be implemented, multiple file tree view modes . . .
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE", "file_tree_view_mode");  // mode of view of tree of files
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_DEPTH", "present_file_tree_to_depth");
+
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD", "present files in cwd");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS", "present directories and file counts");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N", "present directories to depth");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES", "present images in gallery format");
+
+
 
 //----------------------------------------------------------------------
 // -- SECTION -- document layout keynames and values
 //----------------------------------------------------------------------
 
+// QUESTION should we shorten names of these key to match following three keys dated 2018-02-16? . . . TMH
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK", "content_margin_block_element_mark_with");
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK", "content_margin_block_element_mark_alignment");
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__BORDER_STYLE", "content_margin_block_element_border_style");
+
+// 2018-02-16 FRI . . .
+    define("KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH", "doc_section_margin_width");
+    define("KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH_LEFT", "doc_section_margin_width_left");
+    define("KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH_RIGHT", "doc_section_margin_width_right");
+
+
+// QUESTION should we rename this key to match following three keys? . . . TMH
     define("KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME", "block_element_name");
+
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE", "block_element_border_style");
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX", "block_element_minimum_height_in_pixels");
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH", "block_element_width");
+
+    define("KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH", "horizontal_break_of_width");
+
 
 // 2017-11-08 - TO BE IMPLEMENTED, KEYS POINTING TO PAGE-LOAD-WISE RUNNING COUNTS OF SPECIFIC ROUTINE CALLS:
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED", "count_of_document_sections_opened");
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_CLOSED", "count_of_document_sections_closed");
-
-    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE", "block_element_border_style");
-    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX", "block_element_minimum_height_in_pixels");
-    define("KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH", "horizontal_break_of_width");
 
 
 

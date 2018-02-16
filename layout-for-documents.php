@@ -72,12 +72,19 @@ function &document_section_count($caller, $option)
 
 function block_element_for_document_section_margin($caller, $options) // 2017-11-07 - NOT YET IMPLEMENTED - TMH
 {
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+// VAR BEGIN
 
     $mark_for_margin = "&nbsp;";
 
 // diagnostics:
 
     $rname = "block_element_for_document_section_margin";
+
+// VAR END
+
 
 
 // For browser-based layout development, check if calling code asks
@@ -95,8 +102,17 @@ function block_element_for_document_section_margin($caller, $options) // 2017-11
         $mark_for_margin = "<center>" . $mark_for_margin . "</center>";
     }
 
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH, $options) )
+    {
+        $attr_width = "width:" . $options[KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH] . ";";
+    }
 
-    echo "   <div style=\"float:left; width:15%; border:none\">
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - generate mark-up . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+//    echo "   <div style=\"float:left; width:15%; border:none\">
+    echo "   <div style=\"float:left; $attr_width border:none\">
       ${mark_for_margin}
    </div>
 
@@ -108,38 +124,96 @@ function block_element_for_document_section_margin($caller, $options) // 2017-11
 
 
 function open_document_section_with_margin_block_elements($caller, $options)
-// function &open_document_section_with_margin_block_elements($caller, $options)
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  to send CSS and HTML mark up to open a web document
-//    section . . .
+//  PURPOSE:  to send HTML mark-up which opens a web document section
+//    composed of, right now three fixed block elements, all left-
+//    floated so they're in a row like this:
+//
+//
+//   [ block element to clear prior HTML position attributes ]
+//   |                                                       |
+//   | [ margin ] [      main       ] [ margin ]             |
+//   | | block  | |      block      | | block  |             |
+//   | |        | |                 | |        |             |
+//   | |   15%  | |    70% width    | |  15%   |             |
+//   | [        ] [                 ] [        ]             |
+//   [                                                       ]
+//
+//
+//    Note:  block elements here are expressed by this PHP code as
+//    HTML div tag pairs.
+//
 //
 //  OPTIONS SUPPORTED:
+//     *  block element border style
+//     *  block element width
+//
+//    Note: To pass these options see file 'defines-nn.php'.
 //
 //
-//  RETURNS:
+//  OPTIONS TO BE SUPPORTED . . .
+//     *  enable/disable margin-creating blocks left and right,
+//     *  block element background style
 //
+//
+//  RETURNS:  nothing
 //
 //
 //----------------------------------------------------------------------
 
 
-
+// VAR BEGIN
 
 // default mark is non-breakable space, not visible but must be
 // something for at least some types of CSS block elements to be
 // rendered with their specified height and width values:
 
-    $block_element_border = "1px dotted white";
+//    $block_element_border = "1px dotted white";
     $block_element_border = "none";
-
     $block_element_name = "DEFAULT BLOCK ELEMENT NAME";
+
+    $min_height = "";
+    $attr_min_height = "";   // has the form "min-height:400px"
+
+    $width = "";
+    $width_as_number = 0;
+    $attr_width = "";        // has the form "width:10%;"
+
+    $width_margin = "";
+    $width_margin_as_number = 0;
 
 // diagnostics:
 
+    $lbuf = "";
+    $dflag_dev = DIAGNOSTICS_ON;
+    $dflag_center_width_calc = DIAGNOSTICS_OFF;
+
     $rname = "open_document_section_with_margin_block_elements";
 
+// VAR END
+
+
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE, $options) )
+    {
+        $block_element_border = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE];
+        if ( strlen($block_element_border) > 0 )
+        {
+            $attr_border = "border:$block_element_border";
+        }
+    }
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX, $options) )
+    {
+        $min_height = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX];
+// treat min_height value as a string, to capture both PX and percent values of block element height:
+        if ( strlen($min_height) > 0 )
+        {
+            $attr_min_height = "min-height:$min_height";  // will be of the form 'min-height:5em', 'min-height:50%' or 'min-height:500px'
+        }
+    }
 
     if ( array_key_exists(KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME, $options) )
     {
@@ -147,32 +221,83 @@ function open_document_section_with_margin_block_elements($caller, $options)
     }
 
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - figure out the width value to apply to the middle block element of given document section:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH, $options) )
+    {
+        $width = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH];
+        $attr_width = "width:$width;";
+    }
+    elseif (
+             ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH, $options) ) &&
+             ( array_key_exists(KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH, $options) )
+           )
+    {
+        $width = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH];
+        $width_margin = $options[KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH]; 
+        $lbuf = "caller sends margin width of $margin_width and content column width of $width,";
+        show_diag($rname, $lbuf, $dflag_dev);
+    }
+    elseif (
+             ( !(array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH, $options)) ) &&
+             ( array_key_exists(KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH, $options) )
+           )
+    {
+        $width_margin = $options[KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH]; 
+        $lbuf = "caller sends only margin width, set to $width_margin,";
+        show_diag($rname, $lbuf, $dflag_center_width_calc);
+        $width_margin_as_number = preg_replace('/[^0-9]/', '', $width_margin);
+        $lbuf = "calculating margin width times two as " . ($width_margin_as_number * 2);
+        show_diag($rname, $lbuf, $dflag_center_width_calc);
+
+        $width_as_number = (100 - ($width_margin_as_number * 2));
+        $attr_width = "width:$width_as_number%;";
+    }
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - create div element to clear prior HTML position attributes:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 //    echo "<div class=\"container\">
 //    echo "<div style=\"display:flex; min-height:30px; max-height:70px\">
 //    echo "<div style=\"display:flex; min-height:30px\">
 //    echo "<div style=\"float:left\">
 //    echo "<div style=\"clear:left; border:$block_element_border; background:none\"><!-- document section tag to open -->
     echo "<!-- document section tag to open -->
-<div style=\"clear:left; border:$block_element_border; background:none\">
+<div style=\"clear:left; $attr_border; background:none\"><!-- div to clear previous block element position attributes -->
 ";
 
     $option[KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME] = "block element for document section margin left";
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - create div element for left margin in web page section:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     block_element_for_document_section_margin($rname, $options);
 
-    echo "   <div style=\"float:left; width:70%; border:none\"><!-- document section, middle column -->
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - create div element for center column content:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    echo "   <div style=\"float:left; $attr_width $attr_min_height $attr_border\"><!-- document section, middle column -->
 ";
 
 
-// Ahh, too clunky:
-//    ++$count_document_sections_opened;
-//
-//    $metrics[KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED] = $count_document_sections_opened;
-//
-//    return $metrics;
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - DEVELOPMENT STEP - increment a number which shows how many times
+//   this function, an "open doc section" function, has been called.
+//   Note this can safely be commented out or skipped without changing
+//   the given web page or web document's layout:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     document_section_count($rname, "increment");
 
-}
+} // end function open_document_section_with_margin_block_elements()
 
 
 
