@@ -14,15 +14,37 @@
 //  TO-DO:
 //
 //  2018-01-24:
-//    [ ]  add symbolic link file type detection, and optional skipping
-//          of symbolic links in build_tree() function,
+//    [p]  add symbolic link file type detection, and optional skipping
+//         of symbolic links in build_tree() function,
+//
+//       ...symbolic link detection in place, option to hide symlinks
+//         not yet implemented.
 //
 //  2018-02-15:
 //    [ ]  add a search feature to provide search for files by name
-//          or text patterns,
+//         or text patterns,
 //
-//    [ ]  add
+//  2018-02-16:
+//    [ ]  investigate how a mapped file hierarchy can be stored in
+//         one or a few files, to avoid frequent or unneeded repeat
+//         file system accesses to display a given file tree,
 //
+//    [ ]  investigate how compress potentially long path names into
+//         some kind of CRC or numeric hash value, for shorter
+//         URLs and shorter keynames of keys to PHP ordered maps,
+//
+//    [ ]  ensure that following variables,
+//
+//    $site = "https://neelanurseries.com";
+//    $path_from_doc_root = "sandbox";
+//    $script_name = $options["script_name"];
+//
+//         are assigned values in the most sensible and scalable
+//         way possible.  First two of three are hard-code assigned
+//         as of 2018 February 16 . . . TMH
+//
+//    [ ]  device good way to manage HTTP get values which need
+//         appear in script's self calling URLs . . .
 //
 //
 //
@@ -194,6 +216,140 @@
 //----------------------------------------------------------------------
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
+
+function present_file_tree_view_mode_links($rname, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to make and send to web browser links to this code's
+//   calling script, a link for each supported file tree view mode.
+//   File tree view modes include:
+//
+//  EXPECTS:  to work propery this function at minimum needs to know
+//   the site for which it is generating mark-up and content, the
+//   path from the web document root to the script which calls this
+//   function, and the name of that script.  In summary this function
+//   expects,
+//
+//     *  resolvable web URL,
+//     *  path from server's web document root to calling script
+//     *  name of script calling this function
+//
+//   Added help to this function to know also the base directory, or
+//   "most parent" directory of the file hierarchy that calling code
+//   is requesting to show as part of a web page, and the current
+//   working directory in that file hierarchy to which a given user
+//   has navigated so far . . .
+//
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES_ABBR
+//
+//
+//----------------------------------------------------------------------
+
+// VAR BEGIN
+
+    $site = "https://neelanurseries.com";
+    $path_from_doc_root = "sandbox";
+    $script_name = $options["script_name"];
+    $url = "";
+
+    $basedir = "";
+    $cwd = "";
+
+// diagnostics:
+
+    $dflag_warning = DIAGNOSTICS_ON;
+    $dflag_var_basedir = DIAGNOSTICS_OFF;
+
+    $rname = "present_file_tree_view_mode_links";
+
+// VAR END
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - obtain base directory and current working directory from
+//          PHP session variable:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR, $_GET) )
+    {
+        show_diag($rname, "obtaining base directory via HTTP 'get' method . . .", $dflag_var_basedir);
+        $basedir = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $_SESSION) )
+    {
+        show_diag($rname, "obtaining base directory via PHP session variable . . .", $dflag_var_basedir);
+        $basedir = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $options) )
+    {
+        show_diag($rname, "obtaining base directory via passed options variable . . .", $dflag_var_basedir);
+        $basedir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    else
+    {
+//        show_diag($rname, "obtaining base directory passed hash of files in current working directory . . .", $dflag_var_basedir);
+//        $first_file_tree_hash_entry = reset($files_in_cwd);
+//        $basedir = $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR];
+        show_diag($rname, "- WARNING - unable to determine base directory of files to show", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR, $_GET) )
+    {
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
+    {
+        $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else
+    {
+        show_diag($rname, "- WARNING - unable to determine current working directory from", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+
+//
+// - STEP - build URL to file tree presenting script, with view mode:
+//  PROBABLY we'll use a foreach construct to iterate over the
+//  file tree view modes which we have implemented. . .
+
+    {
+        $url = "$site/$path_from_doc_root/$script_name?"
+          . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
+          . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd&"
+          . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR
+          . "=" . KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+    }
+
+
+    {
+        $link_text = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD;
+        $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
+        echo "$line_to_browser<br />\n";
+    }
+
+
+} // end function present_file_tree_view_mode_links()
+
+
+
+
 
 function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy)
 {

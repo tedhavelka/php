@@ -201,7 +201,7 @@ function open_document_section_with_margin_block_elements($caller, $options)
         $block_element_border = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_BORDER_STYLE];
         if ( strlen($block_element_border) > 0 )
         {
-            $attr_border = "border:$block_element_border";
+            $attr_border = "border:$block_element_border;";
         }
     }
 
@@ -211,7 +211,7 @@ function open_document_section_with_margin_block_elements($caller, $options)
 // treat min_height value as a string, to capture both PX and percent values of block element height:
         if ( strlen($min_height) > 0 )
         {
-            $attr_min_height = "min-height:$min_height";  // will be of the form 'min-height:5em', 'min-height:50%' or 'min-height:500px'
+            $attr_min_height = "min-height:$min_height;";  // will be of the form 'min-height:5em', 'min-height:50%' or 'min-height:500px'
         }
     }
 
@@ -267,7 +267,7 @@ function open_document_section_with_margin_block_elements($caller, $options)
 //    echo "<div style=\"float:left\">
 //    echo "<div style=\"clear:left; border:$block_element_border; background:none\"><!-- document section tag to open -->
     echo "<!-- document section tag to open -->
-<div style=\"clear:left; $attr_border; background:none\"><!-- div to clear previous block element position attributes -->
+<div style=\"clear:left; $attr_border background:none\"><!-- div to clear previous block element position attributes -->
 ";
 
     $option[KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME] = "block element for document section margin left";

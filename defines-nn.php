@@ -157,18 +157,25 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS", "hide_first_n_path_elements");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS_ABBR", "hide_path_elems");
 
-    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE", "file_tree_view_mode");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE", "file_tree_view_mode");  // mode of view of tree of files
     define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR", "view_mode");
 
 
 // 2018-02-15 - to be implemented, multiple file tree view modes . . .
-    define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE", "file_tree_view_mode");  // mode of view of tree of files
     define("KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_DEPTH", "present_file_tree_to_depth");
 
+
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD", "present files in cwd");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR", "files-in-cwd");
+
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS", "present directories and file counts");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR", "dir-and-file-counts");
+
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N", "present directories to depth");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR", "dirs-n-deep");
+
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES", "present images in gallery format");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES_ABBR", "gallery-format");
 
 
 
