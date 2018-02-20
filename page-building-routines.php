@@ -592,7 +592,7 @@ function parse_image_measures_and_layout_requests_v2($caller, $path_to_image, $c
 
 /*
 function --
-function -- SECTION -- small strings functions
+function -- SECTION -- functions to build small strings
 function --
 */
 

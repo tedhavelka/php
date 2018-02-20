@@ -407,5 +407,65 @@ function document_section_for_vertical_spacing($caller, $options)
 
 
 
+function layout_small_list_of_text_items($caller, $items, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to create HTML mark-up for small lists of text items,
+//    such as hyperlinks in their own HTML block element (div element).
+//   with support for horizontal and vertical type layout, and
+//   justification left, center and right . . .
+//
+//
+//  EXPECTS:
+//
+//     *  list of items to show (a PHP array, an ordered map),
+//     *  a flag to indicate whether caller needs items shown as hyperlinks,
+//     *  an optional list of URL or hyperlink text strings,
+//     *  a layout style:  horizontal or vertical
+//     *  a justification style:  left, center, right
+//     *  a vertical justification style:  top, center, bottom
+//
+//----------------------------------------------------------------------
+
+
+    $rname = "layout_small_list_of_text_items";
+
+
+
+
+    $count_of_items = count($array_of_urls);
+
+    if ( $count_of_items > 0 )
+    {
+        foreach ( $array_of_urls as $key => $url )
+        {
+// 2018-02-19 NOTE:  link text not yet accounted for correctly here!
+//            $link_text = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD;
+            $link_text = preg_replace('/-/', ' ', $array_of_view_modes[$key]);
+            $link = "<a href=\"$url\">" . $link_text . "</a>";
+
+//            echo "$line_to_browser<br />\n";
+            if ( $key == 0 )
+            {
+                $line_to_browser = $link;
+            }
+            elseif ( $key < ($count_of_items - 0))
+            {
+                $line_to_browser = $line_to_browser . "&nbsp; &nbsp; : &nbsp; &nbsp;" . $link;
+            }
+            else
+            {
+                $line_to_browser = $line_to_browser . $link;
+            }
+        }
+
+        echo "$line_to_browser<br />\n";
+    }
+
+}
+
+
+
 
 ?>

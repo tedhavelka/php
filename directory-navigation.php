@@ -217,7 +217,7 @@
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
 
-function present_file_tree_view_mode_links($rname, $options)
+function &file_tree_view_mode_links($rname, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -247,6 +247,11 @@ function present_file_tree_view_mode_links($rname, $options)
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR
 //
 //
+//  RETURNS:  an array of URLs with HTML mark-up to create links
+//    on a typical web page.
+//
+//
+//
 //----------------------------------------------------------------------
 
 // VAR BEGIN
@@ -268,9 +273,9 @@ function present_file_tree_view_mode_links($rname, $options)
     $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
     $dflag_var_basedir = DIAGNOSTICS_OFF;
-    $dflag_view_modes  = DIAGNOSTICS_ON;
+    $dflag_view_modes  = DIAGNOSTICS_OFF;
 
-    $rname = "present_file_tree_view_mode_links";
+    $rname = "file_tree_view_mode_links";
 
 // VAR END
 
@@ -381,7 +386,8 @@ function present_file_tree_view_mode_links($rname, $options)
           array_push($array_of_urls, $url);
     }
 
-
+if ( 0 )
+{
     $count_of_urls = count($array_of_urls);
 
     if ( $count_of_urls > 0 )
@@ -410,7 +416,28 @@ function present_file_tree_view_mode_links($rname, $options)
 
         echo "$line_to_browser<br />\n";
     }
+}
 
+
+    show_diag($rname, "URL list built, actual display moving to another routine . . .", $dflag_dev);
+
+    return $array_of_urls;
+
+
+} // end function file_tree_view_mode_links()
+
+
+
+
+
+function present_file_tree_view_mode_links($caller, $options)
+{
+
+    $rname = "present_file_tree_view_mode_links";
+
+    $array_of_links = null;
+
+    $array_of_links = file_tree_view_mode_links($caller, $options);
 
 } // end function present_file_tree_view_mode_links()
 
