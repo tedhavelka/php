@@ -244,7 +244,7 @@ function present_file_tree_view_mode_links($rname, $options)
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR
-//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES_ABBR
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR
 //
 //
 //----------------------------------------------------------------------
@@ -259,10 +259,16 @@ function present_file_tree_view_mode_links($rname, $options)
     $basedir = "";
     $cwd = "";
 
+    $array_of_view_modes = null;
+    $array_of_urls = null;
+    $count_of_urls = 0;
+
 // diagnostics:
 
+    $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
     $dflag_var_basedir = DIAGNOSTICS_OFF;
+    $dflag_view_modes  = DIAGNOSTICS_ON;
 
     $rname = "present_file_tree_view_mode_links";
 
@@ -297,8 +303,10 @@ function present_file_tree_view_mode_links($rname, $options)
 //        $basedir = $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR];
         show_diag($rname, "- WARNING - unable to determine base directory of files to show", $dflag_warning);
         show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
-        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
-        return;
+//        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+//        return;
+        show_diag($rname, "  +  FOR DEBUGGING SETTING \$basedir TO \"images/ken-bastow\" . . .", $dflag_warning);
+        $basedir = "images/ken-bastow";
     }
 
 
@@ -318,8 +326,35 @@ function present_file_tree_view_mode_links($rname, $options)
     {
         show_diag($rname, "- WARNING - unable to determine current working directory from", $dflag_warning);
         show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
-        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
-        return;
+//        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+//        return;
+        show_diag($rname, "  +  FOR DEBUGGING SETTING \$cwd TO \"images/ken-bastow\" . . .", $dflag_warning);
+        $cwd = "images/ken-bastow";
+    }
+
+
+
+// 2018-02-19 - Somehow we need to make this function knowledgable of
+// the link text which goes with each link . . .
+
+    $array_of_view_modes = array();
+    $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+    $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
+    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
+    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR;
+
+    $array_of_urls = array();
+
+
+// DIAG:
+
+    if ( $dflag_view_modes )
+    {
+        echo "<i>Array of view modes holds:<br />\n";
+        echo "<pre>\n";
+        print_r($array_of_view_modes);
+        echo "</pre>\n";
+        echo "</i>\n";
     }
 
 
@@ -329,18 +364,50 @@ function present_file_tree_view_mode_links($rname, $options)
 //  PROBABLY we'll use a foreach construct to iterate over the
 //  file tree view modes which we have implemented. . .
 
+    foreach ( $array_of_view_modes as $key => $view_mode )
     {
+        if ( $dflag_view_modes )
+        {
+            show_diag($rname, "building URL and appending view mode '$view_mode' as GET parameter . . .",
+              $dflag_view_modes);
+        }
         $url = "$site/$path_from_doc_root/$script_name?"
           . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
           . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd&"
           . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR
-          . "=" . KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+//          . "=" . KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+          . "=$view_mode";
+
+          array_push($array_of_urls, $url);
     }
 
 
+    $count_of_urls = count($array_of_urls);
+
+    if ( $count_of_urls > 0 )
     {
-        $link_text = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD;
-        $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
+        foreach ( $array_of_urls as $key => $url )
+        {
+// 2018-02-19 NOTE:  link text not yet accounted for correctly here!
+//            $link_text = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD;
+            $link_text = preg_replace('/-/', ' ', $array_of_view_modes[$key]);
+            $link = "<a href=\"$url\">" . $link_text . "</a>";
+
+//            echo "$line_to_browser<br />\n";
+            if ( $key == 0 )
+            {
+                $line_to_browser = $link;
+            }
+            elseif ( $key < ($count_of_urls - 0))
+            {
+                $line_to_browser = $line_to_browser . "&nbsp; &nbsp; : &nbsp; &nbsp;" . $link;
+            }
+            else
+            {
+                $line_to_browser = $line_to_browser . $link;
+            }
+        }
+
         echo "$line_to_browser<br />\n";
     }
 

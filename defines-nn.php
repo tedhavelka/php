@@ -174,8 +174,8 @@
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N", "present directories to depth");
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR", "dirs-n-deep");
 
-    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES", "present images in gallery format");
-    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERIES_ABBR", "gallery-format");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY", "present images in gallery format");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR", "gallery-format");
 
 
 
