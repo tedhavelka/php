@@ -169,10 +169,12 @@
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR", "files-in-cwd");
 
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS", "present directories and file counts");
-    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR", "dir-and-file-counts");
+//    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR", "dir-and-file-counts");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR", "directories-and-file-counts");
 
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N", "present directories to depth");
-    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR", "dirs-n-deep");
+//    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR", "dirs-n-deep");
+    define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR", "directories-n-deep");
 
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY", "present images in gallery format");
     define("KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR", "gallery-format");
@@ -182,6 +184,16 @@
 //----------------------------------------------------------------------
 // -- SECTION -- document layout keynames and values
 //----------------------------------------------------------------------
+
+// * REF * http://www.learnlayout.com/position.html
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC", "static");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_RELATIVE", "relative");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED", "fixed");
+    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_ABSOLUTE", "absolute");
+
+//    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_", "");
+
+
 
 // QUESTION should we shorten names of these key to match following three keys dated 2018-02-16? . . . TMH
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK", "content_margin_block_element_mark_with");
@@ -207,6 +219,36 @@
 // 2017-11-08 - TO BE IMPLEMENTED, KEYS POINTING TO PAGE-LOAD-WISE RUNNING COUNTS OF SPECIFIC ROUTINE CALLS:
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_OPENED", "count_of_document_sections_opened");
     define("KEY_NAME__DOC_LAYOUT__DEV__COUNT_SECTIONS_CLOSED", "count_of_document_sections_closed");
+
+
+// 2018-02-22 - Adding some document layout attributes as hash key
+//  names, and struggling here to best group these document layout and
+//  formatting attributes in order to make related attributes easy to
+//  find . . .    - TMH
+
+// Note:  combine following HTML block element layout attribute with
+//  HTML block element position attribute 'fixed' to obtain blocks in
+//  given document which overlap one another:
+
+    define ("KEY_NAME__LAYOUT__SECTION_OF_DOCUMENT", "document_section_layout"); // layout of section of document
+    define ("KEY_VALUE__LAYOUT__HORIZONTAL", "horizontal");
+    define ("KEY_VALUE__LAYOUT__VERTICAL", "vertical");
+
+    define ("KEY_NAME__LAYOUT__LIST_OF_TEXT_ITEMS", "text_item_list_layout_h_or_v"); // list of items of text
+//   horizontal list item layout
+//   vertical list item layout
+
+// As of 2018-02-22, follwing HTML5 terminology we use word 'justification' to express alignment horizontal:
+    define ("KEY_NAME__JUSTIFICATION__LIST_OF_TEXT_ITEMS", "text_item_list_justification");
+    define ("KEY_VALUE__JUSTIFICATION__LEFT", "left");
+    define ("KEY_VALUE__JUSTIFICATION__CENTER", "center");
+    define ("KEY_VALUE__JUSTIFICATION__RIGHT", "right");
+
+// As of 2018-02-22, follwing HTML5 terminology we use word 'alignment' to express alignment vertical:
+    define ("KEY_NAME__ALIGNMENT__LIST_OF_TEXT_ITEMS", "text_item_list_vertical_alignment");
+    define ("KEY_VALUE__ALIGNMENT__TOP", "top");
+    define ("KEY_VALUE__ALIGNMENT__CENTER", "center");
+    define ("KEY_VALUE__ALIGNMENT__BOTTOM", "bottom");
 
 
 
@@ -309,20 +351,6 @@
 
 
 //----------------------------------------------------------------------
-// -- SECTION -- HTML block element keynames and values
-//----------------------------------------------------------------------
-
-// * REF * http://www.learnlayout.com/position.html
-    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC", "static");
-    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_RELATIVE", "relative");
-    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED", "fixed");
-    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_ABSOLUTE", "absolute");
-
-//    define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_", "");
-
-
-
-//----------------------------------------------------------------------
 // -- SECTION -- web page footer attributes
 //----------------------------------------------------------------------
 
@@ -342,6 +370,14 @@
 // 2018-02-14 - added:
 
     define("KEY_NAME__TEXT_MANIPULATION__SPLIT_STRING_INTO_N_STRINGS", 100);
+
+
+
+//----------------------------------------------------------------------
+// -- SECTION -- array and data structure names
+//----------------------------------------------------------------------
+
+    define("ARRAY_NAME__ARRAY_OF_VIEW_MODES", "array_of_view_modes");
 
 
 

@@ -1,16 +1,21 @@
 <?php
 //======================================================================
 //
-//  PROJECT:  PHP library routines at Neela, de Ted
+//  PROJECT:  PHP library routines at Neela
 //
-//  FILE:  layout-for-images.php
+//  FILE:  layout-for-documents.php
 //
 //  STARTED:  2017-11-03
 //
 //
 //  DESCRIPTION:  this file part of local PHP library, and contains
-//   routines to generate HTML and CSS based layout for images.
-//
+//   routines to generate HTML and CSS based layout for documents and
+//   textual information.  With its focus on page layout the routines
+//   in this file generate mostly mark-up for HTML5 / CSS type block
+//   elements, typically <div> elements.  Routines in this file are
+//   sometimes designed to accept document filenames and or arrays
+//   of shorter text strings to put into generated layout mark-up at
+//   the correct places . . .
 //
 //
 //
@@ -463,7 +468,7 @@ function layout_small_list_of_text_items($caller, $items, $options)
         echo "$line_to_browser<br />\n";
     }
 
-}
+} // end function layout_small_list_of_text_items()
 
 
 

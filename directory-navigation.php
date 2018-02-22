@@ -46,6 +46,13 @@
 //    [ ]  device good way to manage HTTP get values which need
 //         appear in script's self calling URLs . . .
 //
+//  2018-02-22:
+//    [ ]  review all PHP local library calls to functions which
+//         return arrays and assure that '=&' is used to obtain a
+//         a bound reference to the original data, where appropriate,
+//         and not to assign a copy of the data, which may lose
+//         synchronization with the original data set,
+//
 //
 //
 //  IDEAS ON FILE PRESENTATION . . .
@@ -151,6 +158,10 @@
 //
 //    *  http://php.net/manual/en/function.array-keys.php
 //
+//    *  http://php.net/manual/en/language.references.return.php
+//
+//    *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
+//
 //
 
 
@@ -217,7 +228,7 @@
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
 
-function &file_tree_view_mode_links($rname, $options)
+function &file_tree_view_mode_urls($rname, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -275,7 +286,7 @@ function &file_tree_view_mode_links($rname, $options)
     $dflag_var_basedir = DIAGNOSTICS_OFF;
     $dflag_view_modes  = DIAGNOSTICS_OFF;
 
-    $rname = "file_tree_view_mode_links";
+    $rname = "file_tree_view_mode_urls";
 
 // VAR END
 
@@ -338,15 +349,9 @@ function &file_tree_view_mode_links($rname, $options)
     }
 
 
-
-// 2018-02-19 - Somehow we need to make this function knowledgable of
-// the link text which goes with each link . . .
-
-    $array_of_view_modes = array();
-    $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
-    $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
-    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
-    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR;
+// NEED TO SANITY CHECK THIS EXPECTED PASSED VALUE, BEFORE
+//  +  MAKING FOLLOWING ASSIGNMENT:
+    $array_of_view_modes = $options[ARRAY_NAME__ARRAY_OF_VIEW_MODES];
 
     $array_of_urls = array();
 
@@ -376,19 +381,129 @@ function &file_tree_view_mode_links($rname, $options)
             show_diag($rname, "building URL and appending view mode '$view_mode' as GET parameter . . .",
               $dflag_view_modes);
         }
+
+//
+// NOTE:  ampersand '&' character has ASCII value 0x26, but this makes
+//  the ampersand literal in a web URL which breaks the 'get method' of
+//  passing variables to the web server or web browser.  So we'll stick
+//  with the '&' notation in this code to construct a URL, in spite of
+//  Firefox 52.2.0's page source view marking these in red . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
         $url = "$site/$path_from_doc_root/$script_name?"
           . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
+//          . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir%26"
           . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd&"
+//          . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd%26"
           . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR
-//          . "=" . KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
           . "=$view_mode";
 
           array_push($array_of_urls, $url);
     }
 
-if ( 0 )
+
+//    show_diag($rname, "URL list built, actual display moving to another routine . . .", $dflag_dev);
+
+    return $array_of_urls;
+
+
+} // end function file_tree_view_mode_urls()
+
+
+
+
+
+function present_file_tree_view_mode_links($caller, $options)
 {
+//----------------------------------------------------------------------
+//
+//----------------------------------------------------------------------
+
+// VAR BEGIN
+
+    $array_of_urls = null;
+
+    $count_of_urls = 0;
+
+// This one needs explanation and code factoring work:
+    $array_of_view_modes = null;
+
+    $list_layout = KEY_VALUE__LAYOUT__VERTICAL; 
+    $list_justification = KEY_VALUE__JUSTIFICATION__RIGHT; 
+    $list_alignment = KEY_VALUE__ALIGNMENT__TOP; 
+    $mark_up_between_items = "mark-up between items";
+
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_dev = DIAGNOSTICS_ON;
+
+    $rname = "present_file_tree_view_mode_links";
+
+// VAR END
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - set some options to lay out several links in a document
+//  section (1), as a vertical list, right-justified . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// // here in key value 'layout' affects block element attributes:
+//     $options[KEY_NAME__LAYOUT__SECTION_OF_DOCUMENT] = KEY_VALUE__LAYOUT__HORIZONTAL;
+// // here in key value 'layout' affects mark-up between text items of list:
+//     $options[KEY_NAME__LAYOUT__LIST_OF_TEXT_ITEMS] = KEY_VALUE__LAYOUT__VERTICAL;
+//     $options[KEY_NAME__JUSTIFICATION__LIST_OF_TEXT_ITEMS] = KEY_VALUE__JUSTIFICATION__RIGHT;
+//     $options[KEY_NAME__ALIGNMENT__LIST_OF_TEXT_ITEMS] = KEY_VALUE__ALIGNMENT__TOP;
+
+
+    show_diag($rname, "starting,", $dflag_announce);
+
+
+// 2018-02-19 - Somehow we need to make this function knowledgable of
+// the link text which goes with each link . . .
+
+    $array_of_view_modes = array();
+    $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+    $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
+    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
+    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR;
+
+    $options[ARRAY_NAME__ARRAY_OF_VIEW_MODES] = $array_of_view_modes;
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - obtain list of URLs . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $array_of_urls =& file_tree_view_mode_urls($caller, $options);
+
+
+// - STEP - in fixed, unconditional manner open a horizontal document section:
+    open_document_section_with_margin_block_elements($rname, $options);
+
+
+    echo "<!-- This paragraph element gives us text alignment within present block element -->\n<p style=\"text-align:right\">\n";
+
+
+
+// - STEP - generate mark-up for layout of list:
+//  *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
+
+    switch ($list_layout) {
+        case KEY_VALUE__LAYOUT__HORIZONTAL:
+            $mark_up_between_items = "&nbsp; &nbsp; : &nbsp; &nbsp;";
+            break;
+        case KEY_VALUE__LAYOUT__VERTICAL:
+            $mark_up_between_items = "<br />\n";
+            break;
+        default:
+            $mark_up_between_items = "&nbsp; &nbsp; : &nbsp; &nbsp;";
+    }
+
+
+
     $count_of_urls = count($array_of_urls);
+
+//    show_diag($rname, "obtained array with $count_of_urls URLs to show,", $dflag_dev);
+    echo "File viewing modes:<br />\n";
 
     if ( $count_of_urls > 0 )
     {
@@ -406,7 +521,7 @@ if ( 0 )
             }
             elseif ( $key < ($count_of_urls - 0))
             {
-                $line_to_browser = $line_to_browser . "&nbsp; &nbsp; : &nbsp; &nbsp;" . $link;
+                $line_to_browser = $line_to_browser . $mark_up_between_items . $link;
             }
             else
             {
@@ -416,28 +531,15 @@ if ( 0 )
 
         echo "$line_to_browser<br />\n";
     }
-}
 
 
-    show_diag($rname, "URL list built, actual display moving to another routine . . .", $dflag_dev);
-
-    return $array_of_urls;
+    echo "</p>\n";
 
 
-} // end function file_tree_view_mode_links()
+// - STEP - in fixed, unconditional manner complete and close horizontal document section for caller's list:
+    close_document_section_with_margin_block_elements($script_name, $options);
 
-
-
-
-
-function present_file_tree_view_mode_links($caller, $options)
-{
-
-    $rname = "present_file_tree_view_mode_links";
-
-    $array_of_links = null;
-
-    $array_of_links = file_tree_view_mode_links($caller, $options);
+    show_diag($rname, "done, returning . . .", $dflag_announce);
 
 } // end function present_file_tree_view_mode_links()
 
@@ -662,7 +764,7 @@ function &build_tree($caller, $base_directory, $options)
     }
 
     show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
-    show_diag($rname, "starting,", $dflag_dev);
+    show_diag($rname, "starting,", $dflag_announce);
     show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
 
 
