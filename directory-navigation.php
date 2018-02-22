@@ -255,7 +255,7 @@ function &file_tree_view_mode_urls($rname, $options)
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR
 //     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR
-//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR
+//     KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR
 //
 //
 //  RETURNS:  an array of URLs with HTML mark-up to create links
@@ -272,8 +272,10 @@ function &file_tree_view_mode_urls($rname, $options)
     $script_name = $options["script_name"];
     $url = "";
 
+// variables to hold 'GET' method values appended to each URL:
     $basedir = "";
     $cwd = "";
+    $view_mode = "";
 
     $array_of_view_modes = null;
     $array_of_urls = null;
@@ -464,7 +466,7 @@ function present_file_tree_view_mode_links($caller, $options)
     $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
     $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
     $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
-    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_IMAGES_IN_GALLERY_ABBR;
+    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR;
 
     $options[ARRAY_NAME__ARRAY_OF_VIEW_MODES] = $array_of_view_modes;
 
@@ -1732,7 +1734,50 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
-function present_files_conventional_view($caller, $file_hierarchy, $options)
+function present_directories_with_file_counts($rname, $file_hierarchy, $options)
+{
+
+    $file_entry = null;
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev      = DIAGNOSTICS_ON;
+    $dflag_options  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_ON;
+
+    $rname = "present_directories_with_file_counts";
+
+
+    show_diag($rname, "starting,", $dflag_announce);
+
+    show_diag($rname, "- 2018-02-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
+    show_diag($rname, "received \$options hash which holds:", $dflag_options);
+    if ( $dflag_options )
+    {
+        echo "<pre>\n";
+        print_r($options);
+        echo "</pre>\n";
+    }
+//    show_diag($rname, "-", $dflag_dev);
+
+    {
+        foreach ( $file_hierarchy as $key => $file_entry )
+        {
+            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+            {
+                echo $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+            }
+        }
+    }
+
+
+    show_diag($rname, "done.", $dflag_announce);
+}
+
+
+
+
+// function present_files_conventional_view($caller, $file_hierarchy, $options)  // <-- name change 2018-02-22 THU - TMH
+function present_files_in_selected_view($caller, $file_hierarchy, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -1787,24 +1832,29 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // VAR BEGIN
 
+// optionally hide directories which are empty:
     $hide_empty_dirs = 0;
 
+// NEED REVIEW, POSSIBLY DEPRECATE:  variable here to optionally hide files, this now handled by view mode routines
     $hide_files = 0;
 
 // 2018-02-13 - added:
     $files_in_cwd = array();
-
-    $base_directory = "";  // NOTE THERE IS A VARIABLE NAMED 'basedir' IN THIS FUNCION - TMH
-
-    $cwd = "";
 
     $url = "";
     $site = "https://neelanurseries.com";
     $path_from_doc_root = "sandbox";
     $script_name = $options["script_name"];
 
+//    $base_directory = "";  // NOTE THERE IS A VARIABLE NAMED 'basedir' IN THIS FUNCION - TMH
+    $cwd = "";
+    $view_mode = "";
+
+
+// flag to toggle development message:
     $flag__show_file_type = 'false';
 
+// local string to hold development note regarding type of present or given file:
     $file_type_note = "";
 
 
@@ -1828,7 +1878,7 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     $dflag_source_of_cwd  = DIAGNOSTICS_OFF;
     $dflag_tracking_cwd   = DIAGNOSTICS_OFF;
 
-    $rname = "present_files_conventional_view";
+    $rname = "present_files_in_selected_view";
 
 // VAR END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1927,8 +1977,19 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
     }
 
 
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR, $_GET) )
+    {
+        $view_mode = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR];
+    }
+    else
+    {
+        $view_mode = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_VIEW_MODE_ABBR;
+    }
+
+
     show_diag($rname, "\$basedir set to '$basedir',", $dflag_dev);
     show_diag($rname, "\$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "\$view_mode set to '$view_mode',", $dflag_dev);
 
 
 // Copy current working directory to local $options hash, to provide
@@ -1983,76 +2044,39 @@ function present_files_conventional_view($caller, $file_hierarchy, $options)
         }
 
 
-
-
+//
+// - STEP - based on present view mode, select a routine to format and
+//    to show files or subset of files from present file tree:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//  Loop 2 to generate mark-up to present files in current working directory:
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        if ( 0 )
+        switch ($view_mode)
         {
-            echo "<br />\n";
-            foreach ( $files_in_cwd as $key => $file_entry )
-            {
-                $path = $file_entry[FILE_PATH_IN_BASE_DIR];
-//            $filename = $file_entry[FILE_NAME];
-                $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
-                $file_count = $file_entry[FILE_COUNT];
+            case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR:
+                present_path_elements_and_files_of_cwd($rname, $files_in_cwd, $options);
+                break;
 
-                if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
-                {
-//                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
-                    $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
-                    $file_type_note = "(directory)";
-                }
+            case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR:
+                present_directories_with_file_counts($rname, $file_hierarchy, $options);
+                break;
 
-                elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
-                {
-                    $url = "$site/$path_from_doc_root/$path/$filename";
-                    $file_type_note = "(file)";
-                }
+            case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR:
+                show_diag($rname, "File browsing view mode 'directories to depth n' not yet implemented!", $dflag_warning);
+                break;
 
-                elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
-                {
-                    $url = "$site/$path_from_doc_root/$path/$filename";
-                    $file_type_note = "(symlink)";
-                }
+            case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR:
+                show_diag($rname, "File browsing view mode 'files in gallery' not yet implemented!", $dflag_warning);
+                break;
 
-                else
-                {
-                    $url = "$site/$path_from_doc_root/$path/$filename";
-                    $file_type_note = "(unrecognized file type)";
-                }
-
-
-
-                $link_text = $filename;
-                $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
-
-                if ( $flag__show_file_type == 'true' )
-                {
-                    $line_to_browser = "$line_to_browser $file_type_note";
-                }
-
-                $line_to_browser = "$line_to_browser<br />\n";
-
-                echo $line_to_browser;
-            }
-            echo "<br />\n";
+            default:
+                present_path_elements_and_files_of_cwd($rname, $files_in_cwd, $options);
         }
-
-        else
-        {
-            present_path_elements_and_files_of_cwd($rname, $files_in_cwd, $options);
-
-        } // end IF-ELSEIF-ELSE block to select among file presentation formats
 
     } // end local scope
 
 
     show_diag($rname, "returning . . .", $dflag_announce);
 
-} // end function present_files_conventional_view()
+} // end function present_files_in_selected_view()
 
 
 
@@ -2163,7 +2187,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 //    echo $term . $term;
 
     show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
-    present_files_conventional_view($caller, $file_hierarchy, $options);
+    present_files_in_selected_view($caller, $file_hierarchy, $options);
 
 
     show_diag($rname, "returning to caller . . .", $dflag_dev);
