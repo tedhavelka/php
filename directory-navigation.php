@@ -429,6 +429,9 @@ function present_file_tree_view_mode_links($caller, $options)
 
     $count_of_urls = 0;
 
+// when available we use this variable to hold current view mode and highlight it:
+    $current_view_mode = "";
+
 // This one needs explanation and code factoring work:
     $array_of_view_modes = null;
 
@@ -437,8 +440,12 @@ function present_file_tree_view_mode_links($caller, $options)
     $list_alignment = KEY_VALUE__ALIGNMENT__TOP; 
     $mark_up_between_items = "mark-up between items";
 
+
+// diagnostics:
+
     $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_dev = DIAGNOSTICS_ON;
+    $dflag_current_view_mode = DIAGNOSTICS_ON;
 
     $rname = "present_file_tree_view_mode_links";
 
@@ -456,6 +463,20 @@ function present_file_tree_view_mode_links($caller, $options)
 //     $options[KEY_NAME__LAYOUT__LIST_OF_TEXT_ITEMS] = KEY_VALUE__LAYOUT__VERTICAL;
 //     $options[KEY_NAME__JUSTIFICATION__LIST_OF_TEXT_ITEMS] = KEY_VALUE__JUSTIFICATION__RIGHT;
 //     $options[KEY_NAME__ALIGNMENT__LIST_OF_TEXT_ITEMS] = KEY_VALUE__ALIGNMENT__TOP;
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR, $_GET) )
+    {
+        $current_view_mode = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE, $options) )
+    {
+        $current_view_mode = $options[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE];
+    }
+    else
+    {
+        $current_view_mode = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
+    }
+
 
 
     show_diag($rname, "starting,", $dflag_announce);
@@ -516,7 +537,17 @@ function present_file_tree_view_mode_links($caller, $options)
 // 2018-02-19 NOTE:  link text not yet accounted for correctly here!
 //            $link_text = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD;
             $link_text = preg_replace('/-/', ' ', $array_of_view_modes[$key]);
-            $link = "<a href=\"$url\">" . $link_text . "</a>";
+
+show_diag($rname, "comparing array of view modes entry '$array_of_view_modes[$key]' with current view mode '$current_view_mode' . . .",
+$dflag_current_view_mode);
+            if ( $array_of_view_modes[$key] === $current_view_mode )
+            {
+                $link = "<a href=\"$url\"><b>" . $link_text . " *</b></a>";
+            }
+            else
+            {
+                $link = "<a href=\"$url\">" . $link_text . " <font color=\"lightgrey\">*</font></a>";
+            }
 
 //            echo "$line_to_browser<br />\n";
             if ( $key == 0 )
@@ -630,7 +661,12 @@ function nn_tree_browser_entry($caller)
     $tree_browser_hash_element = array(
       KEY_NAME__DIRECTORY_NAVIGATION__FILE_NAME => KEY_VALUE__DEFAULT_FILENAME,
       KEY_NAME__DIRECTORY_NAVIGATION__FILE_STATUS => KEY_VALUE__FILE_STATUS__NOT_CHECKED,
-      KEY_NAME__DIRECTORY_NAVIGATION__FILE_TYPE => KEY_VALUE__FILE_TYPE__IS_FILE
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_TYPE => KEY_VALUE__FILE_TYPE__IS_FILE,
+
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_PATH_IN_BASE_DIR => "",
+      KEY_NAME__DIRECTORY_NAVIGATION__FILE_DEPTH_IN_BASE_DIR => 0,
+      KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES => 0,
+      KEY_NAME__DIRECTORY_NAVIGATION__PARENT_HASH_ENTRY => -1
     );
 
     return $tree_browser_hash_element;
@@ -2638,7 +2674,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     $dflag_session_var = DIAGNOSTICS_OFF;
     $dflag_options     = DIAGNOSTICS_OFF;
     $dflag_announce_function_calls = DIAGNOSTICS_ON;
-    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_ON;
+    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
 
     $rname = "present_tree_view";
 
