@@ -162,6 +162,8 @@
 //
 //    *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
 //
+//    *  https://commons.wikimedia.org/wiki/File:ASCII-Table-wide.svg
+//
 //
 
 
@@ -539,7 +541,7 @@ function present_file_tree_view_mode_links($caller, $options)
 
 
 // - STEP - in fixed, unconditional manner complete and close horizontal document section for caller's list:
-    close_document_section_with_margin_block_elements($script_name, $options);
+    close_document_section_with_margin_block_elements($rname, $options);
 
     show_diag($rname, "done, returning . . .", $dflag_announce);
 
@@ -1411,6 +1413,347 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
 
 
 
+function &visible_path_depth($caller, $cwd, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to determine and to return the number of visible path
+//    elements (directories) in a path, when some of the initial
+//    elements may be requested hidden by calling code.
+//
+//  EXPECTS:
+//    *  calling code identifier (string),
+//    *  current working directory or path,
+//    *  options hash which holds the number of initial path elements to hide
+//
+//  RETURNS:
+//    *  integet count of visible path elements
+//
+//----------------------------------------------------------------------
+
+
+// VAR BEGIN
+
+    $path_elements = null;  // assigned an array type value from PHP explode() function,
+
+    $path_element = "";
+
+    $path_element_count = 0;
+
+    $path_depth = 0;
+
+    $hide_first_n_path_elements = 1;
+
+
+// diagnostics:
+
+    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_hide_path_element = DIAGNOSTICS_OFF;
+
+    $rname = "visible_path_depth";
+
+// VAR END
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+    {
+        $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $_SESSION) )
+    {
+        $hide_first_n_path_elements = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+
+
+//    show_diag($rname, "starting,", $dflag_announce);
+    show_diag($rname, "starting,", $dflag_dev);
+    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "hiding first $hide_first_n_path_elements path elements,", $dflag_dev);
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - get elements of path from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $path_elements = explode("/", $cwd, LIMIT_TO_100);
+
+    $path_element_count = count($path_elements);
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    show_diag($rname, "- BEGIN FIGURING OF VISIBLE PATH DEPTH -", $dflag_dev);
+
+    if ( ($path_element_count > 0) && ($path_element_count > $hide_first_n_path_elements) )
+    {
+        $path_depth = 0;
+
+        foreach ( $path_elements as $key => $path_element )
+        {
+
+            if ( $hide_first_n_path_elements > 0 )
+            {
+                show_diag($rname, "hiding path element '$path_element',", $dflag_hide_path_element);
+                --$hide_first_n_path_elements;
+            }
+            else
+            {
+                show_diag($rname, "visible path depth at present is $path_depth . . .",
+                  $dflag_dev);
+                ++$path_depth;
+            }
+
+        } // end FOREACH construct to iterate over elements of path from base dir to cwd
+
+    } // end IF-block to determine whether there are path elements above files in cwd to show
+
+
+    show_diag($rname, "- END FIGURING OF VISIBLE PATH DEPTH -", $dflag_dev);
+
+    return $path_depth;
+
+} // end function visible_path_depth()
+
+
+
+
+function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
+{
+//----------------------------------------------------------------------
+// NOTE:  this function also returns a fixed indent as the first part
+//   of the link text and URL line returned to calling code . . . - TMH
+//
+//----------------------------------------------------------------------
+
+
+// VAR BEGIN
+
+// These three variables assigned values from options hash which caller
+// sets up . . .
+
+    $site = "";
+
+    $path_from_doc_root = "";
+
+    $basedir = "";
+
+//    $cwd . . . passed to this routine in its parameter list.
+
+    $view_mode = "";
+
+
+    $path_elements = null;  // assigned an array type value from PHP explode() function,
+
+    $path_element = "";
+
+    $path_element_count = 0;
+
+    $path_depth = 0;
+
+    $hide_first_n_path_elements = 1;
+
+
+    $path_intermediate = "";
+    $indent;
+    $url;
+    $file_type_note;
+
+
+// diagnostics:
+
+    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_hide_path_element = DIAGNOSTICS_OFF;
+    $dflag_at_document_root  = DIAGNOSTICS_ON;
+    $dflag_var_basedir       = DIAGNOSTICS_OFF;
+
+    $dflag_warning = DIAGNOSTICS_ON;
+
+    $rname = "link_to_file_tree_intermediate_path";
+
+// VAR END
+
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR, $options) )
+    {
+        $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR];
+    }
+    else
+    {
+        show_diag($rname, "- WARNING - no site URL defined in passed options hash!", $dflag_warning);
+        show_diag($rname, "Need site Uniform Resource Locator (URL) to build complete URL to page of this site,", $dflag_warning);
+        show_diag($rname, "returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT, $options) )
+    {
+        $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    }
+    else
+    {
+        show_diag($rname, "- INFO - present script at document root,", $dflag_at_document_root);
+    }
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR, $options) )
+    {
+        $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR];
+    }
+    else
+    {
+        show_diag($rname, "- WARNING - no parent script name found in passed options hash!", $dflag_warning);
+        show_diag($rname, "Need script name to build complete URL to page of this site,", $dflag_warning);
+        show_diag($rname, "returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - obtain base directory, current working directory, first via
+//          HTTP get method, then via PHP session variable . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR, $_GET) )
+    {
+        show_diag($rname, "obtaining base directory via HTTP 'get' method . . .", $dflag_var_basedir);
+        $basedir = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $_SESSION) )
+    {
+        show_diag($rname, "obtaining base directory via PHP session variable . . .", $dflag_var_basedir);
+        $basedir = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY, $options) )
+    {
+        show_diag($rname, "obtaining base directory via passed options variable . . .", $dflag_var_basedir);
+        $basedir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    }
+    else
+    {
+//        show_diag($rname, "obtaining base directory passed hash of files in current working directory . . .", $dflag_var_basedir);
+//        $first_file_tree_hash_entry = reset($files_in_cwd);
+//        $basedir = $first_file_tree_hash_entry[FILE_PATH_IN_BASE_DIR];
+        show_diag($rname, "- WARNING - unable to determine base directory of files to show", $dflag_warning);
+        show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
+        return;
+    }
+
+
+// Preserve view mode as most recently captured through HTTP get method:
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR, $_GET) )
+    {
+        $view_mode = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR];
+    }
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+    {
+        $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+    elseif ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $_SESSION) )
+    {
+        $hide_first_n_path_elements = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+
+
+
+//    show_diag($rname, "starting,", $dflag_announce);
+    show_diag($rname, "starting,", $dflag_dev);
+    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "hiding first $hide_first_n_path_elements path elements,", $dflag_dev);
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - get elements of path from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    $path_elements = explode("/", $cwd, LIMIT_TO_100);
+
+    $path_element_count = count($path_elements);
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - STEP - show directories from base dir to current working dir:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// NOTE:  hidden path elements won't appear on the page but will
+//  necessarily appear in the URLs of shown path elements and files
+//  of the current working directory:
+
+    show_diag($rname, "- BEGIN INTERMEDIATE PATHS MARK-UP GENERATION -", $dflag_dev);
+
+    if ( ($path_element_count > 0) && ($path_element_count > $hide_first_n_path_elements) )
+    {
+        $path_depth = 0;
+
+        foreach ( $path_elements as $key => $path_element )
+        {
+            if ( strlen($path_intermediate) == 0 )
+                { $path_intermediate = $path_element; }
+            else
+                { $path_intermediate = $path_intermediate . "/" . $path_element; }
+
+
+            if ( $hide_first_n_path_elements > 0 )
+            {
+                show_diag($rname, "hiding path element '$path_element',", $dflag_hide_path_element);
+                --$hide_first_n_path_elements;
+            }
+            else
+            {
+//                show_diag($rname, "building indent string and path depth at present is $path_depth . . .",
+//                  $dflag_indent_string);
+//                $indent =& nbsp_based_indent($rname, $path_depth, 0);
+
+                $url = "$site/$path_from_doc_root/$script_name?";
+
+                if ( strlen($view_mode) > 0 )
+                {
+                    $url = $url . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR . "=$view_mode";
+                }
+
+//                $url = "$site/$path_from_doc_root/$script_name?"
+                $url = "$url&"
+                  . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
+                  . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path_intermediate";
+
+
+
+                $file_type_note = "(directory)";
+
+                $link_text = $path_element;
+
+// 2018-02-22 - indent string building factored into separate routine:
+//                $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
+                $line_to_browser = "<a href=\"$url\">" . $link_text . "</a>";
+
+// 2018-02-22 - echo statement left in calling routine while $line_to_broswer
+//  +  construction factored into this routine:
+//                echo "$line_to_browser<br />\n";
+
+                ++$path_depth;
+            }
+
+        } // end FOREACH construct to iterate over elements of path from base dir to cwd
+
+    } // end IF-block to determine whether there are path elements above files in cwd to show
+
+
+    show_diag($rname, "- END INTERMEDIATE PATHS MARK-UP GENERATION -", $dflag_dev);
+
+    return $line_to_browser;
+
+} // end function link_to_file_tree_intermediate_path()
+
+
+
+
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
 //----------------------------------------------------------------------
@@ -1560,7 +1903,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     }
     else
     {
-        show_diag($rname, "- WARNING - unable to determine current working directory from", $dflag_warning);
+        show_diag($rname, "- WARNING - unable to determine current working directory", $dflag_warning);
         show_diag($rname, "  +  via get method, PHP session var or calling code options!", $dflag_warning);
         show_diag($rname, "  +  returning early to calling code . . .", $dflag_warning);
         return;
@@ -1736,15 +2079,44 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 {
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to present files from a file hierarchy, filtering for 
+//   and showing only directory type files followed by their respective
+//   counts of regular files with each immediate directory.
+//
+//
+//
+//----------------------------------------------------------------------
+
+// VAR BEGIN
 
     $file_entry = null;
+
+    $cwd = "";  // assigned value from data member of a file tree hash entry,
+
+    $path_depth = 0;  // figured by another routine which splits $cwd into path elements,
+
+    $indent = "";  // holds string built by another routine which uses value of path depth,
+
+    $url = "";
+
+    $file_count_note = "";
+
+
+// diagnostics:
 
     $dflag_announce = DIAGNOSTICS_ON;
     $dflag_dev      = DIAGNOSTICS_ON;
     $dflag_options  = DIAGNOSTICS_OFF;
     $dflag_warning  = DIAGNOSTICS_ON;
 
+    $dflag_visible_path_depth = DIAGNOSTICS_OFF;
+    $dflag_indent_string = DIAGNOSTICS_OFF;
+
     $rname = "present_directories_with_file_counts";
+
+// VAR END
 
 
     show_diag($rname, "starting,", $dflag_announce);
@@ -1764,14 +2136,53 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
         {
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
             {
-                echo $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+
+                $cwd = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
+
+
+// - STEP - build indent based on file depth in present file tree:
+
+                $path_depth =& visible_path_depth($rname, $cwd, $options);
+                show_diag($rname, "called for and got back visible path depth of $path_depth,", $dflag_visible_path_depth);
+
+                $indent =& nbsp_based_indent($rname, $path_depth, 0);
+                show_diag($rname, "and indent string '$indent',", $dflag_indent_string);
+
+
+// - STEP - build URL:
+
+                $url = &link_to_file_tree_intermediate_path($caller, $cwd, $options);
+
+
+// - STEP - build link text:
+
+                if ( $file_entry[FILE_COUNT] > 0 )
+                {
+//                    echo $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+                    $file_count_note = $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+                }
+                elseif ( $file_entry[FILE_COUNT] == 0 )
+                {
+//                    echo $file_entry[FILE_NAME] . " . . .<br >\n";
+                    $file_count_note = $file_entry[FILE_NAME] . " . . .<br >\n";
+                }
+                else
+                {
+//                    echo $file_entry[FILE_NAME] . " (<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                    $file_count_note = $file_entry[FILE_NAME] . " (<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                }
+
+
+                echo "$indent $url $file_count_note";
             }
         }
     }
 
 
     show_diag($rname, "done.", $dflag_announce);
-}
+
+} // end function present_directories_with_file_counts()
+
 
 
 

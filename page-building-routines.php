@@ -600,7 +600,8 @@ function &nbsp_based_indent($caller, $depth, $options)
 {
 
 //    $mark_up = "&nbsp;";
-    $mark_up = "*&nbsp;";
+//    $mark_up = "*&nbsp;";
+    $mark_up = "<font color=\"lightgrey\">*</font>&nbsp;";
 
     $indent;
 

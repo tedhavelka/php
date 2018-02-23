@@ -148,11 +148,20 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FILES", "hide_files");
 
 
-    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD", "cwd");
-    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR", "cwd");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL", "site_uniform_resource_locator");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR", "site_url");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT", "path_from_document_root");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT_ABBR", "path_from_doc_root");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME", "script_name");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR", "script");
 
     define("KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY", "base_directory");
     define("KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR", "basedir");
+
+    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD", "cwd");
+    define("KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR", "cwd");
 
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS", "hide_first_n_path_elements");
     define("KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS_ABBR", "hide_path_elems");
