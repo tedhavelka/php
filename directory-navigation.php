@@ -670,6 +670,8 @@ function &build_tree($caller, $base_directory, $options)
 
     $files_noted = 0;
 
+    $file_tree_hash_entry = 0;  // pointer to hash entry, may be duplicative of variable \$files_noted - TMH
+
     $file_limit_not_reached = 'true';
 
     $files_in_current_dir = array();
@@ -710,16 +712,16 @@ function &build_tree($caller, $base_directory, $options)
 
 // diagnostics and formatting:
 
-    $dmsg = "";                          // . . . local diagnostics message string for development and debugging,
+    $dmsg = "";  // . . . local diagnostics message string for development and debugging,
 
     $term = "<br />\n";
 
-    $dflag_announce = DIAGNOSTICS_ON;    // . . . diagnostics flag for development-related run time comments,
-    $dflag_dev      = DIAGNOSTICS_ON;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev      = DIAGNOSTICS_ON;
     $dflag_format   = DIAGNOSTICS_ON;
-    $dflag_verbose  = DIAGNOSTICS_OFF;    // . . . diagnostics flag for verbose messages during development,
-    $dflag_warning  = DIAGNOSTICS_ON;    // . . . diagnostics flag to toggle warnings in this routine,
-    $dflag_minimal  = DIAGNOSTICS_ON;
+    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_ON;
+    $dflag_minimal  = DIAGNOSTICS_OFF;
     $dflag_summary  = DIAGNOSTICS_ON;
 
     $dflag_open_dir    = DIAGNOSTICS_ON;
@@ -731,10 +733,12 @@ function &build_tree($caller, $base_directory, $options)
 
     $dflag_file_count_per_directory = DIAGNOSTICS_ON;
     $dflag_base_directory_file_list = DIAGNOSTICS_ON;
-    $dflag_loop_1 = DIAGNOSTICS_ON;
-    $dflag_loop_2 = DIAGNOSTICS_ON;
+    $dflag_loop_1                   = DIAGNOSTICS_ON;
+    $dflag_loop_2                   = DIAGNOSTICS_ON;
 
-    $dflag_file_limit_reached = DIAGNOSTICS_ON;
+    $dflag_file_limit_reached       = DIAGNOSTICS_ON;
+    $dflag_noting_first             = DIAGNOSTICS_ON;
+    $dflag_filenames_by_pattern     = DIAGNOSTICS_ON;
 
 //    $rname = "tree_browser";
     $rname = "build_tree";
@@ -745,26 +749,30 @@ function &build_tree($caller, $base_directory, $options)
 
     if ( 1 )
     {
-        show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
+    show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
 //        $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
-        $dflag_dev      = DIAGNOSTICS_OFF;
-        $dflag_format   = DIAGNOSTICS_OFF;
-        $dflag_verbose  = DIAGNOSTICS_OFF;
-        $dflag_warning  = DIAGNOSTICS_OFF;
-        $dflag_minimal  = DIAGNOSTICS_OFF;
-        $dflag_summary  = DIAGNOSTICS_OFF;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_format   = DIAGNOSTICS_OFF;
+    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_OFF;
+    $dflag_minimal  = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_OFF;
 
-        $dflag_open_dir    = DIAGNOSTICS_OFF;
+//    $dflag_open_dir    = DIAGNOSTICS_OFF;
 
-        $dflag_note_file   = DIAGNOSTICS_OFF;
-        $dflag_check_file  = DIAGNOSTICS_OFF;
-        $dflag_files_limit = DIAGNOSTICS_OFF;
-        $dflag_files_count = DIAGNOSTICS_OFF;
+    $dflag_note_file   = DIAGNOSTICS_OFF;
+    $dflag_check_file  = DIAGNOSTICS_OFF;
+    $dflag_files_limit = DIAGNOSTICS_OFF;
+    $dflag_files_count = DIAGNOSTICS_OFF;
 
-        $dflag_file_count_per_directory = DIAGNOSTICS_OFF;
-        $dflag_base_directory_file_list = DIAGNOSTICS_OFF;
-        $dflag_loop_1 = DIAGNOSTICS_OFF;
-        $dflag_loop_2 = DIAGNOSTICS_OFF;
+    $dflag_file_count_per_directory = DIAGNOSTICS_OFF;
+    $dflag_base_directory_file_list = DIAGNOSTICS_OFF;
+    $dflag_loop_1                   = DIAGNOSTICS_OFF;
+    $dflag_loop_2                   = DIAGNOSTICS_OFF;
+
+//    $dflag_file_limit_reached       = DIAGNOSTICS_OFF;
+//    $dflag_noting_first             = DIAGNOSTICS_OFF;
+    $dflag_filenames_by_pattern     = DIAGNOSTICS_OFF;
     }
 
     show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
@@ -783,6 +791,27 @@ function &build_tree($caller, $base_directory, $options)
         show_diag($rname, "- WARNING - returning early . . .",
           $dflag_warning);
         return;
+    }
+    else
+    {
+        show_diag($rname, "noting base directory '$base_directory' in file tree hash at entry $file_tree_hash_entry . . .",
+          $dflag_noting_first);
+
+        $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
+
+        $navigable_tree[$file_tree_hash_entry][FILE_NAME] = basename($base_directory);
+        $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
+        $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+ // was "." but creates "./dir_name" which list_of_filenames_by_pattern() cannot open - TMH
+        $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = dirname($base_directory); 
+        $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = 0;
+        $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
+
+        ++$files_noted;
+        $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
+
+        show_diag($rname, "hash entry pointer now holds $file_tree_hash_entry.  Continuing,",
+          $dflag_noting_first);
     }
 
 
@@ -809,7 +838,8 @@ function &build_tree($caller, $base_directory, $options)
 
     if ( $dflag_dev )
     {
-        echo "In loop 1, from base directory got file list:<br />\n";
+//        echo "In loop 1, from base directory got file list:<br />\n";
+        echo "Above loop 1, from base directory got file list:<br />\n";
         echo "<pre>\n";
         print_r($files_in_current_dir);
         echo "</pre>\n";
@@ -822,7 +852,7 @@ function &build_tree($caller, $base_directory, $options)
 
     $index_to_latest_not_checked = 0;    // . . . loop set up, this value may already by assigned in var block top of routine
 
-    $files_noted = 0;
+//    $files_noted = 0;
 
     if ( $files_noted < FILE_LIMIT_OF_TREE_BROWSER )
         { $file_limit_not_reached = 'true'; }
@@ -980,7 +1010,8 @@ function &build_tree($caller, $base_directory, $options)
 
 //            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
 
-            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
+//            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
+            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
 
             $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
             $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
@@ -1205,7 +1236,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
         if ( $current_dir_has_files_to_process == 'true' )
         {
             show_diag($rname, "After loop 2 updating array named 'files_in_current_dir' using path '$current_path' . . .",
-              $dflag_dev);
+              $dflag_filenames_by_pattern);
             $files_in_current_dir =& list_of_filenames_by_pattern($rname, $current_path, "/(.*)/");
         }
         else
@@ -1413,7 +1444,7 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
 
 
 
-function &visible_path_depth($caller, $cwd, $options)
+function &visible_path_depth($caller, $callers_path, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -1447,8 +1478,10 @@ function &visible_path_depth($caller, $cwd, $options)
 
 // diagnostics:
 
-    $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_announce          = DIAGNOSTICS_OFF;
+    $dflag_dev               = DIAGNOSTICS_OFF;
     $dflag_hide_path_element = DIAGNOSTICS_OFF;
+    $dflag_path_element      = DIAGNOSTICS_OFF;
 
     $rname = "visible_path_depth";
 
@@ -1466,8 +1499,8 @@ function &visible_path_depth($caller, $cwd, $options)
 
 
 //    show_diag($rname, "starting,", $dflag_announce);
-    show_diag($rname, "starting,", $dflag_dev);
-    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "starting,", $dflag_announce);
+    show_diag($rname, "working with \$callers_path set to '$callers_path',", $dflag_dev);
     show_diag($rname, "hiding first $hide_first_n_path_elements path elements,", $dflag_dev);
 
 
@@ -1475,7 +1508,7 @@ function &visible_path_depth($caller, $cwd, $options)
 // - STEP - get elements of path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $path_elements = explode("/", $cwd, LIMIT_TO_100);
+    $path_elements = explode("/", $callers_path, LIMIT_TO_100);
 
     $path_element_count = count($path_elements);
 
@@ -1493,16 +1526,18 @@ function &visible_path_depth($caller, $cwd, $options)
         foreach ( $path_elements as $key => $path_element )
         {
 
-            if ( $hide_first_n_path_elements > 0 )
+show_diag($rname, "looking at path element '$path_element',", $dflag_path_element);
+
+//            if ( $hide_first_n_path_elements > 0 )
+            if ( $hide_first_n_path_elements >= 0 )
             {
                 show_diag($rname, "hiding path element '$path_element',", $dflag_hide_path_element);
                 --$hide_first_n_path_elements;
             }
             else
             {
-                show_diag($rname, "visible path depth at present is $path_depth . . .",
-                  $dflag_dev);
                 ++$path_depth;
+                show_diag($rname, "visible path depth at present is $path_depth . . .", $dflag_dev);
             }
 
         } // end FOREACH construct to iterate over elements of path from base dir to cwd
@@ -1519,7 +1554,7 @@ function &visible_path_depth($caller, $cwd, $options)
 
 
 
-function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
+function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 {
 //----------------------------------------------------------------------
 // NOTE:  this function also returns a fixed indent as the first part
@@ -1539,7 +1574,7 @@ function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
 
     $basedir = "";
 
-//    $cwd . . . passed to this routine in its parameter list.
+//    $cwd . . . not the same as calling code's path, \$cwd is the end user's latest selected directory or file.
 
     $view_mode = "";
 
@@ -1570,7 +1605,7 @@ function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
 
     $dflag_warning = DIAGNOSTICS_ON;
 
-    $rname = "link_to_file_tree_intermediate_path";
+    $rname = "url_of_file_tree_intermediate_path";
 
 // VAR END
 
@@ -1665,7 +1700,7 @@ function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
 
 //    show_diag($rname, "starting,", $dflag_announce);
     show_diag($rname, "starting,", $dflag_dev);
-    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "working with \$callers_path set to '$callers_path',", $dflag_dev);
     show_diag($rname, "hiding first $hide_first_n_path_elements path elements,", $dflag_dev);
 
 
@@ -1673,7 +1708,7 @@ function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
 // - STEP - get elements of path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $path_elements = explode("/", $cwd, LIMIT_TO_100);
+    $path_elements = explode("/", $callers_path, LIMIT_TO_100);
 
     $path_element_count = count($path_elements);
 
@@ -1747,9 +1782,10 @@ function &link_to_file_tree_intermediate_path($caller, $cwd, $options)
 
     show_diag($rname, "- END INTERMEDIATE PATHS MARK-UP GENERATION -", $dflag_dev);
 
-    return $line_to_browser;
+//    return $line_to_browser;
+    return $url;
 
-} // end function link_to_file_tree_intermediate_path()
+} // end function url_of_file_tree_intermediate_path()
 
 
 
@@ -1770,6 +1806,9 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 // variables this function expects from external sources, e.g. PHP
 // session var or HTTP get method, or other:
+    $site = "https://neelanurseries.com";
+    $path_from_doc_root = "sandbox";
+    $script_name = $options["script_name"];
     $basedir = "";
     $cwd = "";
     $hide_first_n_path_elements = 1;
@@ -1788,9 +1827,6 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // and passed to this function in a sensible library way, where calling
 // code knows about and sets these appropriately.  Right now just
 // hard-coded values for a couple of these:                        - TMH
-    $site = "https://neelanurseries.com";
-    $path_from_doc_root = "sandbox";
-    $script_name = $options["script_name"];
     $url = "";
 
     $link_text = "";
@@ -1927,7 +1963,9 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     $path_element_count = count($path_elements);
 
-    show_diag($rname, "path entails $path_element_count elements and we're asked to hide first $hide_first_n_path_elements elements of these:" , $dflag_path_elements);
+    show_diag($rname, "current working directory has $path_element_count elements,", $dflag_path_elements);
+    show_diag($rname, "we're asked to hide first $hide_first_n_path_elements elements of these," , $dflag_path_elements);
+    show_diag($rname, "here are the path elements of \$cwd:" , $dflag_path_elements);
     if ( $dflag_path_elements )
     {
         foreach ( $path_elements as $key => $path_element )
@@ -1936,10 +1974,10 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
         }
     }
 
-
-
-
-    echo "<br />\n"; // <-- for diagnostics readability
+    if ( $dflag_path_elements )
+    {
+        echo "<br />\n"; // <-- for diagnostics readability
+    }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - show directories from base dir to current working dir:
@@ -2050,9 +2088,9 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
-            $indent = nbsp_based_indent($rname, $path_depth, 0);
+            $indent =& nbsp_based_indent($rname, $path_depth, 0);
             $link_text = $filename;
-            $line_to_browser = "$indent <a href=\"$url\">" . $link_text . "</a>";
+            $line_to_browser = "$indent<a href=\"$url\">" . $link_text . "</a>";
 
             if ( $flag__show_file_type == 'true' )
             {
@@ -2085,6 +2123,13 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 //   and showing only directory type files followed by their respective
 //   counts of regular files with each immediate directory.
 //
+//   Note there is additional behavior this function planned to carry
+//   out:  when a user navigates to a directory containing only regular
+//   files, that directory's file content is listed.  That is to say
+//   that when the current working directory contains only files those
+//   files are also shown by their names, though they are not of type
+//   directory.
+//
 //
 //
 //----------------------------------------------------------------------
@@ -2093,9 +2138,18 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
     $file_entry = null;
 
-    $cwd = "";  // assigned value from data member of a file tree hash entry,
+//
+// NEED 2018-02-23 FRI - Need to take care with \$cwd which as of this
+//  morning has a different meaning and use in this function than
+//  elsewhere in this file.  \$cwd normally holds session state by
+//  getting passed in PHP session var and or via HTTP 'get' method:
+//
 
-    $path_depth = 0;  // figured by another routine which splits $cwd into path elements,
+    $cwd = "";
+
+    $current_path = "";  // assigned value from data member of a file tree hash entry,
+
+    $path_depth = 0;  // figured by another routine which splits $current_path into path elements,
 
     $indent = "";  // holds string built by another routine which uses value of path depth,
 
@@ -2119,6 +2173,34 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 // VAR END
 
 
+
+// Look for current working directory in a couple of places:
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR, $_GET) )
+    {
+        show_diag($rname, "obtaining current working directory via HTTP get method . . .", $dflag_source_of_cwd);
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
+    {
+        show_diag($rname, "obtaining current working directory via PHP session variable . . .", $dflag_source_of_cwd);
+        $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        show_diag($rname, "obtaining current working directory via options from caller . . .!", $dflag_source_of_cwd);
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else    
+    {
+        show_diag($rname, "- WARNING - couldn't find current working directory via HTTP get method,", $dflag_warning);
+        show_diag($rname, "  +  or other means.  Falling back to current working directory from first", $dflag_warning);
+        show_diag($rname, "  +  entry in file tree hash:", $dflag_warning);
+        $cwd = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
+    }
+
+
+
     show_diag($rname, "starting,", $dflag_announce);
 
     show_diag($rname, "- 2018-02-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
@@ -2137,12 +2219,12 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
             {
 
-                $cwd = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
+                $current_path = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
 
 
 // - STEP - build indent based on file depth in present file tree:
 
-                $path_depth =& visible_path_depth($rname, $cwd, $options);
+                $path_depth =& visible_path_depth($rname, $current_path, $options);
                 show_diag($rname, "called for and got back visible path depth of $path_depth,", $dflag_visible_path_depth);
 
                 $indent =& nbsp_based_indent($rname, $path_depth, 0);
@@ -2151,29 +2233,59 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
 // - STEP - build URL:
 
-                $url = &link_to_file_tree_intermediate_path($caller, $cwd, $options);
+                $url = &url_of_file_tree_intermediate_path($caller, $current_path, $options);
 
 
 // - STEP - build link text:
 
+                $link_text = $file_entry[FILE_NAME];
+
                 if ( $file_entry[FILE_COUNT] > 0 )
                 {
 //                    echo $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
-                    $file_count_note = $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+                    $file_count_note = "(" . $file_entry[FILE_COUNT] . ")<br >\n";
                 }
                 elseif ( $file_entry[FILE_COUNT] == 0 )
                 {
 //                    echo $file_entry[FILE_NAME] . " . . .<br >\n";
-                    $file_count_note = $file_entry[FILE_NAME] . " . . .<br >\n";
+                    $file_count_note = ". . .<br >\n";
                 }
                 else
                 {
 //                    echo $file_entry[FILE_NAME] . " (<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
-                    $file_count_note = $file_entry[FILE_NAME] . " (<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                    $file_count_note = "(<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                }
+
+                $link_text = "$link_text $file_count_note";
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Note:  PHP implements loose comparison operator '==' and strict
+//  comparison operation '==='.  For more details and useful truth
+//  tables see PHP on-line document at:
+//
+//    *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                if ( $current_path === $cwd )
+                {
+                    $url = "<b><a href=\"$url\">$link_text</a></b>";
+                }
+                else
+                {
+                    $url = "<a href=\"$url\">$link_text</a>";
                 }
 
 
-                echo "$indent $url $file_count_note";
+                if ( strlen($indent) > 0 )
+                {
+                    echo "$indent $url";
+                }
+                else
+                {
+                    echo "$url";
+                }
+
             }
         }
     }
@@ -2526,7 +2638,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     $dflag_session_var = DIAGNOSTICS_OFF;
     $dflag_options     = DIAGNOSTICS_OFF;
     $dflag_announce_function_calls = DIAGNOSTICS_ON;
-    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
+    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_ON;
 
     $rname = "present_tree_view";
 
@@ -2542,7 +2654,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
         $dflag_options     = DIAGNOSTICS_OFF;
 
         $dflag_announce_function_calls = DIAGNOSTICS_OFF;
-        $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
+        $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;  // end block to turn all diagnostics off
     }
 
 
@@ -2584,6 +2696,14 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
         echo "</pre>\n";
     }
 
+// 2018-01-28 - For development only:
+//    show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy);
+//    echo $term . $term;
+
+    show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
+    present_files_in_selected_view($caller, $file_hierarchy, $options);
+
+
     if ( $dflag_file_hash_tree_in_full )
     {
         show_diag($rname, "file tree hash in full:", $dflag_file_hash_tree_in_full);
@@ -2591,14 +2711,6 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
         print_r($file_hierarchy);
         echo "</pre>\n";
     }
-
-
-// 2018-01-28 - For development only:
-//    show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy);
-//    echo $term . $term;
-
-    show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
-    present_files_in_selected_view($caller, $file_hierarchy, $options);
 
 
     show_diag($rname, "returning to caller . . .", $dflag_dev);
