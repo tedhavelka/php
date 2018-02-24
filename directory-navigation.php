@@ -1874,6 +1874,96 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 
 
 
+function &link_to_first_non_hidden_path_elements($caller, $options)
+{
+//----------------------------------------------------------------------
+//  PURPOSE:
+//----------------------------------------------------------------------
+
+// VAR BEGIN
+
+    $url = "";
+    $link_text = "";
+    $link = ""; // a link entails a URL, link text and HTML mark-up
+
+    $site = "";
+    $script_name = "";
+    $path_from_doc_root = "";
+    $view_mode = "";
+    $base_dir = "";
+    $cwd = "";
+    $hide_first_n_path_elements = 0;
+
+    $rname = "link_to_first_non_hidden_path_elements";
+
+// VAR END
+
+
+
+// - STEP - set variables with data from local $options hash:
+
+
+// NOTE:  NEED TO SANITY CHECK FOLLOWING VARIABLES' VALUES AFTER
+//   +  ASSIGNEMENT TO BE SURE THEY ARE NON-ZERO LENGTH:
+
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR];
+    $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR];
+    $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $view_mode = $options[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE];
+    $base_dir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
+    $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+        { $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS]; }
+    else
+        { $hide_first_n_path_elements = 0; }
+
+
+
+    if ( $hide_first_n_path_elements > 0 )
+    {
+        $path_elements = explode("/", $cwd, LIMIT_TO_100);
+
+// 2018-02-23 - Note, hiding path elements nearest the relative root
+// of the file tree's base directory works in the case where the
+// first n path elements are a series of nested directories, one in the
+// next.
+//
+// As before we want to construct a URL which has the full, "web
+// document root" oriented path but whose hyperlink text has only the
+// non-hidden path elements . . .
+
+//
+
+        $url = $site . "/" . $path_from_doc_root . "/" . $script_name
+          . "?" . KEY_NAME__BASE_DIR . "=$base_dir"
+          . "&" . KEY_NAME__VIEW_MODE . "=$view_mode"
+          . "&" . KEY_NAME__CWD . "=$cwd";
+
+
+// Build link text:
+
+        foreach ( $path_elements as $key => $path_element )
+        {
+            if ( $hide_first_n_path_elements > 0 )
+            {
+                --$hide_first_n_path_elements;
+            }
+            else
+            {
+
+            }
+        }
+
+    } // end IF-block to test for hidden path elements
+
+
+} // end function link_to_first_non_hidden_path_elements
+
+
+
+
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
 //----------------------------------------------------------------------
@@ -2222,6 +2312,20 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 //   directory.
 //
 //
+//  NOTES ON IMPLEMENTATION:  this routine present all files of given
+//   file tree which are themselves directories.  In this action this
+//   routine always shows the same number of items so long as the
+//   file tree remains unchanged, that is nothing added nor deleted.
+//   With each navigating click or user selection of a directory,
+//   however, this routine tracks and highlights that selected
+//   directory, which we dub the "current working directory" to match
+//   the same notion in modern and long-time operating systems with
+//   file systems.
+//
+//   A further behavior planned for this routine is to show in
+//   thumbnail format or tiny icons the regular files within the
+//   user's current working directory . . .
+//
 //
 //----------------------------------------------------------------------
 
@@ -2316,8 +2420,9 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 //    show_diag($rname, "-", $dflag_dev);
 
 
+
 //----------------------------------------------------------------------
-// - STEP - show base directory and skip initial dirs to hide . . .
+// - STEP - show initial not-hidden file tree path elements
 //----------------------------------------------------------------------
 
     if ( $hide_first_n_path_elements > 0 )
