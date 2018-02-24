@@ -119,7 +119,8 @@ function show_diag($caller, $message, $bit_wise_message_option)
 
     if ( ( $bit_wise_message_option == DEFAULT_DIAGNOSTIC_MESSAGE ) || ( $bit_wise_message_option == DIAGNOSTICS_ON ) )
     {
-        echo "$caller ($bit_wise_message_option): &nbsp;$message<br />\n";
+//        echo "$caller ($bit_wise_message_option): &nbsp;$message<br />\n";
+        echo "$caller: &nbsp;$message<br />\n";
     }
     else if ( $bit_wise_message_option == MESSAGE_ONLY )
     {

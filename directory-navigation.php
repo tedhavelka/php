@@ -6,8 +6,8 @@
 //
 //  FILE:  directory-navigation.php
 //
-//  STANDING:  2018-02-12 THIS FILE UNDER DEVELOPMENT, NOT YET WORKING
-//    NOR RELEASED FOR PRODUCTION USE! - TMH
+//  STANDING:  2018-02-12 THIS FILE UNDER DEVELOPMENT, NOT FULLY
+//    WORKING AND NOT RELEASED FOR PRODUCTION USE! - TMH
 //
 //
 //
@@ -163,6 +163,12 @@
 //    *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
 //
 //    *  https://commons.wikimedia.org/wiki/File:ASCII-Table-wide.svg
+//
+//
+//
+//  AUTHORS AND CONTRIBUTORS:
+//
+//    Ted Havelka        ted@cs.pdx.edu        (TMH)
 //
 //
 
@@ -680,8 +686,9 @@ function &build_tree($caller, $base_directory, $options)
 {
 //----------------------------------------------------------------------
 //
-//  PURPOSE:  to map and flatten a file tree hierarchy, and store
-//   this mapped data in a PHP hash.
+//  PURPOSE:  to map a file tree hierarchy to a PHP hash, also known as
+//   an "ordered map", for parsing, presentation of files and possible
+//   searching . . .
 //
 //
 //  NOTES ON IMPLEMENTATION:  this routine a non-recursive algorithm
@@ -694,7 +701,6 @@ function &build_tree($caller, $base_directory, $options)
 //----------------------------------------------------------------------
 
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // VAR BEGIN
 
 //    $show_usage = false;
@@ -780,6 +786,8 @@ function &build_tree($caller, $base_directory, $options)
     $rname = "build_tree";
 
 // VAR END
+
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -833,32 +841,38 @@ function &build_tree($caller, $base_directory, $options)
     {
         if ( 0 )
         {
-        show_diag($rname, "noting base directory '$base_directory' in file tree hash at entry $file_tree_hash_entry . . .",
-          $dflag_noting_first);
+            show_diag($rname, "noting base directory '$base_directory' in file tree hash at entry $file_tree_hash_entry . . .",
+              $dflag_noting_first);
 
-        $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
+            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
 
-        $navigable_tree[$file_tree_hash_entry][FILE_NAME] = basename($base_directory);
+            $navigable_tree[$file_tree_hash_entry][FILE_NAME] = basename($base_directory);
 //        $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
-        $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__FILE_STATUS__CHECKED;
-        $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__FILE_STATUS__CHECKED;
+            $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
 
  // was "." but creates "./dir_name" which list_of_filenames_by_pattern() cannot open - TMH
-        if ( dirname($base_directory) === "." )
-            { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = ""; }
-        else
-            { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = dirname($base_directory); }
+            if ( dirname($base_directory) === "." )
+                { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = ""; }
+            else
+                { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = dirname($base_directory); }
 
 //        $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = realpath($base_directory); 
-        $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = 0;
-        $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
+            $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = 0;
+            $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
 
-        ++$files_noted;
-        $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
+            ++$files_noted;
+            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
 
-        show_diag($rname, "hash entry pointer now holds $file_tree_hash_entry.  Continuing,",
-          $dflag_noting_first);
+            show_diag($rname, "hash entry pointer now holds $file_tree_hash_entry.  Continuing,",
+              $dflag_noting_first);
         }
+        else
+        {
+            show_diag($rname, "NOTE:  Not storing base directory '$base_directory' in file tree hash.",
+              $dflag_noting_first);
+        }
+
     }
 
 
@@ -2016,12 +2030,19 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     }
 
 
-    $hide_first_n_path_elements = 1;
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+    {
+        $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+    else
+    {
+        $hide_first_n_path_elements = 0;
+    }
 
 
     show_diag($rname, "\$basedir = '$basedir'", $dflag_var_basedir);
     show_diag($rname, "\$cwd = '$cwd'", $dflag_var_cwd);
-    show_diag($rname, "'hide path elements' var set manually to $hide_first_n_path_elements", $dflag_var_hide_path_elements);
+    show_diag($rname, "'hide first n path elements' var set to $hide_first_n_path_elements,", $dflag_var_hide_path_elements);
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2271,6 +2292,17 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
 
 
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+    {
+        $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+    else
+    {
+        $hide_first_n_path_elements = 0;
+    }
+
+
+
     show_diag($rname, "starting,", $dflag_announce);
 
     show_diag($rname, "- 2018-02-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
@@ -2282,6 +2314,53 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
         echo "</pre>\n";
     }
 //    show_diag($rname, "-", $dflag_dev);
+
+
+//----------------------------------------------------------------------
+// - STEP - show base directory and skip initial dirs to hide . . .
+//----------------------------------------------------------------------
+
+    if ( $hide_first_n_path_elements > 0 )
+    {
+        $path_elements = explode("/", $cwd, LIMIT_TO_100);
+
+// 2018-02-23 - Note, hiding path elements nearest the relative root
+// of the file tree's base directory works in the case where the
+// first n path elements are a series of nested directories, one in the
+// next.
+//
+// As before we want to construct a URL which has the full, "web
+// document root" oriented path but whose hyperlink text has only the
+// non-hidden path elements . . .
+
+//
+
+        $url = $site . "/" . $web_doc_root . "/" . $script_name . "?"
+          . KEY_NAME__BASE_DIR . "=$basedir&"
+          . KEY_NAME__VIEW_MODE . "=$view_mode&"
+          . KEY_NAME__CWD . "=$cwd";
+
+
+// Build link text:
+
+        foreach ( $path_elements as $key => $path_element )
+        {
+            if ( $hide_first_n_path_elements > 0 )
+            {
+                --$hide_first_n_path_elements;
+            }
+            else
+            {
+
+            }
+        }
+    }
+
+
+
+//----------------------------------------------------------------------
+// - STEP - show files of file tree which are directories
+//----------------------------------------------------------------------
 
     {
         foreach ( $file_hierarchy as $key => $file_entry )
