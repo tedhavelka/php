@@ -587,7 +587,7 @@ function present_file_tree_view_mode_links($caller, $options)
 
 
 
-function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy)
+function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy) // - FOR DEVELOPMENT -
 {
 //----------------------------------------------------------------------
 //
@@ -822,6 +822,10 @@ function &build_tree($caller, $base_directory, $options)
     show_diag($rname, "starting,", $dflag_announce);
     show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
 
+
+
+// 2018-20-26 - added this Monday:
+    $base_directory = preg_replace('/\/+$/', '', $base_directory);
 
 //----------------------------------------------------------------------
 // - STEP - sanity checking base directory from caller:
@@ -2025,6 +2029,56 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
 
 
 
+
+function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
+{
+
+    $files_in_cwd = array();
+
+    $key = 0;
+
+    $entry = null;
+
+// diagnostics:
+    $dflag_warning = DIAGNOSTICS_ON;
+    $dflag_dev     = DIAGNOSTICS_ON;
+
+    $rname = "hash_of_files_in_cwd";
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else
+    {
+        show_diag($rname, "- WARNING - no current working directory value found in \$options hash!",
+          $dflag_warning);
+        show_diag($rname, "  +  returning early to calling code . . .",
+          $dflag_warning);
+        return;
+    }
+
+
+
+    foreach ( $file_tree_hierarchy as $key => $entry )
+    {
+        if ( $cwd === $entry[FILE_PATH_IN_BASE_DIR] )
+        {
+//            show_diag($rname, "adding file tree hash entry $key to hash of files in \$cwd,",
+//              $dflag_dev);
+            $files_in_cwd[$key] = $entry;
+        }
+    }
+
+
+    return $files_in_cwd;
+
+} // end function hash_of_files_in_cwd()
+
+
+
+
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
 //----------------------------------------------------------------------
@@ -2421,6 +2475,8 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $link = "";             // combined URL, link text and mark-up for formatting
 
 
+    $files_in_cwd = null;
+
 
 // diagnostics:
 
@@ -2564,6 +2620,17 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                 if ( $current_path === $cwd )
                 {
                     $url = "<b><a href=\"$url\">$link_text</a></b>";
+                    $files_in_cwd =& hash_of_files_in_cwd($rname, $file_hierarchy, $options);
+{
+            show_diag($rname, "unsorted files in current working directory include:", $dflag_dev);
+            echo "<pre>\n";
+//            print_r($files_in_cwd);
+            foreach ( $files_in_cwd as $key => $entry )
+            {
+                echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
+            }
+            echo "</pre>\n";
+}
                 }
                 else
                 {
