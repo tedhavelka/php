@@ -766,7 +766,6 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_summary  = DIAGNOSTICS_ON;
 
     $dflag_open_dir    = DIAGNOSTICS_ON;
-
     $dflag_note_file   = DIAGNOSTICS_ON;
     $dflag_check_file  = DIAGNOSTICS_ON;
     $dflag_files_limit = DIAGNOSTICS_ON;
@@ -802,8 +801,7 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_minimal  = DIAGNOSTICS_OFF;
     $dflag_summary  = DIAGNOSTICS_OFF;
 
-//    $dflag_open_dir    = DIAGNOSTICS_OFF;
-
+    $dflag_open_dir    = DIAGNOSTICS_OFF;
     $dflag_note_file   = DIAGNOSTICS_OFF;
     $dflag_check_file  = DIAGNOSTICS_OFF;
     $dflag_files_limit = DIAGNOSTICS_OFF;
@@ -815,7 +813,7 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_loop_2                   = DIAGNOSTICS_OFF;
 
 //    $dflag_file_limit_reached       = DIAGNOSTICS_OFF;
-//    $dflag_noting_first             = DIAGNOSTICS_OFF;
+    $dflag_noting_first             = DIAGNOSTICS_OFF;
     $dflag_filenames_by_pattern     = DIAGNOSTICS_OFF;
     $dflag_file_depth               = DIAGNOSTICS_OFF;
     }
@@ -892,7 +890,8 @@ function &build_tree($caller, $base_directory, $options)
 // - STEP - 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    show_diag($rname, "calling for list of files in base directory '$base_directory' . . .", $dflag_open_dir);
+    show_diag($rname, "calling for list of files in base directory '$base_directory' . . .",
+      $dflag_open_dir);
     $files_in_current_dir =& list_of_filenames_by_pattern($rname, $base_directory, "/(.*)/");
     sort( $files_in_current_dir );
 //    array_push($files_in_current_dir, "---MARKER---");
@@ -1695,9 +1694,9 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 
 
 
-    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR, $options) )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL, $options) )
     {
-        $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR];
+        $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
     }
     else
     {
@@ -1718,9 +1717,9 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
     }
 
 
-    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR, $options) )
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME, $options) )
     {
-        $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR];
+        $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
     }
     else
     {
@@ -1877,7 +1876,34 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 function &link_to_first_non_hidden_path_elements($caller, $options)
 {
 //----------------------------------------------------------------------
-//  PURPOSE:
+//  PURPOSE:  To construct a hyperlink to the first non-hidden
+//   directory of a given file tree.  Calling code specifies a path
+//   with one or more directories, e.g. a non-trivial and valid path.
+//   Calling code also sets number of leading path elements to hide
+//   from the web document's presented text, the text of the given
+//   hyperlink.  Hidden path elements are present in the given URL
+//   this routine constructs.
+//
+//  EXPECTS:
+//   *  valid and non-trivial path to web-server accessible file tree
+//   *  count of leading path elements to hide
+//
+//  RETURNS:
+//   *  a hyperlink with URL, link text and HTML5 mark-up
+//
+//
+//  2018-02-26 NOTE:  This routine does not answer the task of building
+//   two or more hyperlinks to account for two or more nested
+//   directories in series, each of which contain one file, that is
+//   one directory.  This task needs be implemented to handle multiple
+//   symlinks which library-calling code (e.g. web page designer) wants
+//   shown.
+//
+//   Contributor Ted not worrying about this today, as may be rare
+//   case where people viewing a file tree want to see leading
+//   directories which each contain only one file.
+//
+//
 //----------------------------------------------------------------------
 
 // VAR BEGIN
@@ -1893,6 +1919,9 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
     $base_dir = "";
     $cwd = "";
     $hide_first_n_path_elements = 0;
+
+
+    $dflag_dev = DIAGNOSTICS_OFF;
 
     $rname = "link_to_first_non_hidden_path_elements";
 
@@ -1937,27 +1966,59 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
 //
 
         $url = $site . "/" . $path_from_doc_root . "/" . $script_name
-          . "?" . KEY_NAME__BASE_DIR . "=$base_dir"
-          . "&" . KEY_NAME__VIEW_MODE . "=$view_mode"
-          . "&" . KEY_NAME__CWD . "=$cwd";
+          . "?" . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$base_dir"
+          . "&" . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR . "=$view_mode"
+          . "&" . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd";
+
+        show_diag($rname, "built URL which holds '$url',", $dflag_dev);
 
 
 // Build link text:
 
-        foreach ( $path_elements as $key => $path_element )
+        $path_element_count = count($path_elements);
+        show_diag($rname, "finding '$path_element_count' path elements in '$cwd',", $dflag_dev);
+        show_diag($rname, "asked to hide '$hide_first_n_path_elements' path elements,", $dflag_dev);
+        show_diag($rname, "showing all path elements:", $dflag_dev);
+        if ( $dflag_dev)
         {
-            if ( $hide_first_n_path_elements > 0 )
-            {
-                --$hide_first_n_path_elements;
-            }
-            else
-            {
+            echo "<pre>\n";
+            print_r($path_elements);
+            echo "</pre>\n";
+        }
 
+
+        if ( $path_element_count > 0 )
+        {
+            foreach ( $path_elements as $key => $path_element )
+            {
+                if ( $hide_first_n_path_elements > 0 )
+                {
+                    --$hide_first_n_path_elements;
+                }
+                else
+                {
+                    if ( $key >= ($path_element_count - 1))
+                        { $link_text = $link_text . $path_element; }
+                    else
+                        { $link_text = $link_text . "$path_element/"; }
+                }
             }
         }
 
     } // end IF-block to test for hidden path elements
+    else
+    {
+        show_diag($rname, "not asked to hide any leading path elements!", $dflag_dev);
+        $link_text = $cwd;
+    }
 
+    show_diag($rname, "built link text '$link_text',", $dflag_dev);
+
+
+    $link = "<a href=\"$url\">$link_text</a><br />\n";
+
+    show_diag($rname, "returning link '$link' . . .", $dflag_dev);
+    return $link;
 
 } // end function link_to_first_non_hidden_path_elements
 
@@ -2340,28 +2401,37 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 //  getting passed in PHP session var and or via HTTP 'get' method:
 //
 
-    $cwd = "";
+    $cwd = "";        // assigned from PHP session variable or $_GET variable,
 
-    $current_path = "";  // assigned value from data member of a file tree hash entry,
+    $current_path = "";  // assigned value from data member of a file tree hash entry for each file presented here,
 
     $path_depth = 0;  // figured by another routine which splits $current_path into path elements,
 
     $indent = "";  // holds string built by another routine which uses value of path depth,
 
-    $url = "";
 
-    $file_count_note = "";
+    $non_hidden_path_elements = "";  // specific link to handle leading path elements which contain only one file each
+
+    $url = "";              // Uniform Resource Locator, generally a web address
+
+    $file_count_note = "";  // part of link text,
+
+    $link_text = "";        // text which appears on web document for given URL,
+
+    $link = "";             // combined URL, link text and mark-up for formatting
+
 
 
 // diagnostics:
 
     $dflag_announce = DIAGNOSTICS_ON;
-    $dflag_dev      = DIAGNOSTICS_ON;
+    $dflag_dev      = DIAGNOSTICS_OFF;
     $dflag_options  = DIAGNOSTICS_OFF;
-    $dflag_warning  = DIAGNOSTICS_ON;
+    $dflag_warning  = DIAGNOSTICS_OFF;
 
+    $dflag_source_of_cwd      = DIAGNOSTICS_OFF;
     $dflag_visible_path_depth = DIAGNOSTICS_OFF;
-    $dflag_indent_string = DIAGNOSTICS_OFF;
+    $dflag_indent_string      = DIAGNOSTICS_OFF;
 
     $rname = "present_directories_with_file_counts";
 
@@ -2425,42 +2495,12 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 // - STEP - show initial not-hidden file tree path elements
 //----------------------------------------------------------------------
 
-    if ( $hide_first_n_path_elements > 0 )
-    {
-        $path_elements = explode("/", $cwd, LIMIT_TO_100);
+// Note - library-calling code normally sets number of leading path
+//  +  elements to hide:
+//    $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS] = 1;
+    $non_hidden_path_elements =& link_to_first_non_hidden_path_elements($rname, $options);
 
-// 2018-02-23 - Note, hiding path elements nearest the relative root
-// of the file tree's base directory works in the case where the
-// first n path elements are a series of nested directories, one in the
-// next.
-//
-// As before we want to construct a URL which has the full, "web
-// document root" oriented path but whose hyperlink text has only the
-// non-hidden path elements . . .
-
-//
-
-        $url = $site . "/" . $web_doc_root . "/" . $script_name . "?"
-          . KEY_NAME__BASE_DIR . "=$basedir&"
-          . KEY_NAME__VIEW_MODE . "=$view_mode&"
-          . KEY_NAME__CWD . "=$cwd";
-
-
-// Build link text:
-
-        foreach ( $path_elements as $key => $path_element )
-        {
-            if ( $hide_first_n_path_elements > 0 )
-            {
-                --$hide_first_n_path_elements;
-            }
-            else
-            {
-
-            }
-        }
-    }
-
+    echo $non_hidden_path_elements;
 
 
 //----------------------------------------------------------------------
@@ -2533,19 +2573,21 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
                 if ( strlen($indent) > 0 )
                 {
-                    echo "$indent $url";
+                    $link = "$indent $url";
                 }
                 else
                 {
-                    echo "$url";
+                    $link = $url;
                 }
 
+
+                echo $link;
             }
         }
     }
 
 
-    show_diag($rname, "done.", $dflag_announce);
+    show_diag($rname, "returning . . .", $dflag_announce);
 
 } // end function present_directories_with_file_counts()
 
@@ -2892,7 +2934,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     $dflag_session_var = DIAGNOSTICS_OFF;
     $dflag_options     = DIAGNOSTICS_OFF;
     $dflag_announce_function_calls = DIAGNOSTICS_ON;
-    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_ON;
+    $dflag_file_hash_tree_in_full  = DIAGNOSTICS_OFF;
 
     $rname = "present_tree_view";
 
@@ -2954,7 +2996,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 //    show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarchy);
 //    echo $term . $term;
 
-    show_diag($rname, "calling function under development to present files in tree view . . .", $dflag_dev);
+    show_diag($rname, "calling function to present files in user-selected view mode . . .", $dflag_dev);
     present_files_in_selected_view($caller, $file_hierarchy, $options);
 
 
@@ -2967,7 +3009,7 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
     }
 
 
-    show_diag($rname, "returning to caller . . .", $dflag_dev);
+    show_diag($rname, "returning . . .", $dflag_dev);
 
 } // end function present_tree_view()
 
