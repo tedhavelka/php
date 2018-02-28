@@ -45,4 +45,40 @@ function &url_safe_filename($caller, $filename, $options)
 
 
 
+
+function &thumbnail_safe_filename($caller, $filename, $options)
+{
+
+    $dflag_dev = DIAGNOSTICS_ON;
+    $rname = "thumbnail_safe_filename";
+ 
+
+    echo "$rname:  working with filename '<b>$filename</b>' . . .<br />\n";
+
+    $thumbnail_safe_name = preg_replace('/#/', '%23', $filename);
+    show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/ /', '-', $thumbnail_safe_name);
+    show_diag($rname, "after replacing / / safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\[/', '', $thumbnail_safe_name);
+    show_diag($rname, "after replacing /\[/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\]/', '', $thumbnail_safe_name);
+    show_diag($rname, "after replacing /\]/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\'/', '', $thumbnail_safe_name);
+    show_diag($rname, "after replacing /\'/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\+/', '-plus', $thumbnail_safe_name);
+    show_diag($rname, "after replacing /\+/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/([A-Z])\.-/', '$1-', $thumbnail_safe_name);
+    $thumbnail_safe_name = preg_replace('/([A-Z])\./', '$1-', $thumbnail_safe_name);
+
+    $thumbnail_safe_name = preg_replace('/-jpg$/', '.jpg', $thumbnail_safe_name);
+
+    return $thumbnail_safe_name;
+
+}
 ?>

@@ -189,6 +189,9 @@
     require_once '/opt/nn/lib/php/page-building-routines.php';
 
 
+    require_once('./lib/phpThumb/phpthumb.class.php');
+
+
 
 //----------------------------------------------------------------------
 // - SECTION - PHP script constants
@@ -1079,8 +1082,9 @@ function &build_tree($caller, $base_directory, $options)
 
 //            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
 
-//            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
-            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
+            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
+// PHP Notice:  Only variables should be assigned by reference in /var/www/neelanurseries.com/public_html/lib/php/directory-navigation.php on line 1086
+//            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
 
             $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
             $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
@@ -2079,6 +2083,27 @@ function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
 
 
 
+function present_images_as_thumbnails($caller, $files_in_cwd, $options)
+{
+
+    $key = 0;
+    $hash_entry = null;
+    $safe_filename = "";
+
+    $dflag_dev = DIAGNOSTICS_ON;
+    $rname = "present_images_as_thumbnails";
+
+    foreach ( $files_in_cwd as $key => $hash_entry )
+    {
+        $safe_filename =& thumbnail_safe_filename($rname, $hash_entry[FILE_NAME], $options);
+
+        show_diag($rname, $hash_entry[FILE_NAME] . "--> $safe_filename", $dflag_dev);
+    }
+}
+
+
+
+
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
 //----------------------------------------------------------------------
@@ -2621,16 +2646,19 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                 {
                     $url = "<b><a href=\"$url\">$link_text</a></b>";
                     $files_in_cwd =& hash_of_files_in_cwd($rname, $file_hierarchy, $options);
-{
-            show_diag($rname, "unsorted files in current working directory include:", $dflag_dev);
-            echo "<pre>\n";
+
+                    {
+                        show_diag($rname, "unsorted files in current working directory include:", $dflag_dev);
+                        echo "<pre>\n";
 //            print_r($files_in_cwd);
-            foreach ( $files_in_cwd as $key => $entry )
-            {
-                echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
-            }
-            echo "</pre>\n";
-}
+                        foreach ( $files_in_cwd as $key => $entry )
+                        {
+                            echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
+                        }
+                        echo "</pre>\n";
+                    } // end local scope
+
+                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
                 }
                 else
                 {
