@@ -2,7 +2,7 @@
 
 //======================================================================
 //
-//  FILE:  site_navigation_routines.php
+//  FILE:  site-navigation-routines.php
 //
 //  DESCRIPTION:  PHP library of Ted's, to hold routines related to
 //   building site navigation menus, based in part on filenames and on
@@ -1421,6 +1421,8 @@ if ( $dflag_parse_file_text )
             ++$loop_counter;
 
         } // end WHILE-block iterating over files in caller-specified directory,
+
+        closedir($handle);
 
     } // end IF-block testing file handle assignment of value from opendir(),
 

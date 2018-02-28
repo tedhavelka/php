@@ -2097,7 +2097,8 @@ function present_images_as_thumbnails($caller, $files_in_cwd, $options)
     {
         $safe_filename =& thumbnail_safe_filename($rname, $hash_entry[FILE_NAME], $options);
 
-        show_diag($rname, $hash_entry[FILE_NAME] . "--> $safe_filename", $dflag_dev);
+//        show_diag($rname, $hash_entry[FILE_NAME] . " &nbsp;--> &nbsp;$safe_filename", $dflag_dev);
+        show_diag($rname, $hash_entry[FILE_NAME] . " --> $safe_filename", $dflag_dev);
     }
 }
 
@@ -2682,6 +2683,8 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                     } // end local scope
 
                     present_images_as_thumbnails($rname, $files_in_cwd, $options);
+
+                    create_symlinks_with_safe_names($rname, $cwd, $options);
                 }
 
             } // end IF-statement to test whether present file is a directory

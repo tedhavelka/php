@@ -3,7 +3,7 @@
 //
 //  PROJECT:  PHP library routines at Neela, de Ted
 //
-//  FILE:  page-building-routines.php
+//  FILE:  file-and-directory-routines.php
 //
 //  STARTED:  2017 August 30
 //
@@ -38,6 +38,7 @@
 
     require_once '/opt/nn/lib/php/diagnostics-nn.php';
 
+    require_once '/opt/nn/lib/php/text-manipulation.php';
 
 
 
@@ -153,6 +154,8 @@ function &list_of_filenames_by_pattern($caller, $path_to_search, $pattern_to_mat
 
         } // close WHILE-loop which iterates while there are files yet to read in caller's path
 
+        closedir($handle);
+
     }
     else
     {
@@ -267,6 +270,8 @@ function &list_of_filenames_sorted_by_same_marker(
 
         } // while WHILE-loop to iterate over files in caller's current directory
 
+        closedir($handle);
+
     }
     else
     {
@@ -288,6 +293,171 @@ function &list_of_filenames_sorted_by_same_marker(
     return $filenames_matching_infix;
 
 }
+
+
+
+
+function &filename_symlink_entry($caller)
+{
+    $hash_entry = array();
+
+    $hash_entry[KEY_NAME__FILE_NAME] = KEY_VALUE__DEFAULT_FILENAME;
+    $hash_entry[KEY_NAME__SYMLINK_NAME] = KEY_VALUE__DEFAULT_SYMLINK_NAME;
+    $hash_entry[KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__NOT_CHECKED;
+
+    return $hash_entry;
+}
+
+
+
+
+function &create_symlinks_with_safe_names($caller, $callers_path, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to create safely named (1) symbolic links to files in a
+//    calling code specified path, and to return a hash of target file
+//   and symlink pairs.
+//
+//
+//  EXPECTS:
+//    *  a valid path to a directory
+//    *  an optional pattern by which to match filenames needing safe-name symlinks
+//
+//
+//  MODIFIES:
+//    *  server side directory to which caller's path points
+//
+//  RETURNS:
+//    *  hash of corresponding filename and symlink pairs
+//
+//
+//----------------------------------------------------------------------
+
+
+// VAR BEGIN
+    $handle = null;
+
+    $current_filename = "";
+
+    $current_path_and_file = "";
+
+    $symlink_name = "";
+
+    $symlink_result = FALSE;
+
+    $filenames_and_symlinks = array();
+
+    $count_symlinks_created = 0;
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev = DIAGNOSTICS_ON;
+    $dflag_warning = DIAGNOSTICS_ON;
+    $rname = "create_symlinks_with_safe_names";
+// VAR END
+
+
+    show_diag($rname, "starting,", $dflag_announce);
+
+//    $scripts_path = getcwd();
+//    show_diag($rname, "script's current path is '$scripts_path',", $dflag_dev);
+
+    show_diag($rname, "about to create symlinks in path '$callers_path',", $dflag_dev);
+
+
+// - STEPS:
+//    1)  check that path is valid directory
+//    2)  open valid director for reading filenames
+//    3)  for regular files which are not symlinks figure a safe version of present filename
+//    4)  check whether symlink by safe version of filename exists
+//    5)  create symlink when not yet present / amend symlink name when safe name already in use
+//    
+
+
+    if ( is_dir($callers_path) )
+    {
+        if ( $handle = opendir($callers_path) )
+        {
+            while (false !== ($current_filename = readdir($handle)))
+            {
+                show_diag($rname, "- Note - looking at file '$current_filename',", $dflag_dev);
+                if ( preg_match('/[^\.].*\.[^\.]+/', $current_filename, $matches) )
+                {
+                    show_diag($rname, "- Note - looks like non-hidden file,", $dflag_dev);
+                    $symlink_name =& thumbnail_safe_filename($rname, $current_filename, $options);
+                    $filenames_and_symlinks[$count_symlinks_created] = filename_symlink_entry($rname);
+                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__FILENAME] = $current_filename;
+                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] = $symlink_name;
+                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
+
+
+                    $current_path_and_file = "$callers_path/$current_filename";
+                    $current_path_and_symlink = "$callers_path/$symlink_name";
+
+                    if ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
+//                    if ( is_file($current_filename) && !(is_link($current_filename)) )
+                    {
+                        $current_path_and_symlink = "/var/www/neelanurseries.com/public_html/sandbox/" . $current_path_and_symlink;
+//                        $current_path_and_symlink = preg_replace('/ /', '\\ ', $current_path_and_symlink);
+//                        $current_filename = preg_replace('/ /', '\\ ', $current_filename);
+
+                        show_diag($rname, "calling PHP symlink() with target '$current_filename'", $dflag_dev);
+                        show_diag($rname, "and symlink $current_path_and_symlink . . .", $dflag_dev);
+
+                        $symlink_result = symlink($current_filename, "$current_path_and_symlink");
+
+                        show_diag($rname, "call to PHP symlink() returns '$symlink_result',", $dflag_dev);
+                        show_diag($rname, "-", $dflag_dev);
+
+                        ++$count_symlinks_created;
+                    }
+ 
+                }
+                elseif ( is_link($current_path_and_file) )
+                {
+                    show_diag($rname, "- Note - current file is a symbolic link,", $dflag_dev);
+                }
+                else
+                {
+                    show_diag($rname, "- Note - current filename may begin or end with a dot '.',", $dflag_dev);
+                }
+
+            } // end WHILE-block iterating over files in caller-specified directory,
+
+
+// - STEP - create empty file in caller's directory to indicate need
+//  for symbolic links checks, and symlinks created as needed:
+
+
+
+
+            closedir($handle);
+
+        } // end IF-block to check whether we can open caller's directory
+        else
+        {
+            show_diag($rname, "- WARNING - trouble opening caller's path as a directory!",
+              $dflag_warning);
+        }
+
+//        chdir($scripts_path);
+
+    } // end IF-block to check whether caller's path points to valid directory
+    else
+    {
+        show_diag($rname, "- WARNING - caller's path does not test as a file of type directory!",
+          $dflag_warning);
+        show_diag($rname, "- WARNING - returning early . . .",
+          $dflag_warning);
+    }
+
+
+    show_diag($rname, "returning . . .", $dflag_announce);
+
+    return $filenames_and_symlinks;
+
+} // end function create_symlinks_with_safe_names()
+
 
 
 

@@ -50,13 +50,20 @@ function &thumbnail_safe_filename($caller, $filename, $options)
 {
 
     $dflag_dev = DIAGNOSTICS_OFF;
+    $dflag_pound = DIAGNOSTICS_OFF;
     $rname = "thumbnail_safe_filename";
  
 
     show_diag($rname, "working with filename '<b>$filename</b>' . . .", $dflag_dev);
 
-    $thumbnail_safe_name = preg_replace('/#/', '%23', $filename);
-      show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+    $thumbnail_safe_name = $filename;
+
+    $thumbnail_safe_name = preg_replace('/#/', '%23', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_pound);
+
+
+// account for some special and specific plant naming conventions:
+    $thumbnail_safe_name = preg_replace('/OB-/', 'OB-minus', $thumbnail_safe_name);
 
 // modify opening square brackets preceded by a space character:
     $thumbnail_safe_name = preg_replace('/ \[/', '--', $thumbnail_safe_name);
@@ -93,6 +100,9 @@ function &thumbnail_safe_filename($caller, $filename, $options)
 // change single dash between uppercase alphabetics to two dashes:
     $thumbnail_safe_name = preg_replace('/([A-Z])-([A-Z])/', '$1--$2', $thumbnail_safe_name);
 
+// change "space dash space" character sequence to two dashes:
+    $thumbnail_safe_name = preg_replace('/ - /', '--', $thumbnail_safe_name);
+
 // change a period followed by a space to one dash:
     $thumbnail_safe_name = preg_replace('/\. /', '-', $thumbnail_safe_name);
 
@@ -114,13 +124,32 @@ function &thumbnail_safe_filename($caller, $filename, $options)
     $thumbnail_safe_name = preg_replace('/\+/', '-plus', $thumbnail_safe_name);
     show_diag($rname, "after replacing /\+/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
+
+// replace two or more successive periods with a single period:
+    $thumbnail_safe_name = preg_replace('/\.(\.)+/', '.', $thumbnail_safe_name);
+
+
 // remove period characters from filename:
 //    $thumbnail_safe_name = preg_replace('/([A-Z])\.-/', '$1-', $thumbnail_safe_name);
-    $thumbnail_safe_name = preg_replace('/([a-zA-Z])\./', '$1-', $thumbnail_safe_name);
+//    $thumbnail_safe_name = preg_replace('/([a-zA-Z])\./', '$1-', $thumbnail_safe_name);
 
-    $thumbnail_safe_name = preg_replace('/-jpg$/', '.jpg', $thumbnail_safe_name);
+//    $thumbnail_safe_name = preg_replace('/-jpg$/', '.jpg', $thumbnail_safe_name);
+
+//    $thumbnail_safe_name = preg_replace('/([^\.])+\.([^\.])*/', '$1-$2', $thumbnail_safe_name);
+
+
+// https://stackoverflow.com/questions/6314007/remove-all-decimals-but-last . . .
+// ...use regex with positive look ahead:
+
+    $thumbnail_safe_name = preg_replace('/\.(?=.*\.)/', '-', $thumbnail_safe_name);
+
 
     return $thumbnail_safe_name;
 
 }
+
+
+
+
+
 ?>

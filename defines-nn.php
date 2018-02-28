@@ -97,7 +97,11 @@
     define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
     define("KEY_VALUE__FILE_STATUS__NOT_CHECKED", "not checked");
 
+    define("KEY_VALUE__SYMLINK_STATUS__CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
+    define("KEY_VALUE__SYMLINK_STATUS__NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
+
     define("KEY_VALUE__DEFAULT_FILENAME", "DEFAULT FILE NAME");
+    define("KEY_VALUE__DEFAULT_SYMLINK_NAME", "DEFAULT SYMLINK NAME");
 
 
 
@@ -391,6 +395,9 @@
 
     define("ARRAY_NAME__ARRAY_OF_VIEW_MODES", "array_of_view_modes");
 
+    define("KEY_NAME__FILENAME]", "filename");
+    define("KEY_NAME__SYMLINK_NAME]", "symlink_name");
+    define("KEY_NAME__SYMLINK_STATUS]", "symlink_status");
 
 
 ?>
