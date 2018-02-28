@@ -2645,20 +2645,6 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                 if ( $current_path === $cwd )
                 {
                     $url = "<b><a href=\"$url\">$link_text</a></b>";
-                    $files_in_cwd =& hash_of_files_in_cwd($rname, $file_hierarchy, $options);
-
-                    {
-                        show_diag($rname, "unsorted files in current working directory include:", $dflag_dev);
-                        echo "<pre>\n";
-//            print_r($files_in_cwd);
-                        foreach ( $files_in_cwd as $key => $entry )
-                        {
-                            echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
-                        }
-                        echo "</pre>\n";
-                    } // end local scope
-
-                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
                 }
                 else
                 {
@@ -2677,7 +2663,28 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
 
                 echo $link;
-            }
+
+// - STEP - show files in current working directory:
+
+                if ( $current_path === $cwd )
+                {
+                    $files_in_cwd =& hash_of_files_in_cwd($rname, $file_hierarchy, $options);
+
+                    {
+                        show_diag($rname, "unsorted files in current working directory include:", $dflag_dev);
+                        echo "<pre>\n";
+//            print_r($files_in_cwd);
+                        foreach ( $files_in_cwd as $key => $entry )
+                        {
+                            echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
+                        }
+                        echo "</pre>\n";
+                    } // end local scope
+
+                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
+                }
+
+            } // end IF-statement to test whether present file is a directory
         }
     }
 

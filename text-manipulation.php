@@ -49,32 +49,74 @@ function &url_safe_filename($caller, $filename, $options)
 function &thumbnail_safe_filename($caller, $filename, $options)
 {
 
-    $dflag_dev = DIAGNOSTICS_ON;
+    $dflag_dev = DIAGNOSTICS_OFF;
     $rname = "thumbnail_safe_filename";
  
 
-    echo "$rname:  working with filename '<b>$filename</b>' . . .<br />\n";
+    show_diag($rname, "working with filename '<b>$filename</b>' . . .", $dflag_dev);
 
     $thumbnail_safe_name = preg_replace('/#/', '%23', $filename);
-    show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+      show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
+// modify opening square brackets preceded by a space character:
+    $thumbnail_safe_name = preg_replace('/ \[/', '--', $thumbnail_safe_name);
+      show_diag($rname, "after replacing / \[/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+// modify closing square brackets followed by a space character:
+    $thumbnail_safe_name = preg_replace('/\] /', '--', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\] / safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+// remove remaining square brackets:
+    $thumbnail_safe_name = preg_replace('/\[/', '', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\[/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\]/', '', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\]/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+
+// modify opening parentheses preceded by a space character:
+    $thumbnail_safe_name = preg_replace('/ \(/', '--', $thumbnail_safe_name);
+      show_diag($rname, "after replacing / \(/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+// modify closing parentheses followed by a space character:
+    $thumbnail_safe_name = preg_replace('/\) /', '--', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\) / safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+// remove remaining open and close parentheses:
+    $thumbnail_safe_name = preg_replace('/\(/', '', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\(/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+    $thumbnail_safe_name = preg_replace('/\)/', '', $thumbnail_safe_name);
+      show_diag($rname, "after replacing /\)/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+
+// change single dash between uppercase alphabetics to two dashes:
+    $thumbnail_safe_name = preg_replace('/([A-Z])-([A-Z])/', '$1--$2', $thumbnail_safe_name);
+
+// change a period followed by a space to one dash:
+    $thumbnail_safe_name = preg_replace('/\. /', '-', $thumbnail_safe_name);
+
+
+// change remaining space characters to dashes:
     $thumbnail_safe_name = preg_replace('/ /', '-', $thumbnail_safe_name);
     show_diag($rname, "after replacing / / safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
-    $thumbnail_safe_name = preg_replace('/\[/', '', $thumbnail_safe_name);
-    show_diag($rname, "after replacing /\[/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
-    $thumbnail_safe_name = preg_replace('/\]/', '', $thumbnail_safe_name);
-    show_diag($rname, "after replacing /\]/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
-
+// remove single quotes:
     $thumbnail_safe_name = preg_replace('/\'/', '', $thumbnail_safe_name);
     show_diag($rname, "after replacing /\'/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
+// remove commas:
+    $thumbnail_safe_name = preg_replace('/,/', '', $thumbnail_safe_name);
+    show_diag($rname, "after replacing /\'/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
+
+// substitute plus character with short phrase:
     $thumbnail_safe_name = preg_replace('/\+/', '-plus', $thumbnail_safe_name);
     show_diag($rname, "after replacing /\+/ safer filename holds '$thumbnail_safe_name',", $dflag_dev);
 
-    $thumbnail_safe_name = preg_replace('/([A-Z])\.-/', '$1-', $thumbnail_safe_name);
-    $thumbnail_safe_name = preg_replace('/([A-Z])\./', '$1-', $thumbnail_safe_name);
+// remove period characters from filename:
+//    $thumbnail_safe_name = preg_replace('/([A-Z])\.-/', '$1-', $thumbnail_safe_name);
+    $thumbnail_safe_name = preg_replace('/([a-zA-Z])\./', '$1-', $thumbnail_safe_name);
 
     $thumbnail_safe_name = preg_replace('/-jpg$/', '.jpg', $thumbnail_safe_name);
 
