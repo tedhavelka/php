@@ -2085,6 +2085,12 @@ function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
 
 function present_images_as_thumbnails($caller, $files_in_cwd, $options)
 {
+//----------------------------------------------------------------------
+// 2018-03-01 - THIS ROUTINE NOT COMPLETE, CALLS ANOTHER ROUTINE TO
+//   clean up filenames, but this may not be sufficient to address
+//   filename needs of James Heinrich's phpThumb code . . .  - TMH
+//
+//----------------------------------------------------------------------
 
     $key = 0;
     $hash_entry = null;
@@ -2490,18 +2496,20 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $indent = "";  // holds string built by another routine which uses value of path depth,
 
 
-    $non_hidden_path_elements = "";  // specific link to handle leading path elements which contain only one file each
+    $non_hidden_path_elements = "";  // specific link to handle leading path elements which contain only one file each,
 
-    $url = "";              // Uniform Resource Locator, generally a web address
+    $url = "";              // Uniform Resource Locator, generally a web address,
 
     $file_count_note = "";  // part of link text,
 
     $link_text = "";        // text which appears on web document for given URL,
 
-    $link = "";             // combined URL, link text and mark-up for formatting
+    $link = "";             // combined URL, link text and mark-up for formatting,
 
 
     $files_in_cwd = null;
+
+    $hash_of_symlinks = null;  // holds list of symlink plus filename pairs, for use with phpThumb calls,
 
 
 // diagnostics:
@@ -2514,6 +2522,7 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $dflag_source_of_cwd      = DIAGNOSTICS_OFF;
     $dflag_visible_path_depth = DIAGNOSTICS_OFF;
     $dflag_indent_string      = DIAGNOSTICS_OFF;
+    $dflag_symlink_names      = DIAGNOSTICS_ON;
 
     $rname = "present_directories_with_file_counts";
 
@@ -2682,9 +2691,23 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                         echo "</pre>\n";
                     } // end local scope
 
-                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
+//                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
 
-                    create_symlinks_with_safe_names($rname, $cwd, $options);
+                    $hash_of_symlinks = create_symlinks_with_safe_names($rname, $cwd, $options);
+
+                    if ( $dflag_symlink_names )
+                    {
+                        show_diag($rname, "got back hash containing in part these symbolic links:",
+                          $dflag_symlink_names);
+                        echo "<pre>\n";
+                        foreach ( $hash_of_symlinks as $key => $entry )
+                        {
+                            echo "$key => '" . $entry[KEY_NAME__SYMLINK_NAME] . "'<br />\n";
+                        }
+                        echo "</pre>\n";
+                    }
+
+
                 }
 
             } // end IF-statement to test whether present file is a directory

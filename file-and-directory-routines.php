@@ -352,9 +352,11 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
     $count_symlinks_created = 0;
 
-    $dflag_announce = DIAGNOSTICS_ON;
-    $dflag_dev = DIAGNOSTICS_ON;
-    $dflag_warning = DIAGNOSTICS_ON;
+    $lbuf = "";
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_ON;
+    $dflag_add_entry= DIAGNOSTICS_ON;
     $rname = "create_symlinks_with_safe_names";
 // VAR END
 
@@ -398,20 +400,28 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                         $symlink_name = "$symlink_prefix$symlink_name";
                     }
 
-
-                    $filenames_and_symlinks[$count_symlinks_created] = filename_symlink_entry($rname);
-                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__FILENAME] = $current_filename;
-                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] = $symlink_name;
-                    $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
-
                     $current_path_and_file = "$callers_path/$current_filename";
                     $current_path_and_symlink = "$callers_path/$symlink_name";
+
 
 // PHP file tests require full path, absolute or relative, in order to give correct answers:
 //                    if ( is_file($current_filename) && !(is_link($current_filename)) )
                     if ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
                     {
-                        $current_path_and_symlink = "/var/www/neelanurseries.com/public_html/sandbox/" . $current_path_and_symlink;
+                        show_diag($rname, "adding entry to symbolic links hash, key to entry equals $count_symlinks_created . . .",
+                          $dflag_add_entry);
+
+                        $filenames_and_symlinks[$count_symlinks_created] = filename_symlink_entry($rname);
+                        $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__FILENAME] = $current_filename;
+                        $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] = $symlink_name;
+                        $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
+
+                        $lbuf = "this entry holds symbolic link name '" . $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] . "',";
+                        show_diag($rname, $lbuf, $dflag_add_entry);
+
+
+                        $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
+
 //                        $current_path_and_symlink = preg_replace('/ /', '\\ ', $current_path_and_symlink);
 //                        $current_filename = preg_replace('/ /', '\\ ', $current_filename);
 // . . . PHP's symlink() handles space characters and square brackets in filenames, no need to remove them here - TMH
