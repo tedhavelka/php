@@ -401,10 +401,21 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 //                        $current_path_and_symlink = preg_replace('/ /', '\\ ', $current_path_and_symlink);
 //                        $current_filename = preg_replace('/ /', '\\ ', $current_filename);
 
-                        show_diag($rname, "calling PHP symlink() with target '$current_filename'", $dflag_dev);
-                        show_diag($rname, "and symlink $current_path_and_symlink . . .", $dflag_dev);
 
-                        $symlink_result = symlink($current_filename, "$current_path_and_symlink");
+                        if ( is_link($current_path_and_symlink) )
+                        {
+                            show_diag($rname, "<b>symlink already in place, no need to recreate!</b>", $dflag_dev);
+                        }
+                        elseif ( $symlink_name === $current_filename )
+                        {
+                            show_diag($rname, "<b>target filename and symlink names equal, no need to create symlink,</b>", $dflag_dev);
+                        }
+                        else
+                        {
+                            show_diag($rname, "calling PHP symlink() with target '$current_filename'", $dflag_dev);
+                            show_diag($rname, "and symlink $current_path_and_symlink . . .", $dflag_dev);
+                            $symlink_result = symlink($current_filename, "$current_path_and_symlink");
+                        }
 
                         show_diag($rname, "call to PHP symlink() returns '$symlink_result',", $dflag_dev);
                         show_diag($rname, "-", $dflag_dev);
