@@ -2512,6 +2512,14 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $hash_of_symlinks = null;  // holds list of symlink plus filename pairs, for use with phpThumb calls,
 
 
+    $phpThumb = null;
+    $thumbnail_width = 50;
+    $filename_for_thumbnail = "";
+    $output_filename = "";     // used as parameter to local phpThumb object,
+    $path_to_thumbnail = "";   // points to file which to which $output_filename ultimately refers, but relative path differs,
+    $link_to_thumbnail = "";
+
+
 // diagnostics:
 
     $dflag_announce = DIAGNOSTICS_ON;
@@ -2523,6 +2531,7 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $dflag_visible_path_depth = DIAGNOSTICS_OFF;
     $dflag_indent_string      = DIAGNOSTICS_OFF;
     $dflag_symlink_names      = DIAGNOSTICS_ON;
+    $dflag_php_thumb          = DIAGNOSTICS_ON;
 
     $rname = "present_directories_with_file_counts";
 
@@ -2674,7 +2683,10 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 
                 echo $link;
 
+
+//
 // - STEP - show files in current working directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
                 if ( $current_path === $cwd )
                 {
@@ -2691,7 +2703,9 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                         echo "</pre>\n";
                     } // end local scope
 
+
 //                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
+
 
                     $hash_of_symlinks = create_symlinks_with_safe_names($rname, $cwd, $options);
 
@@ -2708,11 +2722,79 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
                     }
 
 
-                }
+//
+// - STEP - show thumbnails of image files in current working directory
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// NEED:  to make this into its own routine . . .
+
+                    {
+                        $phpThumb = new phpThumb();
+                        $thumbnail_width = 50;
+                        $thumbnail_height = 50;
+
+                        foreach ( $hash_of_symlinks as $key => $entry )
+                        {
+
+                            $lbuf = "setting phpThumb source data to '" . $cwd."/".$entry[KEY_NAME__SYMLINK_NAME] . "' . . .";
+                            show_diag($rname, $lbuf, $dflag_php_thumb);
+                            $phpThumb->setSourceData(file_get_contents($cwd."/".$entry[KEY_NAME__SYMLINK_NAME]));
+
+// See James Heinrich's phpThumb/docs/phpthumb.readme.txt file for
+// details on settable parameters, many expressed by single letters,
+// such as thumbnail width 'w' and height 'h':
+
+//                            $phpThumb->setParameter('w', $thumbnail_width);
+                            $phpThumb->setParameter('h', $thumbnail_height);
+
+// NEED - to replace hard coded thumbnail filename prefix with PHP defined constant:
+                            $filename_for_thumbnail = preg_replace('/z-tn--/', 'thumbnail--', $entry[KEY_NAME__SYMLINK_NAME]);
+// Note:  variable $output_filename gets assigned a relative path which our local phpThumb object uses in its context, 
+//  +  a context which may differ in environment variables like $PWD from the environment of Neela Nurseries PHP
+//  +  library code:
+                            $output_filename = "./thumbnails/$filename_for_thumbnail";
+
+if ($phpThumb->GenerateThumbnail()) { // this line is VERY important, do not remove it!
+    if ($phpThumb->RenderToFile($output_filename)) {
+        echo 'Successfully rendered to "'.$output_filename.'"';
+    } else {
+        echo 'Failed:<pre>'.implode("\n\n", $phpThumb->debugmessages).'</pre>';
+    }
+    $phpThumb->purgeTempFiles();
+} else {
+    echo 'Failed:<pre>'.$phpThumb->fatalerror."\n\n".implode("\n\n", $phpThumb->debugmessages).'</pre>';
+}
+
+                            $phpThumb->resetObject();
+                        }
+
+                    } // end local scope, 
+
+
+// Thumbnails have now been created,
+
+                    echo "<br /> <br />\n";
+
+                    foreach ( $hash_of_symlinks as $key => $entry )
+                    {
+                        $filename_for_thumbnail = preg_replace('/z-tn--/', 'thumbnail--', $entry[KEY_NAME__SYMLINK_NAME]);
+                        $path_to_thumbnail = "./lib/phpThumb/thumbnails/$filename_for_thumbnail";
+
+                        $link_to_thumbnail = "<img border=\"1\" src=\"$path_to_thumbnail\" width=\"*\" alt=\"\">\n";
+ 
+                        echo $link_to_thumbnail;
+                    }
+
+                    echo "<br /> <br />\n";
+
+
+                } // end IF-statement $current_path equals $cwd
 
             } // end IF-statement to test whether present file is a directory
-        }
-    }
+
+        } // end FOREACH construct to iterate over entries of file tree hierarchy
+
+    } // end local scope
 
 
     show_diag($rname, "returning . . .", $dflag_announce);
