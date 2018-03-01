@@ -342,6 +342,8 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
     $current_path_and_file = "";
 
+    $symlink_prefix = "";
+
     $symlink_name = "";
 
     $symlink_result = FALSE;
@@ -364,6 +366,10 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
     show_diag($rname, "about to create symlinks in path '$callers_path',", $dflag_dev);
 
+    if ( array_key_exists(KEY_NAME__SYMBOLIC_LINK_PREFIX, $options) )
+    {
+        $symlink_prefix = $options[KEY_NAME__SYMBOLIC_LINK_PREFIX];
+    }
 
 // - STEPS:
 //    1)  check that path is valid directory
@@ -384,23 +390,31 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                 if ( preg_match('/[^\.].*\.[^\.]+/', $current_filename, $matches) )
                 {
                     show_diag($rname, "- Note - looks like non-hidden file,", $dflag_dev);
+
                     $symlink_name =& thumbnail_safe_filename($rname, $current_filename, $options);
+
+                    if ( strlen($symlink_prefix) > 0 )
+                    {
+                        $symlink_name = "$symlink_prefix$symlink_name";
+                    }
+
+
                     $filenames_and_symlinks[$count_symlinks_created] = filename_symlink_entry($rname);
                     $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__FILENAME] = $current_filename;
                     $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] = $symlink_name;
                     $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
 
-
                     $current_path_and_file = "$callers_path/$current_filename";
                     $current_path_and_symlink = "$callers_path/$symlink_name";
 
-                    if ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
+// PHP file tests require full path, absolute or relative, in order to give correct answers:
 //                    if ( is_file($current_filename) && !(is_link($current_filename)) )
+                    if ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
                     {
                         $current_path_and_symlink = "/var/www/neelanurseries.com/public_html/sandbox/" . $current_path_and_symlink;
 //                        $current_path_and_symlink = preg_replace('/ /', '\\ ', $current_path_and_symlink);
 //                        $current_filename = preg_replace('/ /', '\\ ', $current_filename);
-
+// . . . PHP's symlink() handles space characters and square brackets in filenames, no need to remove them here - TMH
 
                         if ( is_link($current_path_and_symlink) )
                         {

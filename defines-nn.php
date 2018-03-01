@@ -85,10 +85,16 @@
 
 
 //----------------------------------------------------------------------
-// -- SECTION -- general file attributes
+// -- SECTION -- files and directories
 //----------------------------------------------------------------------
 
-// 2018-01-22 -
+    define("KEY_NAME__SYMBOLIC_LINK_PREFIX", "symbolic_link_prefix");
+    define("KEY_NAME__SYMBOLIC_LINK_PREFIX_ABBR", "symlink_prefix");
+//    define("", "");
+
+
+// general file attributes
+
     define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
     define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
     define("KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK", "symlink");
@@ -102,6 +108,7 @@
 
     define("KEY_VALUE__DEFAULT_FILENAME", "DEFAULT FILE NAME");
     define("KEY_VALUE__DEFAULT_SYMLINK_NAME", "DEFAULT SYMLINK NAME");
+//    define("", "");
 
 
 
