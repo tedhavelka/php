@@ -48,17 +48,32 @@ function &url_safe_filename($caller, $filename, $options)
 
 function &thumbnail_safe_filename($caller, $filename, $options)
 {
+//----------------------------------------------------------------------
+//
+//  NOTE:  2018-03-01 observing that when creating filenames to
+//   put into URLs, both the character '#' and the substituation with
+//   pattern '%23' create URLs which the web server can't resolve
+//   properly, leading to "file not found" errors.  Or the matter
+//   might arise on the web browser side.  With Firefox 52.2.0
+//   observe that when copying URLs containing '%23' pattern, that
+//   pattern gets converted on the fly to '#'.  Hence a difference
+//   substitution choice for '#' in this routine . . .   - TMH
+//
+//
+//----------------------------------------------------------------------
 
     $dflag_dev = DIAGNOSTICS_OFF;
     $dflag_pound = DIAGNOSTICS_OFF;
+    $dflag_starting_with = DIAGNOSTICS_OFF;
     $rname = "thumbnail_safe_filename";
  
 
-    show_diag($rname, "working with filename '<b>$filename</b>' . . .", $dflag_dev);
+    show_diag($rname, "working with filename '<b>$filename</b>' . . .", $dflag_starting_with);
 
     $thumbnail_safe_name = $filename;
 
-    $thumbnail_safe_name = preg_replace('/#/', '%23', $thumbnail_safe_name);
+//    $thumbnail_safe_name = preg_replace('/#/', '%23', $thumbnail_safe_name);
+    $thumbnail_safe_name = preg_replace('/#/', 'no-', $thumbnail_safe_name);
       show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_pound);
 
 
@@ -99,6 +114,15 @@ function &thumbnail_safe_filename($caller, $filename, $options)
 
 // change single dash between uppercase alphabetics to two dashes:
     $thumbnail_safe_name = preg_replace('/([A-Z])-([A-Z])/', '$1--$2', $thumbnail_safe_name);
+
+//  *  https://stackoverflow.com/questions/2078915/a-regular-expression-to-exclude-a-word-string
+//  *  https://www.regular-expressions.info/wordboundaries.html
+//    $thumbnail_safe_name = preg_replace('/([A-Z])-([A-Z])(?!CLOSE-UP)/', '$1--$2', $thumbnail_safe_name);
+//    $thumbnail_safe_name = preg_replace('/(?!CLOSE-UP)([A-Z])-([A-Z])/', '$1--$2', $thumbnail_safe_name);
+
+// however when that dash appears in pattern 'CLOSE-UP' . . .
+    $thumbnail_safe_name = preg_replace('/CLOSE--UP/', 'CLOSE-UP', $thumbnail_safe_name);
+
 
 // change "space dash space" character sequence to two dashes:
     $thumbnail_safe_name = preg_replace('/ - /', '--', $thumbnail_safe_name);
@@ -142,7 +166,6 @@ function &thumbnail_safe_filename($caller, $filename, $options)
 // ...use regex with positive look ahead:
 
     $thumbnail_safe_name = preg_replace('/\.(?=.*\.)/', '-', $thumbnail_safe_name);
-
 
     return $thumbnail_safe_name;
 

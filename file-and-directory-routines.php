@@ -356,7 +356,7 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
     $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_dev      = DIAGNOSTICS_OFF;
     $dflag_warning  = DIAGNOSTICS_ON;
-    $dflag_add_entry= DIAGNOSTICS_ON;
+    $dflag_add_entry= DIAGNOSTICS_OFF;
     $rname = "create_symlinks_with_safe_names";
 // VAR END
 
@@ -393,13 +393,6 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                 {
                     show_diag($rname, "- Note - looks like non-hidden file,", $dflag_dev);
 
-                    $symlink_name =& thumbnail_safe_filename($rname, $current_filename, $options);
-
-                    if ( strlen($symlink_prefix) > 0 )
-                    {
-                        $symlink_name = "$symlink_prefix$symlink_name";
-                    }
-
                     $current_path_and_file = "$callers_path/$current_filename";
                     $current_path_and_symlink = "$callers_path/$symlink_name";
 
@@ -408,6 +401,15 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 //                    if ( is_file($current_filename) && !(is_link($current_filename)) )
                     if ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
                     {
+// *****
+                        $symlink_name =& thumbnail_safe_filename($rname, $current_filename, $options);
+
+                        if ( strlen($symlink_prefix) > 0 )
+                        {
+                            $symlink_name = "$symlink_prefix$symlink_name";
+                        }
+// *****
+
                         show_diag($rname, "adding entry to symbolic links hash, key to entry equals $count_symlinks_created . . .",
                           $dflag_add_entry);
 
@@ -446,22 +448,24 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
                         ++$count_symlinks_created;
                     }
- 
-                }
-                elseif ( is_link($current_path_and_file) )
-                {
-                    show_diag($rname, "- Note - current file is a symbolic link,", $dflag_dev);
+                    elseif ( is_link($current_path_and_file) )
+                    {
+                        show_diag($rname, "- Note - current file is a symbolic link,", $dflag_dev);
+                    }
+
                 }
                 else
                 {
                     show_diag($rname, "- Note - current filename may begin or end with a dot '.',", $dflag_dev);
-                }
+
+                } // end IF-block to test for file which starts with a dot
 
             } // end WHILE-block iterating over files in caller-specified directory,
 
 
 // - STEP - create empty file in caller's directory to indicate need
 //  for symbolic links checks, and symlinks created as needed:
+
 
 
 
