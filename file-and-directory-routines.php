@@ -350,25 +350,54 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
     $symlink_result = FALSE;
 
+
+    $sylinks_noted = array();
+
     $filenames_and_symlinks = array();
 
     $count_symlinks_noted = 0;
 
     $count_symlinks_created = 0;
 
+
     $lbuf = "";
     $dflag_announce  = DIAGNOSTICS_ON;
     $dflag_dev       = DIAGNOSTICS_ON;
     $dflag_warning   = DIAGNOSTICS_ON;
+
+    $dflag_loop      = DIAGNOSTICS_ON;
     $dflag_add_entry = DIAGNOSTICS_ON;
     $dflag_summary   = DIAGNOSTICS_ON;
-    $dflag_create_symlink = DIAGNOSTICS_ON;
-    $dflag_symlink_with_prefix = DIAGNOSTICS_ON;
 
+    $dflag_note_symlink           = DIAGNOSTICS_ON;
+    $dflag_create_symlink         = DIAGNOSTICS_ON;
+    $dflag_symlink_with_prefix    = DIAGNOSTICS_ON;
     $dflag_found_prefixed_symlink = DIAGNOSTICS_ON;
+    $dflag_file_found_first       = DIAGNOSTICS_ON;
+    $dflag_not_implemented        = DIAGNOSTICS_ON;
 
     $rname = "create_symlinks_with_safe_names";
 // VAR END
+
+
+// if ( 1 )
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
+    $dflag_announce  = DIAGNOSTICS_OFF;
+    $dflag_dev       = DIAGNOSTICS_OFF;
+//    $dflag_warning   = DIAGNOSTICS_OFF;
+
+    $dflag_loop      = DIAGNOSTICS_OFF;
+    $dflag_add_entry = DIAGNOSTICS_OFF;
+    $dflag_summary   = DIAGNOSTICS_OFF;
+
+    $dflag_note_symlink           = DIAGNOSTICS_OFF;
+    $dflag_create_symlink         = DIAGNOSTICS_OFF;
+    $dflag_symlink_with_prefix    = DIAGNOSTICS_OFF;
+    $dflag_found_prefixed_symlink = DIAGNOSTICS_OFF;
+    $dflag_file_found_first       = DIAGNOSTICS_OFF;
+    $dflag_not_implemented        = DIAGNOSTICS_OFF;
+}
 
 
     show_diag($rname, "starting,", $dflag_announce);
@@ -376,12 +405,14 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 //    $scripts_path = getcwd();
 //    show_diag($rname, "script's current path is '$scripts_path',", $dflag_dev);
 
-    show_diag($rname, "about to create symlinks in path '$callers_path',", $dflag_dev);
+    show_diag($rname, "working in path '$callers_path',", $dflag_dev);
 
     if ( array_key_exists(KEY_NAME__SYMBOLIC_LINK_PREFIX, $options) )
     {
         $symlink_prefix = $options[KEY_NAME__SYMBOLIC_LINK_PREFIX];
     }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // - STEPS:
 //    1)  check that path is valid directory
@@ -389,23 +420,49 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 //    3)  for regular files which are not symlinks figure a safe version of present filename
 //    4)  check whether symlink by safe version of filename exists
 //    5)  create symlink when not yet present / amend symlink name when safe name already in use
-//    
+//
+//    ...steps 4 and 5 are unclear
+//
+//  When this routine executes, a symbolic link for thumbnailing
+//  purposes may exist.  The routine may find the symlink before the
+//  target filename, or the target filename before the symlink.
+//
+//  When a thumbnailing symlink is found first, we want to note this
+//  symlink in the hash we're returning to calling code, which holds
+//  all symlinks to image files to be shown as thumbnail size images.
+//  We determine a symlink is found first when we can check and see
+//  there is no symlinks hash entry with that symlink name already
+//  stored.
+//
+//  The symlinks-and-files hash has numeric keys.  Rather than code a
+//  search of this hash, we can create a local hash whose keys are
+//  the names of noted symlinks.  Then we can use PHP's function to
+//  check whether an array key exists, to determine whether a symlink
+//  for thumbnailing is already noted.
+//
+//  When a regular file is found first, we construct a name of a
+//  symlink to this regular file.  Again we check whether the symlink
+//  to this file has already been noted.
+//
+//
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     if ( is_dir($callers_path) )
     {
         if ( $handle = opendir($callers_path) )
         {
-
+            show_diag($rname, "<br />\n", $dflag_loop);
 
             while (false !== ($current_filename = readdir($handle)))
             {
-                show_diag($rname, "- Note - looking at file '$current_filename',", $dflag_dev);
+                show_diag($rname, "- Top of dir-listing WHILE loop -", $dflag_loop);
+                show_diag($rname, "looking at file '$current_filename',", $dflag_loop);
 
                 if ( preg_match('/[^\.].*\.[^\.]+/', $current_filename, $matches) )
                 {
 //                    show_diag($rname, "- Note - looks like non-hidden file,", $dflag_dev);
-                    show_diag($rname, "- Note - filename does not begin with '.',", $dflag_dev);
+                    show_diag($rname, "filename does not begin with '.',", $dflag_dev);
 
                     $current_path_and_file = "$callers_path/$current_filename";
 
@@ -417,18 +474,32 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                               $dflag_found_prefixed_symlink);
                             $lbuf = "this symlink points to '" . readlink($current_path_and_file) . "',"; 
                             show_diag($rname, $lbuf, $dflag_found_prefixed_symlink);
-                            $filenames_and_symlinks[$count_symlinks_noted] = filename_symlink_entry($rname);
-                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILENAME] = readlink($current_path_and_file);
-                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] = $symlink_name;
-                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
-                            ++$count_symlinks_noted;
+
+                            if ( array_key_exists($current_filename, $symlinks_noted) )
+                            {
+                                show_diag($rname, "this symbolic link already created and noted in hash to return to caller,",
+                                  $dflag_note_symlink);
+                            }
+                            else
+                            {
+                                show_diag($rname, "<b>noting this symlink</b> in hash of symlinks and respective files . . .",
+                                  $dflag_note_symlink);
+
+                                $symlinks_noted[$current_filename] = 1;
+
+                                $filenames_and_symlinks[$count_symlinks_noted] = filename_symlink_entry($rname);
+                                $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILENAME] = readlink($current_path_and_file);
+                                $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] = $current_filename; // $symlink_name;
+                                $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
+                                ++$count_symlinks_noted;
+                            }
                         }
                         elseif (strlen($symlink_prefix) == 0)
                         {
                             show_diag($rname, "calling code specifies no prefix for symbolic links,", $dflag_no_prefix_specified);
                             show_diag($rname, "not creating symlink to present symbolic link.", $dflag_no_prefix_specified);
                         }
-                        elseif (strpos($current_filename, $symlink_prefix, 0) != 0)
+                        elseif (strpos($current_filename, $symlink_prefix, 0) === FALSE)
                         {
                             show_diag($rname, "found symbolic link whose name does not begin with caller's prefix '$symlink_prefix',",
                               $dflag_no_prefix_specified);
@@ -436,8 +507,17 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                         }
 
                     }
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - ELSE if the current file is not a symlink:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                     elseif ( is_file($current_path_and_file) && !(is_link($current_path_and_file)) )
                     {
+                        $RF = "- REGULAR FILE -";
+                        show_diag($rname, "$RF file '$current_path_and_file' tests as regular file and not symlink,",
+                          $dflag_dev);
+                        show_diag($rname, "$RF building symbolic link name to this file for thumbnailing purposes . . .",
+                          $dflag_dev);
+
 // create program-safe and shell-safe filename:
                         $symlink_name =& thumbnail_safe_filename($rname, $current_filename, $options);
 
@@ -447,36 +527,73 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
                             $symlink_name = "$symlink_prefix$symlink_name";
                         }
 
-// create an absolute or relative path to new symlink:
-                        $current_path_and_symlink = "$callers_path/$symlink_name";
-                        $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
 
-                        $filenames_and_symlinks[$count_symlinks_noted] = filename_symlink_entry($rname);
-                        $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILENAME] = $current_filename;
-                        $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] = $symlink_name;
-                        $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
-                        ++$count_symlinks_noted;
-
-                        $lbuf = "this entry holds symbolic link name '" . $filenames_and_symlinks[$count_symlinks_created][KEY_NAME__SYMLINK_NAME] . "',";
-                        show_diag($rname, $lbuf, $dflag_add_entry);
-
-
-                        show_diag($rname, "- CREATE SYMLINK - calling PHP symlink() with target '$current_filename'",
-                          $dflag_create_symlink);
-                        show_diag($rname, "- CREATE SYMLINK - and symlink '$current_path_and_symlink' . . .",
-                          $dflag_create_symlink);
-                        $symlink_result = symlink($current_filename, "$current_path_and_symlink");
-
-                        if ( $symlink_result == 1 )
+                        if ( array_key_exists($symlink_name, $symlinks_noted) )
                         {
-                            ++$count_symlinks_created;
+                            show_diag($rname, "$RF this symbolic link already created and noted in hash to return to caller,",
+                              $dflag_note_symlink);
+
+                            $lbuf = basename(readlink("$callers_path/$symlink_name"));
+                            show_diag($rname, "$RF symbolic link points to '$lbuf' and current filename is '$current_filename',",
+                              $dflag_file_found_first);
+
+                            if ( $lbuf === $current_filename )
+                            {
+                                show_diag($rname, "$RF this symlink points to its expected file,",
+                                  $dflag_file_found_first);
+                            }
+
+                            show_diag($rname, "$RF NOTE: &nbsp;no action implemented to handle thumbnailing symbolic links pointing to wrong files -",
+                              $dflag_not_implemented);
                         }
+                        else
+                        {
+                            show_diag($rname, "$RF symlink '$symlink_name' not yet noted,", $dflag_note_symlink);
 
-                        show_diag($rname, "- CREATE SYMLINK - call to PHP symlink() returns '$symlink_result',",
-                          $dflag_create_symlink);
-                        show_diag($rname, "-", $dflag_create_symlink);
-                    }
+// create an absolute or relative path to new symlink:
+                            $current_path_and_symlink = "$callers_path/$symlink_name";
+                            $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
 
+                            show_diag($rname, "$RF <b>noting this symlink</b> in hash of symlinks and respective files . . .",
+                              $dflag_note_symlink);
+
+                            $symlinks_noted[$symlink_name] = 1;
+
+                            $filenames_and_symlinks[$count_symlinks_noted] = filename_symlink_entry($rname);
+                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILENAME] = $current_filename;
+                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] = $symlink_name;
+                            $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
+                            ++$count_symlinks_noted;
+
+                            $lbuf = "$RF this entry holds symbolic link name '" . $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] . "',";
+                            show_diag($rname, $lbuf, $dflag_add_entry);
+
+                            if ( file_exists($current_path_and_symlink) )
+                            {
+                                show_diag($rname, "$RF NOTE: &nbsp;symbolic link already exists so not recreating,",
+                                  $dflag_create_symlink);
+                            }
+                            else
+                            {
+                                show_diag($rname, "$RF calling PHP symlink() with target '$current_filename'",
+                                  $dflag_create_symlink);
+                                show_diag($rname, "$RF and symlink '$current_path_and_symlink' . . .",
+                                  $dflag_create_symlink);
+                                $symlink_result = symlink($current_filename, "$current_path_and_symlink");
+
+                                if ( $symlink_result == 1 )
+                                {
+                                    ++$count_symlinks_created;
+                                }
+
+                                show_diag($rname, "$RF call to PHP symlink() returns '$symlink_result',",
+                                  $dflag_create_symlink);
+                                show_diag($rname, "$RF -", $dflag_create_symlink);
+                            }
+
+                        } // end IF-block to check whether symbolic link to present file already noted
+
+                    } // end IF-ELSEIF block to process symbolic links one way, and regular files another way
 
 
 
@@ -493,6 +610,8 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
                 } // end IF-block to test for file which starts with a dot
 
+                show_diag($rname, "---<br />\n", $dflag_dev);
+
             } // end WHILE-block iterating over files in caller-specified directory,
 
 
@@ -505,26 +624,37 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 
             closedir($handle);
 
-        } // end IF-block to check whether we can open caller's directory
+        }
         else
         {
             show_diag($rname, "- WARNING - trouble opening caller's path as a directory!",
               $dflag_warning);
-        }
 
-//        chdir($scripts_path);
+        } // end IF-block to check whether we can open caller's directory
 
-    } // end IF-block to check whether caller's path points to valid directory
+    }
     else
     {
         show_diag($rname, "- WARNING - caller's path does not test as a file of type directory!",
           $dflag_warning);
         show_diag($rname, "- WARNING - returning early . . .",
           $dflag_warning);
+
+    } // end IF-block to check whether caller's path points to valid directory
+
+
+    show_diag($rname, "SUMMARY:  created $count_symlinks_created symbolic links.",
+      $dflag_summary);
+    if ( $dflag_summary )
+    {
+        show_diag($rname, "hash of symlinks and filenames to return to caller:", $dflag_summary);
+        echo "<pre>\n";
+        foreach ($filenames_and_symlinks as $key => $entry)
+        {
+            echo "$key) " . $filenames_and_symlinks[$key][KEY_NAME__SYMLINK_NAME] . "-->" . $filenames_and_symlinks[$key][KEY_NAME__FILENAME] . "<br />";
+        }
+        echo "</pre>\n";
     }
-
-
-    show_diag($rname, "SUMMARY:  created $count_symlinks_created symbolic links.", $dflag_summary);
     show_diag($rname, "returning . . .", $dflag_announce);
 
     return $filenames_and_symlinks;

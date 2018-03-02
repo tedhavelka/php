@@ -788,19 +788,16 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_filenames_by_pattern     = DIAGNOSTICS_ON;
     $dflag_file_depth               = DIAGNOSTICS_ON;
 
-//    $rname = "tree_browser";
     $rname = "build_tree";
 
 // VAR END
-
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-    if ( 1 )
-    {
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
-//        $dflag_announce = DIAGNOSTICS_OFF;    // . . . diagnostics flag for development-related run time comments,
+    $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_dev      = DIAGNOSTICS_OFF;
     $dflag_format   = DIAGNOSTICS_OFF;
     $dflag_verbose  = DIAGNOSTICS_OFF;
@@ -823,9 +820,9 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_noting_first             = DIAGNOSTICS_OFF;
     $dflag_filenames_by_pattern     = DIAGNOSTICS_OFF;
     $dflag_file_depth               = DIAGNOSTICS_OFF;
-    }
+}
 
-    show_diag($rname, "- 2018-01-23 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
+
     show_diag($rname, "starting,", $dflag_announce);
     show_diag($rname, "called by '$caller' with base directory '$base_directory',", $dflag_dev);
 
@@ -2129,6 +2126,15 @@ function present_images_as_thumbnails($caller, $hash_of_symlinks, $cwd, $options
 // VAR END
 
 
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
+    $dflag_announce  = DIAGNOSTICS_OFF;
+    $dflag_dev       = DIAGNOSTICS_OFF;
+    $dflag_php_thumb = DIAGNOSTICS_OFF;
+    $dflag_unsupported_file = DIAGNOSTICS_OFF;
+    $dflag_symlink_count_in_hash = DIAGNOSTICS_OFF;
+}
+
 
     show_diag($rname, "starting,", $dflag_announce);
     show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
@@ -2657,6 +2663,21 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
 // VAR END
 
 
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_options  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_OFF;
+
+    $dflag_source_of_cwd      = DIAGNOSTICS_OFF;
+    $dflag_visible_path_depth = DIAGNOSTICS_OFF;
+    $dflag_indent_string      = DIAGNOSTICS_OFF;
+    $dflag_show_hash_files_in_cwd = DIAGNOSTICS_OFF;
+    $dflag_symlink_names      = DIAGNOSTICS_OFF;
+    $dflag_php_thumb          = DIAGNOSTICS_OFF;
+}
+
 
 // Look for current working directory in a couple of places:
 
@@ -2997,6 +3018,23 @@ function present_files_in_selected_view($caller, $file_hierarchy, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
+    $dflag_announce   = DIAGNOSTICS_OFF;
+    $dflag_dev        = DIAGNOSTICS_OFF;
+//    $dflag_warning    = DIAGNOSTICS_OFF;
+    $dflag_legend     = DIAGNOSTICS_OFF;
+    $dflag_summary    = DIAGNOSTICS_OFF;
+
+    $dflag_empty_dirs     = DIAGNOSTICS_OFF;
+    $dflag_nested_loop_l1 = DIAGNOSTICS_OFF;
+    $dflag_nested_loop_l2 = DIAGNOSTICS_OFF;
+
+    $dflag_var_basedir    = DIAGNOSTICS_OFF;
+    $dflag_source_of_cwd  = DIAGNOSTICS_OFF;
+    $dflag_tracking_cwd   = DIAGNOSTICS_OFF;
+}
+
 
     show_diag($rname, "starting,", $dflag_announce);
 
@@ -3235,7 +3273,8 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 // VAR END
 
 
-    if ( 0 )
+//    if ( 0 )
+    if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
     {
         $dflag_dev = DIAGNOSTICS_OFF;
         $dflag_get = DIAGNOSTICS_OFF;
