@@ -76,6 +76,9 @@ function &thumbnail_safe_filename($caller, $filename, $options)
     $thumbnail_safe_name = preg_replace('/#/', 'no-', $thumbnail_safe_name);
       show_diag($rname, "after replacing /#/ safer filename holds '$thumbnail_safe_name',", $dflag_pound);
 
+// handle ampersand characters embedded in names of regular files:
+    $thumbnail_safe_name = preg_replace('/\&/', 'and', $thumbnail_safe_name);
+
 
 // account for some special and specific plant naming conventions:
     $thumbnail_safe_name = preg_replace('/OB-/', 'OB-minus', $thumbnail_safe_name);

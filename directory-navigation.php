@@ -14,7 +14,7 @@
 //  TO-DO:
 //
 //  2018-01-24:
-//    [p]  add symbolic link file type detection, and optional skipping
+//    [x]  add symbolic link file type detection, and optional skipping
 //         of symbolic links in build_tree() function,
 //
 //       ...symbolic link detection in place, option to hide symlinks
@@ -33,7 +33,7 @@
 //         some kind of CRC or numeric hash value, for shorter
 //         URLs and shorter keynames of keys to PHP ordered maps,
 //
-//    [ ]  ensure that following variables,
+//    [x]  ensure that following variables,
 //
 //    $site = "https://neelanurseries.com";
 //    $path_from_doc_root = "sandbox";
@@ -43,7 +43,7 @@
 //         way possible.  First two of three are hard-code assigned
 //         as of 2018 February 16 . . . TMH
 //
-//    [ ]  device good way to manage HTTP get values which need
+//    [ ]  devise good way to manage HTTP get values which need
 //         appear in script's self calling URLs . . .
 //
 //  2018-02-22:
@@ -171,6 +171,8 @@
 //    Ted Havelka        ted@cs.pdx.edu        (TMH)
 //
 //
+//
+//----------------------------------------------------------------------
 
 
 
@@ -2093,6 +2095,7 @@ function present_images_as_thumbnails($caller, $hash_of_symlinks, $cwd, $options
 //----------------------------------------------------------------------
 
 // VAR BEGIN
+    $matches = null;
 
     $phpThumb = null;
     $thumbnail_width = 50;
@@ -2110,6 +2113,7 @@ function present_images_as_thumbnails($caller, $hash_of_symlinks, $cwd, $options
     $dflag_announce  = DIAGNOSTICS_ON;
     $dflag_dev       = DIAGNOSTICS_ON;
     $dflag_php_thumb = DIAGNOSTICS_OFF;
+    $dflag_unsupported_file = DIAGNOSTICS_ON;
     $rname = "present_images_as_thumbnails";
 
 // VAR END
@@ -2126,6 +2130,9 @@ function present_images_as_thumbnails($caller, $hash_of_symlinks, $cwd, $options
 
         foreach ( $hash_of_symlinks as $key => $entry )
         {
+
+            if ( preg_match('/.*\.jpg/', $entry[KEY_NAME__SYMLINK_NAME], $matches) )
+            {
 
             $lbuf = "setting phpThumb source data to '" . $cwd."/".$entry[KEY_NAME__SYMLINK_NAME] . "' . . .";
             show_diag($rname, $lbuf, $dflag_php_thumb);
@@ -2158,7 +2165,18 @@ function present_images_as_thumbnails($caller, $hash_of_symlinks, $cwd, $options
             }
 
             $phpThumb->resetObject();
-        }
+
+            }
+            else
+            {
+
+// NEED CODE HERE TO PRESENT NON-THUMBNAILABLE FILES
+                $lbuf = "find non-image or unsupported format file '" . $entry[KEY_NAME__SYMLINK_NAME]  . "',";
+                show_diag($rname, $lbuf, $dflag_unsupported_file);
+
+            } // end IF to test whether current symlink name refers to supported image type file
+
+        } // end FOREACH to iterate over hash of filenames and respective symbolic links
 
     } // end local scope, 
 
@@ -2618,7 +2636,7 @@ function present_directories_with_file_counts($rname, $file_hierarchy, $options)
     $dflag_visible_path_depth = DIAGNOSTICS_OFF;
     $dflag_indent_string      = DIAGNOSTICS_OFF;
     $dflag_show_hash_files_in_cwd = DIAGNOSTICS_OFF;
-    $dflag_symlink_names      = DIAGNOSTICS_ON;
+    $dflag_symlink_names      = DIAGNOSTICS_OFF;
     $dflag_php_thumb          = DIAGNOSTICS_OFF;
 
     $rname = "present_directories_with_file_counts";
