@@ -20,6 +20,8 @@
 //
 //    *  http://php.net/manual/en/function.readlink.php
 //
+//    *  http://php.net/manual/en/function.get-defined-constants.php
+//
 //
 //
 //  AUTHORS AND CONTRIBUTORS:

@@ -703,7 +703,34 @@ function &build_tree($caller, $base_directory, $options)
 //
 //   See also large approximate forty line comment block at end of
 //   this file for details of this routines algorithm versions 1 and
-//   2 . . . .
+//   2 . . . . as of 2018-03-05 Monday that larger comment block may
+//   be removed altogether.  Some quick notes:
+//
+//   This routine named 'build_tree', a reference to its design to
+//   build in its executing script's memory a tree like structure to
+//   reflect the file system hierarchy which is already in place on a
+//   given server, is written with two loops nested inside an outer
+//   "iterate over files in directory" loop.
+//
+//   In the first nested loop all files in the current directory are
+//   noted / added to a PHP hash.  In the second loop, noted files
+//   which are not yet checked / reviewed are annotated further in
+//   their respective entries in the file tree hash.  Annotation in
+//   loop 2 includes noting file type, and relative path from the
+//   starting or base directory this routine is mapping into memory.
+//
+//   When a not-checked file is found and is a directory, script
+//   execution goes back to loop one.  As file tree mapping proceeds
+//   there may be multiple directories with not-checked files.
+//
+//   This logic and note-taking are not enough to create an easily
+//   navigable file tree, in the orderable sense computer users are
+//   often used to enjoying at the command line.  For this reason,
+//   as of 2018-03-05 work is underway to improve the annotation to
+//   support more intuitive, orderable file tree presentations.  More
+//   to come soon . . .   - TMH
+//
+//
 //
 //----------------------------------------------------------------------
 
@@ -718,6 +745,7 @@ function &build_tree($caller, $base_directory, $options)
 
     $files_noted = 0;
 
+// D'ah poorly named variable.  'file tree hash entry' sounds like a PHP hash table, not a pointer - TMH
     $file_tree_hash_entry = 0;           // pointer to hash entry, may be duplicative of variable $files_noted,
 
     $file_limit_not_reached = 'true';
@@ -747,6 +775,11 @@ function &build_tree($caller, $base_directory, $options)
 
 
     $flag_count_symlinks_as_regular_files = 0;  // '0' for false, to disable symlink counting as regular files
+
+// 2018-03-05 - Monday, Ted looking to enable support of symbolic links
+//  +  which point to directories.  Need to test whether some
+//  +  non-alpha non-numeric characters in dirnames are gumming up
+//  *  phpThumb calls . . .
 
 
 // PHP "file tree" hash to return to calling code:
@@ -1018,6 +1051,16 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
             }
 
+
+            if ( is_dir($current_path_and_file) && !is_link($current_path_and_file) )
+            {
+                show_diag($rname, "- zz4 - ready to note symlink '$file' which points to a directory,", $dflag_note_file);
+//                $file_type = KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY;
+//                ++$count_of_regular_files;
+//                ++$navigable_tree[$key_to_present_directory][FILE_COUNT];
+            }
+
+
 //            if ( is_file($current_path_and_file) )
             if ( is_file($current_path_and_file) && !is_link($current_path_and_file) )
             {
@@ -1028,9 +1071,11 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
                 if ( $dflag_file_count_per_directory )
                 {
-                    $lbuf = "incrementing file count of present directory, noted in hash entry $key_to_present_directory to " .  $navigable_tree[$key_to_present_directory][FILE_COUNT] . ",";
+                    $lbuf = "incrementing file count of present directory, noted in hash entry $key_to_present_directory to "
+                      . $navigable_tree[$key_to_present_directory][FILE_COUNT] . ",";
                     show_diag($rname, $lbuf, $dflag_file_count_per_directory);
-                    $_SESSION[KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES][$key_to_present_directory] = $navigable_tree[$key_to_present_directory][FILE_COUNT];
+                    $_SESSION[KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES][$key_to_present_directory]
+                      = $navigable_tree[$key_to_present_directory][FILE_COUNT];
                 }
             }
 
@@ -1208,7 +1253,8 @@ show_diag($rname, "- zztop - above loop 2 setting \$current_path_and_file from f
             if ( $noted_file[FILE_STATUS] == FILE_NOT_CHECKED )
             {
 //                if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY) && ($unchecked_directory_found == 'false') )
-                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+//                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+                if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY) || ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY) )
                 {
                     if ( $unchecked_directory_found == 'false' )
                     {
@@ -2266,8 +2312,8 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
     $dflag_php_thumb = DIAGNOSTICS_OFF;
     $dflag_unsupported_file = DIAGNOSTICS_ON;
     $dflag_symlink_count_in_hash = DIAGNOSTICS_ON;
-    $dflag_symlink_count_in_hash = DIAGNOSTICS_ON;
-    $dflag_not_jpg   = DIAGNOSTICS_ON;
+    $dflag_not_jpg               = DIAGNOSTICS_ON;
+    $dflag_phpthumb_src_path     = DIAGNOSTICS_OFF;
 
     $rname = "present_images_as_thumbnails_with_md5_hashes";
 
@@ -2282,6 +2328,8 @@ if (0)
     $dflag_php_thumb = DIAGNOSTICS_OFF;
     $dflag_unsupported_file = DIAGNOSTICS_OFF;
     $dflag_symlink_count_in_hash = DIAGNOSTICS_OFF;
+    $dflag_not_jpg               = DIAGNOSTICS_OFF;
+    $dflag_phpthumb_src_path     = DIAGNOSTICS_OFF;
 }
 
 
@@ -2321,17 +2369,46 @@ if (0)
 // // details on settable parameters, many expressed by single letters,
 // // such as thumbnail width 'w' and height 'h':
 
-// Source image filename:  $cwd."/".$entry[KEY_NAME__SYMLINK_NAME]
-
-//                $path_to_image = $cwd."/".$entry[KEY_NAME__SYMLINK_NAME];
                 $path_to_image = "./" . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
-                show_diag($rname, "using this link built path to image '$path_to_image',", $dflag_dev);
+//                $path_to_image = $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
+//                $path_to_image = $_SERVER['PWD'] . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
+//                $path_to_image = dirname($_SERVER['SCRIPT_FILENAME']) . "/" . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
 
-                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
+//                show_diag($rname, "\$_SERVER hash holds:", $dflag_phpthumb_src_path);
+//                if ( $dflag_phpthumb_src_path )
+//                {
+//                    echo "<pre>\n";
+//                    print_r($_SERVER);
+//                    echo "</pre>\n";
+//
+//                    $lbuf = dirname($_SERVER['SCRIPT_FILENAME']);
+//                    show_diag($rname, "closest we can get to needed path elements is '$lbuf',", $dflag_phpthumb_src_path);
+//                }
+
+//                show_diag($rname, "using most of server's SCRIPT_NAME, script $cwd and symlink built path to image:", $dflag_phpthumb_src_path);
+
+// 2018-03-05 - Working on correct relative path for local phpThumb library installation at nn:
+$path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to_image);
+
+
+
+                show_diag($rname, "for phpThumb library routine built source path:", $dflag_dev);
+                show_diag($rname, "<i>$path_to_image_amended</i>", ($dflag_phpthumb_src_path | $dflag_dev));
+
+//                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
+                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image_amended&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
+
+// 2018-03-05 - Monday, Ted testing whether &amp; pattern throwing off call
+//  to phpThumb script:
+
+//                $link_to_thumbnail = preg_replace('/\&amp;/', '\&', $link_to_thumbnail);
+
+
 
                 $link_to_image = "<a href=\"$cwd/".$entry[KEY_NAME__SYMLINK_NAME]."\">$link_to_thumbnail</a>";
 
-                echo $link_to_image;
+// Send to browser mark-up of thumbnail image as link to full size image:
+                echo $link_to_image . "<br /> <br />\n";
 
 
             } // end IF to test whether current symlink name refers to supported image type file
@@ -2999,8 +3076,8 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
 // NEED:  to make this into its own routine . . .
 
-                    present_images_as_thumbnails($rname, $hash_of_symlinks, $cwd, $options);
-//                    present_images_as_thumbnails_with_md5_hashes($rname, $hash_of_symlinks, $cwd, $options);
+//                    present_images_as_thumbnails($rname, $hash_of_symlinks, $cwd, $options);
+                    present_images_as_thumbnails_with_md5_hashes($rname, $hash_of_symlinks, $cwd, $options);
 
 
 // Thumbnails have now been created,

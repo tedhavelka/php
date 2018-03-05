@@ -98,6 +98,7 @@
     define("KEY_VALUE__FILE_TYPE__IS_FILE", "file");
     define("KEY_VALUE__FILE_TYPE__IS_DIRECTORY", "directory");
     define("KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK", "symlink");
+    define("KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY", "symlink_to_directory");
     define("KEY_VALUE__FILE_TYPE__IS_NOT_DETERMINED", "not determined");
 
     define("KEY_VALUE__FILE_STATUS__CHECKED", "checked");
