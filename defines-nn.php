@@ -402,9 +402,10 @@
 
     define("ARRAY_NAME__ARRAY_OF_VIEW_MODES", "array_of_view_modes");
 
-    define("KEY_NAME__FILENAME]", "filename");
-    define("KEY_NAME__SYMLINK_NAME]", "symlink_name");
-    define("KEY_NAME__SYMLINK_STATUS]", "symlink_status");
+//    define("KEY_NAME__FILENAME]", "filename");
+    define("KEY_NAME__FILE_NAME", "filename");
+    define("KEY_NAME__SYMLINK_NAME", "symlink_name");
+    define("KEY_NAME__SYMLINK_STATUS", "symlink_status");
 
 
 ?>

@@ -38,6 +38,9 @@
 // - SECTION - PHP include directives
 //----------------------------------------------------------------------
 
+    require_once '/opt/nn/lib/php/defines-nn.php';
+//    require '/opt/nn/lib/php/defines-nn.php';
+
     require_once '/opt/nn/lib/php/diagnostics-nn.php';
 
     require_once '/opt/nn/lib/php/text-manipulation.php';
@@ -301,6 +304,7 @@ function &list_of_filenames_sorted_by_same_marker(
 
 function &filename_symlink_entry($caller)
 {
+
     $hash_entry = array();
 
     $hash_entry[KEY_NAME__FILE_NAME] = KEY_VALUE__DEFAULT_FILENAME;
@@ -351,7 +355,7 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
     $symlink_result = FALSE;
 
 
-    $sylinks_noted = array();
+    $symlinks_noted = array();
 
     $filenames_and_symlinks = array();
 
@@ -376,12 +380,14 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
     $dflag_file_found_first       = DIAGNOSTICS_ON;
     $dflag_not_implemented        = DIAGNOSTICS_ON;
 
+    $dflag_debugging_extended = DIAGNOSTICS_ON;
+
     $rname = "create_symlinks_with_safe_names";
 // VAR END
 
 
-// if ( 1 )
-if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+if ( 0 )
+//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
     $dflag_dev       = DIAGNOSTICS_OFF;
@@ -411,6 +417,14 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
     {
         $symlink_prefix = $options[KEY_NAME__SYMBOLIC_LINK_PREFIX];
     }
+
+
+    show_diag($rname, "-----", $dflag_debugging_extended);
+    show_diag($rname, "Extended debugging 2018-03-05 - issue with defined constants,", $dflag_debugging_extended);
+    $lbuf = "In spite of nn defines file include, constant 'KEY_NAME__FILE_NAME' holds '".KEY_NAME__FILE_NAME."',";
+    show_diag($rname, $lbuf, $dflag_debugging_extended);
+    show_diag($rname, "-----", $dflag_debugging_extended);
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -488,7 +502,7 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
                                 $symlinks_noted[$current_filename] = 1;
 
                                 $filenames_and_symlinks[$count_symlinks_noted] = filename_symlink_entry($rname);
-                                $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILENAME] = readlink($current_path_and_file);
+                                $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__FILE_NAME] = readlink($current_path_and_file);
                                 $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_NAME] = $current_filename; // $symlink_name;
                                 $filenames_and_symlinks[$count_symlinks_noted][KEY_NAME__SYMLINK_STATUS] = KEY_VALUE__SYMLINK_STATUS__CHECKED;
                                 ++$count_symlinks_noted;
@@ -651,7 +665,7 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
         echo "<pre>\n";
         foreach ($filenames_and_symlinks as $key => $entry)
         {
-            echo "$key) " . $filenames_and_symlinks[$key][KEY_NAME__SYMLINK_NAME] . "-->" . $filenames_and_symlinks[$key][KEY_NAME__FILENAME] . "<br />";
+            echo "$key) " . $filenames_and_symlinks[$key][KEY_NAME__SYMLINK_NAME] . "-->" . $filenames_and_symlinks[$key][KEY_NAME__FILE_NAME] . "<br />";
         }
         echo "</pre>\n";
     }

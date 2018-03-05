@@ -1947,8 +1947,8 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
 // NOTE:  NEED TO SANITY CHECK FOLLOWING VARIABLES' VALUES AFTER
 //   +  ASSIGNEMENT TO BE SURE THEY ARE NON-ZERO LENGTH:
 
-    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR];
-    $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME_ABBR];
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+    $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
     $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
     $view_mode = $options[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE];
     $base_dir = $options[KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY];
@@ -2303,6 +2303,12 @@ if (0)
 //   multiple image file extension, use here:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+// 2018-03-05 - Monday, PHP interpreter compaining of undefined constants,
+//  What is going on here?  - TMH
+//    define("KEY_NAME__SYMLINK_NAME]", "symlink_name");
+
+
+
             $lbuf = "looking at noted symbolic link '" . $entry[KEY_NAME__SYMLINK_NAME] . "',";
             show_diag($rname, $lbuf, $dflag_not_jpg);
 
@@ -2325,6 +2331,7 @@ if (0)
 
                 $link_to_image = "<a href=\"$cwd/".$entry[KEY_NAME__SYMLINK_NAME]."\">$link_to_thumbnail</a>";
 
+                echo $link_to_image;
 
 
             } // end IF to test whether current symlink name refers to supported image type file
@@ -2689,7 +2696,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
-function present_directories_with_file_counts($rname, $file_hierarchy, $options)
+function present_directories_with_file_counts($caller, $file_hierarchy, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -2992,8 +2999,8 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
 // NEED:  to make this into its own routine . . .
 
-//                    present_images_as_thumbnails($rname, $hash_of_symlinks, $cwd, $options);
-                    present_images_as_thumbnails_with_md5_hashes($rname, $hash_of_symlinks, $cwd, $options);
+                    present_images_as_thumbnails($rname, $hash_of_symlinks, $cwd, $options);
+//                    present_images_as_thumbnails_with_md5_hashes($rname, $hash_of_symlinks, $cwd, $options);
 
 
 // Thumbnails have now been created,
@@ -3254,6 +3261,10 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
     if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR, $_GET) )
     {
         $view_mode = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE, $options) )
+    {
+        $view_mode = $options[KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE];
     }
     else
     {
