@@ -829,7 +829,8 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+// if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+if ( 1 )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
     $dflag_announce = DIAGNOSTICS_OFF;
@@ -1039,8 +1040,8 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
             show_diag($rname, "checking file type of '$current_path_and_file' . . .", $dflag_note_file);
 
-//            if ( is_dir($current_path_and_file) )
-            if ( is_dir($current_path_and_file) && !is_link($current_path_and_file) )
+            if ( is_dir($current_path_and_file) )
+//            if ( is_dir($current_path_and_file) && !is_link($current_path_and_file) )
             {
                 show_diag($rname, "- zz1 - noting directory '$file',", $dflag_note_file);
                 $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
@@ -1052,7 +1053,7 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
             }
 
 
-            if ( is_dir($current_path_and_file) && !is_link($current_path_and_file) )
+            if ( is_dir($current_path_and_file) && is_link($current_path_and_file) )
             {
                 show_diag($rname, "- zz4 - ready to note symlink '$file' which points to a directory,", $dflag_note_file);
 //                $file_type = KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY;
@@ -1082,8 +1083,17 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
             if ( is_link($current_path_and_file) )
             {
-                show_diag($rname, "- zz3 - noting symlink '$file',", $dflag_note_file);
-                $file_type = KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK;
+                if ( is_dir($current_path_and_file) )
+                {
+                    show_diag($rname, "- zz4 - noting symlink '$file' which points to directory,", $dflag_note_file);
+//                    $file_type = KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY;
+                    $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+                }
+                else
+                {
+                    show_diag($rname, "- zz3 - noting symlink '$file',", $dflag_note_file);
+                    $file_type = KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK;
+                }
 
                 if ( $flag_count_symlinks_as_regular_files )
                 {
@@ -1096,7 +1106,7 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
             if ( !(file_exists($current_path_and_file)) )
             {
-                show_diag($rname, "- zz3 - noting file '$current_path_and_file' does not exist,", $dflag_note_file);
+                show_diag($rname, "- zz0 - noting file '$current_path_and_file' does not exist,", $dflag_note_file);
                 $file_type = "non-existent";
             }
 
@@ -2320,8 +2330,8 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
 // VAR END
 
 
-//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
-if (0)
+//if (0)
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
     $dflag_dev       = DIAGNOSTICS_OFF;
@@ -2405,17 +2415,18 @@ $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to
 
 
 
-                $link_to_image = "<a href=\"$cwd/".$entry[KEY_NAME__SYMLINK_NAME]."\">$link_to_thumbnail</a>";
+                $link_to_image = "<a href=\"$cwd/".$entry[KEY_NAME__SYMLINK_NAME]."\">$link_to_thumbnail</a>\n";
 
 // Send to browser mark-up of thumbnail image as link to full size image:
-                echo $link_to_image . "<br /> <br />\n";
+//                echo $link_to_image . "<br /> <br />\n";
+                echo $link_to_image;
 
 
             } // end IF to test whether current symlink name refers to supported image type file
 
             else
             {
-                $lbuf = "encoutnered non-JPEG file '" . $entry[KEY_NAME__SYMLINK_NAME] . "',";
+                $lbuf = "encountered non-JPEG file '" . $entry[KEY_NAME__SYMLINK_NAME] . "',";
                 show_diag($rname, $lbuf, $dflag_not_jpg);
  
             } // end IF construct to test whether current filename ends in .jpg extension

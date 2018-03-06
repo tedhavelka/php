@@ -382,14 +382,14 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
     $dflag_file_found_first       = DIAGNOSTICS_ON;
     $dflag_not_implemented        = DIAGNOSTICS_ON;
 
-    $dflag_debugging_extended = DIAGNOSTICS_ON;
+    $dflag_debugging_extended     = DIAGNOSTICS_ON;
 
     $rname = "create_symlinks_with_safe_names";
 // VAR END
 
 
-if ( 0 )
-//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+//if ( 0 )
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
     $dflag_dev       = DIAGNOSTICS_OFF;
@@ -405,6 +405,8 @@ if ( 0 )
     $dflag_found_prefixed_symlink = DIAGNOSTICS_OFF;
     $dflag_file_found_first       = DIAGNOSTICS_OFF;
     $dflag_not_implemented        = DIAGNOSTICS_OFF;
+
+    $dflag_debugging_extended     = DIAGNOSTICS_OFF;
 }
 
 
