@@ -1,0 +1,25 @@
+
+
+2018-02-14 - Wednesday, ok so there is an issue we encounter today with our idea of supporting a stateful current working directory for the user visiting our site, and browsing a given file tree.  The first time working through code with shows just files in the present directory, we ended up needing to filter the "file path in base directory" string through PHP's basename() function, which gives a substring of all characters past the last '/' in a string.  In general however the current working directory of a user in a file system location is a full path from some root point.  So we really don't want to be filtering our "file path in base directory" file attribute through a call to basename().
+
+Let's check and see to what value we're assigning $cwd the first time our local PHP function named present_tree_view() is called . . .
+
+
+
+
+[ ]  Issue:  we want to show files in the user's current working directory or 'cwd', along with the parent directory elements up to the base directory, or some point below it.  Each file entry in the file tree hash contains a path from the base directory, which as of 2018-02-14 includes the base directory itself.  It's debate-able whether this is good.  But with this path we can ostensibly build URLs to the parent directories which contain the cwd.
+
+Directories of the user's file tree they're browsing are presented in mark-up as fixed URLs with an HTTP post value appended to the URL.  That post value changes to reflect the path from the base directory of the file tree being presented to the given subdirectory in that file tree.
+
+. . . Noting now that our file tree presenting code needs to maintain the base directory of the file tree it is presenting, in order to create URLs which link to the path elements from and including the base directory to the current working directory.  So for each and all calls to the file tree presenting code, we must ensure that the code gets the following three data:
+
+   *  base directory
+   *  current working directory
+   *  number of path elements starting with base dir to omit from tree presentation
+
+
+
+
+
+
+// --- EOF ---
