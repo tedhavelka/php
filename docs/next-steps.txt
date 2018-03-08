@@ -1,0 +1,34 @@
+##======================================================================
+##
+##  PROJECT:  nn Local PHP library
+##
+##  FILE:  next-steps.txt
+##
+##  DESCRIPTION:  notes to describe next development steps planned for
+##    local PHP library routines.
+##
+##
+##
+##
+##
+##
+##======================================================================
+
+
+
+- SECTION - Overview
+
+This document started a couple months into the development of some simple PHP-based routines for managing mostly file-wise content and web page layout and mark-up.  This project dubbed 'PHP local library'.
+
+
+
+- SECTION - Issues
+
+Issue:  for content served by a server side application web browsers expect and need, in general, a serialized string of data with all document elements in the correct order.  The nn local PHP library functions to provide file tree presentations and navigation via a web page, get their file listings from given directory in an unpredictable order.  As of 2018-03-08 Wednesday the code to build a flattened file tree representation in a PHP script's memory doesn't account for the hierarchy of parent and child directories.  Each file has its relative path noted with it, in a hash, a path from the given base directory to the given file.  In that sense the hierarchy is not lost, but it is also not easy to reconstruct, and therefore not easy to serialize, that is to send to a web browser in meaningful correct order.
+
+With the attributes presently stored by directory-navigation.php routines for each file in a given file tree, we would need to parse the relative paths of each file into path elements to see the hierarchy.  The file tree hash uses numeric hash keys.  If for each file we note the hash key's integer name of the parent directory of that file, we would have an easier way to locate all files which appear in a given directory.  There is still the question of how to order an arbitrarily mixed hash of file tree entries.  What efficient algorithm can we use, an algorithm preferrably not recursive, to best order file tree entries in preparation to serialize them?
+
+
+
+
+## --- EOF ---
