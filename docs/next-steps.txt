@@ -29,6 +29,15 @@ Issue:  for content served by a server side application web browsers expect and 
 With the attributes presently stored by directory-navigation.php routines for each file in a given file tree, we would need to parse the relative paths of each file into path elements to see the hierarchy.  The file tree hash uses numeric hash keys.  If for each file we note the hash key's integer name of the parent directory of that file, we would have an easier way to locate all files which appear in a given directory.  There is still the question of how to order an arbitrarily mixed hash of file tree entries.  What efficient algorithm can we use, an algorithm preferrably not recursive, to best order file tree entries in preparation to serialize them?
 
 
+Parent directory attribute:
+
+It's natural to think of each file entry in the file tree hash having an attribute of its parent directory.  While symbolic links to directories complicate tree re-building and presentation, a file in a traditional Unix-like file hierarchy has only one parent directory which is of type directory and not a symbolic link.  So each file entry can represent its parent dir by a single integer number.
+
+We can begin our tree rebuilding work by starting with a sorted list of all directories in given base directory.  For each directory we show all its files.  When our routine finds a directory which is a directory in the real sense and not a symbolic link, our routine knows the index or key name this directory in the file tree hash . . .
+
+
+  Ah but now there's a question on how to show directories in the current directory:  before files in the sequence?  After files?  Interspersed by alphabetized names of dirs and files?
+
 
 
 ## --- EOF ---
