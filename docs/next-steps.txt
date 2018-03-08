@@ -1,1 +1,17 @@
+##
+##  PROJECT:
+##
+##  FILE:  next-steps.txt
+##
+##
+##
+##
+
+
+
+
 Lost this file during early branch creation . . . not good, what happened? - TMH
+
+
+- 2018-03-08 Thursday -
+Next algorithmic work is to amend build_tree() function to that it notes for each file entry in file hash tree, the current file's parent directory.  This may be good time to merge the 'PHP library with docs' branch into master and start a new branch - TMH
