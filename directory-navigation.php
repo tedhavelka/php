@@ -212,9 +212,10 @@
     define("FILE_PATH_IN_BASE_DIR",  KEY_NAME__DIRECTORY_NAVIGATION__FILE_PATH_IN_BASE_DIR);
     define("FILE_DEPTH_IN_BASE_DIR", KEY_NAME__DIRECTORY_NAVIGATION__FILE_DEPTH_IN_BASE_DIR);
     define("FILE_COUNT",             KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES);
+    define("FILE_SHOWN_T_F",         KEY_NAME__DIRECTORY_NAVIGATION__ENTRY_SHOWN);
 
-    define("FILE_CHECKED", KEY_VALUE__FILE_STATUS__CHECKED);
-    define("FILE_NOT_CHECKED", KEY_VALUE__FILE_STATUS__NOT_CHECKED);
+    define("FILE_CHECKED",           KEY_VALUE__FILE_STATUS__CHECKED);
+    define("FILE_NOT_CHECKED",       KEY_VALUE__FILE_STATUS__NOT_CHECKED);
 
 //    define("FILE_LIMIT_OF_TREE_BROWSER", 4096);
     define("FILE_LIMIT_OF_TREE_BROWSER", 2048);
@@ -1154,6 +1155,7 @@ if ( 1 )
             $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = $current_path;
             $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
             $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
+            $navigable_tree[$file_tree_hash_entry][FILE_SHOWN] = false;
 
             ++$files_noted;
             $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
@@ -2142,6 +2144,16 @@ function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
     return $files_in_cwd;
 
 } // end function hash_of_files_in_cwd()
+
+
+
+
+
+function mark_files_as_not_shown($caller, $file_hierarchy, $options)
+{
+    echo "2018-03-08 - ROUTINE IMPLEMENTATION UNDERWAY<br />\n";
+}
+
 
 
 
