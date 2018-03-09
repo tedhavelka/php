@@ -153,6 +153,9 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES", "count_of_regular_files");
     define("KEY_NAME__DIRECTORY_NAVIGATION__PARENT_HASH_ENTRY", "parent_hash_entry");
 
+    define("KEY_NAME__DIRECTORY_NAVIGATION__ENTRY_SHOWN", "file_tree_entry_shown__t_f");
+
+
     define("KEY_NAME__FILE_DEPTH_IN_BASE_DIR", "file_depth_in_base_dir");
     define("KEY_NAME__FILE_DEPTH_GREATEST_VALUE", "file_depth_greatest_value");
 
