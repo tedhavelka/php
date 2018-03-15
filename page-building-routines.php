@@ -138,6 +138,12 @@ if ( 0 )
     }
 
 
+// Version watermark added 2018-03-14:
+    if ( 1 )
+    {
+        echo "   <!-- 2018-03-14 WED, second latest git commit 058e597 -->\n";
+    }
+
 
     echo "</head>\n\n\n";
 //    echo "</head>\n" . $BLANK_LINES_BETWEEN_HTML_PAGE_SECTIONS;
