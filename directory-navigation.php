@@ -1155,7 +1155,7 @@ if ( 1 )
             $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = $current_path;
             $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
             $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
-            $navigable_tree[$file_tree_hash_entry][FILE_SHOWN] = false;
+            $navigable_tree[$file_tree_hash_entry][FILE_SHOWN_T_F] = false;
 
             ++$files_noted;
             $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
@@ -2799,6 +2799,350 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 
 
+function present_directories_with_file_counts_v1($caller, $file_hierarchy, $options)
+{
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to present files from a file hierarchy, filtering for 
+//   and showing only directory type files followed by their respective
+//   counts of regular files with each immediate directory.
+//
+//   Note there is additional behavior this function planned to carry
+//   out:  when a user navigates to a directory containing only regular
+//   files, that directory's file content is listed.  That is to say
+//   that when the current working directory contains only files those
+//   files are also shown by their names, though they are not of type
+//   directory.
+//
+//
+//  NOTES ON IMPLEMENTATION:  this routine present all files of given
+//   file tree which are themselves directories.  In this action this
+//   routine always shows the same number of items so long as the
+//   file tree remains unchanged, that is nothing added nor deleted.
+//   With each navigating click or user selection of a directory,
+//   however, this routine tracks and highlights that selected
+//   directory, which we dub the "current working directory" to match
+//   the same notion in modern and long-time operating systems with
+//   file systems.
+//
+//   A further behavior planned for this routine is to show in
+//   thumbnail format or tiny icons the regular files within the
+//   user's current working directory . . .
+//
+//
+//----------------------------------------------------------------------
+
+// VAR BEGIN
+
+    $file_entry = null;
+
+//
+// NEED 2018-02-23 FRI - Need to take care with \$cwd which as of this
+//  morning has a different meaning and use in this function than
+//  elsewhere in this file.  \$cwd normally holds session state by
+//  getting passed in PHP session var and or via HTTP 'get' method:
+//
+
+    $cwd = "";        // assigned from PHP session variable or $_GET variable,
+
+    $current_path = "";  // assigned value from data member of a file tree hash entry for each file presented here,
+
+    $path_depth = 0;  // figured by another routine which splits $current_path into path elements,
+
+    $indent = "";  // holds string built by another routine which uses value of path depth,
+
+
+    $non_hidden_path_elements = "";  // specific link to handle leading path elements which contain only one file each,
+
+    $url = "";              // Uniform Resource Locator, generally a web address,
+
+    $file_count_note = "";  // part of link text,
+
+    $link_text = "";        // text which appears on web document for given URL,
+
+    $link = "";             // combined URL, link text and mark-up for formatting,
+
+
+    $files_in_cwd = null;
+
+    $hash_of_symlinks = null;  // holds list of symlink plus filename pairs, for use with phpThumb calls,
+
+
+    $phpThumb = null;
+    $thumbnail_width = 50;
+    $filename_for_thumbnail = "";
+    $output_filename = "";     // used as parameter to local phpThumb object,
+    $path_to_thumbnail = "";   // points to file which to which $output_filename ultimately refers, but relative path differs,
+    $link_to_thumbnail = "";
+
+
+// diagnostics:
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_options  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_OFF;
+
+    $dflag_source_of_cwd      = DIAGNOSTICS_OFF;
+    $dflag_visible_path_depth = DIAGNOSTICS_OFF;
+    $dflag_indent_string      = DIAGNOSTICS_OFF;
+    $dflag_show_hash_files_in_cwd = DIAGNOSTICS_OFF;
+    $dflag_symlink_names      = DIAGNOSTICS_OFF;
+    $dflag_php_thumb          = DIAGNOSTICS_OFF;
+
+    $rname = "present_directories_with_file_counts_v1";
+
+// VAR END
+
+
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+{
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_dev      = DIAGNOSTICS_OFF;
+    $dflag_options  = DIAGNOSTICS_OFF;
+    $dflag_warning  = DIAGNOSTICS_OFF;
+
+    $dflag_source_of_cwd      = DIAGNOSTICS_OFF;
+    $dflag_visible_path_depth = DIAGNOSTICS_OFF;
+    $dflag_indent_string      = DIAGNOSTICS_OFF;
+    $dflag_show_hash_files_in_cwd = DIAGNOSTICS_OFF;
+    $dflag_symlink_names      = DIAGNOSTICS_OFF;
+    $dflag_php_thumb          = DIAGNOSTICS_OFF;
+}
+
+
+// Look for current working directory in a couple of places:
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR, $_GET) )
+    {
+        show_diag($rname, "obtaining current working directory via HTTP get method . . .", $dflag_source_of_cwd);
+        $cwd = $_GET[KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $_SESSION) )
+    {
+        show_diag($rname, "obtaining current working directory via PHP session variable . . .", $dflag_source_of_cwd);
+        $cwd = $_SESSION[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__CWD, $options) )
+    {
+        show_diag($rname, "obtaining current working directory via options from caller . . .!", $dflag_source_of_cwd);
+        $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
+    }
+    else    
+    {
+        show_diag($rname, "- WARNING - couldn't find current working directory via HTTP get method,", $dflag_warning);
+        show_diag($rname, "  +  or other means.  Falling back to current working directory from first", $dflag_warning);
+        show_diag($rname, "  +  entry in file tree hash:", $dflag_warning);
+        $cwd = $file_hierarchy[0][FILE_PATH_IN_BASE_DIR];
+    }
+
+
+
+    if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
+    {
+        $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS];
+    }
+    else
+    {
+        $hide_first_n_path_elements = 0;
+    }
+
+
+
+    show_diag($rname, "starting,", $dflag_announce);
+
+    show_diag($rname, "- 2018-02-22 - ROUTINE IMPLEMENTATION UNDERWAY -", $dflag_dev);
+    show_diag($rname, "received \$options hash which holds:", $dflag_options);
+    if ( $dflag_options )
+    {
+        echo "<pre>\n";
+        print_r($options);
+        echo "</pre>\n";
+    }
+//    show_diag($rname, "-", $dflag_dev);
+
+
+
+//----------------------------------------------------------------------
+// - STEP - show initial not-hidden file tree path elements
+//----------------------------------------------------------------------
+
+// Note - library-calling code normally sets number of leading path
+//  +  elements to hide:
+//    $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS] = 1;
+    $non_hidden_path_elements =& link_to_first_non_hidden_path_elements($rname, $options);
+
+    echo $non_hidden_path_elements;
+
+
+//----------------------------------------------------------------------
+// - STEP - show files of file tree which are directories
+//----------------------------------------------------------------------
+
+    {
+        foreach ( $file_hierarchy as $key => $file_entry )
+        {
+            if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+            {
+
+                $current_path = $file_entry[FILE_PATH_IN_BASE_DIR] . "/" . $file_entry[FILE_NAME];
+
+
+// - STEP - build indent based on file depth in present file tree:
+
+                $path_depth =& visible_path_depth($rname, $current_path, $options);
+                show_diag($rname, "called for and got back visible path depth of $path_depth,", $dflag_visible_path_depth);
+
+                $indent =& nbsp_based_indent($rname, $path_depth, 0);
+                show_diag($rname, "and indent string '$indent',", $dflag_indent_string);
+
+
+// - STEP - build URL:
+
+                $url = &url_of_file_tree_intermediate_path($caller, $current_path, $options);
+
+
+// - STEP - build link text:
+
+                $link_text = $file_entry[FILE_NAME];
+
+                if ( $file_entry[FILE_COUNT] > 0 )
+                {
+//                    echo $file_entry[FILE_NAME] . " (" . $file_entry[FILE_COUNT] . ")<br >\n";
+                    $file_count_note = "(" . $file_entry[FILE_COUNT] . ")<br >\n";
+                }
+                elseif ( $file_entry[FILE_COUNT] == 0 )
+                {
+//                    echo $file_entry[FILE_NAME] . " . . .<br >\n";
+                    $file_count_note = ". . .<br >\n";
+                }
+                else
+                {
+//                    echo $file_entry[FILE_NAME] . " (<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                    $file_count_note = "(<font color=\"red\">" . $file_entry[FILE_COUNT] . "</font>) d'oh wonky file count value, should not be negative!<br >\n";
+                }
+
+                $link_text = "$link_text $file_count_note";
+
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Note:  PHP implements loose comparison operator '==' and strict
+//  comparison operation '==='.  For more details and useful truth
+//  tables see PHP on-line document at:
+//
+//    *  http://php.net/manual/en/types.comparisons.php#types.comparisions-loose
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                if ( $current_path === $cwd )
+                {
+                    $url = "<b><a href=\"$url\">$link_text</a></b>";
+                }
+                else
+                {
+                    $url = "<a href=\"$url\">$link_text</a>";
+                }
+
+
+                if ( strlen($indent) > 0 )
+                {
+                    $link = "$indent $url";
+                }
+                else
+                {
+                    $link = $url;
+                }
+
+
+                echo $link;
+
+
+//
+// - STEP - show files in current working directory:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                if ( $current_path === $cwd )
+                {
+                    $files_in_cwd =& hash_of_files_in_cwd($rname, $file_hierarchy, $options);
+
+                    show_diag($rname, "unsorted files in current working directory include:",
+                      $dflag_show_hash_files_in_cwd);
+                    if ( $dflag_show_hash_files_in_cwd )
+                    {
+                        echo "<pre>\n";
+//            print_r($files_in_cwd);
+                        foreach ( $files_in_cwd as $key => $entry )
+                        {
+                            echo "[$key] => '" . $entry[FILE_NAME] . "'\n";
+                        }
+                        echo "</pre>\n";
+                    } // end local scope
+
+
+//                    present_images_as_thumbnails($rname, $files_in_cwd, $options);
+
+
+                    $hash_of_symlinks = create_symlinks_with_safe_names($rname, $cwd, $options);
+
+                    if ( $dflag_symlink_names )
+                    {
+                        show_diag($rname, "got back hash containing in part these symbolic links:",
+                          $dflag_symlink_names);
+                        echo "<pre>\n";
+                        foreach ( $hash_of_symlinks as $key => $entry )
+                        {
+                            echo "$key => '" . $entry[KEY_NAME__FILENAME] . " --> " . $entry[KEY_NAME__SYMLINK_NAME] . "'<br />\n";
+                        }
+                        echo "</pre>\n";
+                    }
+
+
+//
+// - STEP - show thumbnails of image files in current working directory
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// NEED:  to make this into its own routine . . .
+
+//                    present_images_as_thumbnails($rname, $hash_of_symlinks, $cwd, $options);
+                    present_images_as_thumbnails_with_md5_hashes($rname, $hash_of_symlinks, $cwd, $options);
+
+
+// Thumbnails have now been created,
+
+//                    echo "<br /> <br />\n";
+
+if (0)
+{
+                    foreach ( $hash_of_symlinks as $key => $entry )
+                    {
+                        $filename_for_thumbnail = preg_replace('/z-tn--/', 'thumbnail--', $entry[KEY_NAME__SYMLINK_NAME]);
+                        $path_to_thumbnail = "./lib/phpThumb/thumbnails/$filename_for_thumbnail";
+
+                        $link_to_thumbnail = "<img border=\"1\" src=\"$path_to_thumbnail\" width=\"*\" alt=\"image thumbnail at hash entry $key\">\n";
+ 
+                        echo $link_to_thumbnail;
+                    }
+
+                    echo "<br /> <br />\n";
+}
+
+
+                } // end IF-statement $current_path equals $cwd
+
+            } // end IF-statement to test whether present file is a directory
+
+        } // end FOREACH construct to iterate over entries of file tree hierarchy
+
+    } // end local scope
+
+
+    show_diag($rname, "returning . . .", $dflag_announce);
+
+} // end function present_directories_with_file_counts_v1()
+
+
+
+
+
 function present_directories_with_file_counts($caller, $file_hierarchy, $options)
 {
 //----------------------------------------------------------------------
@@ -3138,6 +3482,11 @@ if (0)
     show_diag($rname, "returning . . .", $dflag_announce);
 
 } // end function present_directories_with_file_counts()
+
+
+
+
+
 
 
 
