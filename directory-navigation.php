@@ -35,8 +35,8 @@
 //
 //    [x]  ensure that following variables,
 //
-//    $site = "https://neelanurseries.com";
-//    $path_from_doc_root = "sandbox";
+//    $site = "https://website.com";
+//    $path_from_doc_root = "zero_or_more_path_elements";
 //    $script_name = $options["script_name"];
 //
 //         are assigned values in the most sensible and scalable
@@ -283,10 +283,12 @@ function &file_tree_view_mode_urls($rname, $options)
 
 // VAR BEGIN
 
-    $site = "https://neelanurseries.com";
-    $path_from_doc_root = "sandbox";
-    $script_name = $options["script_name"];
     $url = "";
+
+// 2018-03-14 - NEED TO CHECK THAT THESE VALUES ARE PASSED TO THIS FUNCTION:
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+    $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
 
 // variables to hold 'GET' method values appended to each URL:
     $basedir = "";
@@ -1146,7 +1148,7 @@ if ( 1 )
 //            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
 
             $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
-// PHP Notice:  Only variables should be assigned by reference in /var/www/neelanurseries.com/public_html/lib/php/directory-navigation.php on line 1086
+// PHP Notice:  Only variables should be assigned by reference in ./lib/php/directory-navigation.php on line 1086
 //            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
 
             $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
@@ -1533,10 +1535,12 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
 
     $indent = "";
     $html_two_space_indent = "&nbsp;&nbsp;";
+
+// NEED TO CHECK THAT OPTIONS VALUES PASSED TO US HERE:
     $url = "";
-    $site = "https://neelanurseries.com";
-    $path_from_doc_root = "sandbox";
-    $script_name = $options["script_name"];
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+    $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
 
 
 
@@ -2483,8 +2487,10 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
 // variables this function expects from external sources, e.g. PHP
 // session var or HTTP get method, or other:
-    $site = "https://neelanurseries.com";
-    $path_from_doc_root = "sandbox";
+
+// NEED TO CHECK THESE VALUES PASSED TO US HERE:
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+    $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
     $script_name = $options["script_name"];
     $basedir = "";
     $cwd = "";
@@ -3558,8 +3564,10 @@ function present_files_in_selected_view($caller, $file_hierarchy, $options)
     $files_in_cwd = array();
 
     $url = "";
-    $site = "https://neelanurseries.com";
-    $path_from_doc_root = "sandbox";
+
+// 2018-03-14 - NEED TO CHECK THAT THESE VALUES ARE PASSED TO THIS FUNCTION:
+    $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+    $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
     $script_name = $options["script_name"];
 
 //    $base_directory = "";  // NOTE THERE IS A VARIABLE NAMED 'basedir' IN THIS FUNCION - TMH
