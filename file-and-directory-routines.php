@@ -415,7 +415,7 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 //    $scripts_path = getcwd();
 //    show_diag($rname, "script's current path is '$scripts_path',", $dflag_dev);
 
-    show_diag($rname, "working in path '$callers_path',", $dflag_dev);
+    show_diag($rname, "working in calling code path '$callers_path',", $dflag_dev);
 
     if ( array_key_exists(KEY_NAME__SYMBOLIC_LINK_PREFIX, $options) )
     {
@@ -568,9 +568,24 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
                         {
                             show_diag($rname, "$RF symlink '$symlink_name' not yet noted,", $dflag_note_symlink);
 
-// create an absolute or relative path to new symlink:
+//
+// - STEP - create an absolute or relative path to new symlink:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// NOTE:  \$_SERVER[PWD] works on some hosts, but may introduce a path
+//  that's not shown or obvious at the shell prompt of a given host.
+//  QUESTION can we detect this and respond dynamically, and make a
+//  substitution which produces a path that succeeds in call to
+//  create symbolic link? . . .
+//
+//  A further test running PHP at command line shows that \$_SERVER[PWD]
+//  sometimes differs when run from command line versus called by
+//  Apache2 or other web server.  Looks like \$_SERVER[DOCUMENT_ROOT]
+//  may also hold the partial path we need to create a valid path
+//  for our call to create a new symlink.  Let's try:
+//
                             $current_path_and_symlink = "$callers_path/$symlink_name";
-                            $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
+//                            $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
+                            $current_path_and_symlink = $_SERVER[DOCUMENT_ROOT] . "/" . $current_path_and_symlink;
 
                             show_diag($rname, "$RF <b>noting this symlink</b> in hash of symlinks and respective files . . .",
                               $dflag_note_symlink);
