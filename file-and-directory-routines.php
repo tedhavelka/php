@@ -388,7 +388,7 @@ function &create_symlinks_with_safe_names($caller, $callers_path, $options)
 // VAR END
 
 
-//if ( 0 )
+// if ( 0 )
 if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
@@ -423,11 +423,11 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
     }
 
 
-    show_diag($rname, "-----", $dflag_debugging_extended);
-    show_diag($rname, "Extended debugging 2018-03-05 - issue with defined constants,", $dflag_debugging_extended);
-    $lbuf = "In spite of nn defines file include, constant 'KEY_NAME__FILE_NAME' holds '".KEY_NAME__FILE_NAME."',";
-    show_diag($rname, $lbuf, $dflag_debugging_extended);
-    show_diag($rname, "-----", $dflag_debugging_extended);
+//    show_diag($rname, "-----", $dflag_debugging_extended);
+//    show_diag($rname, "Extended debugging 2018-03-05 - issue with defined constants,", $dflag_debugging_extended);
+//    $lbuf = "In spite of nn defines file include, constant 'KEY_NAME__FILE_NAME' holds '".KEY_NAME__FILE_NAME."',";
+//    show_diag($rname, $lbuf, $dflag_debugging_extended);
+//    show_diag($rname, "-----", $dflag_debugging_extended);
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -603,8 +603,15 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
                                 {
                                     ++$count_symlinks_created;
                                 }
+                                else
+                                {
+                                    show_diag($rname, "- WARNING - unable to create symbolic link '$current_path_and_symlink',",
+                                      $dflag_warning);
+                                    show_diag($rname, "+ WARNING - other script or code may expect this symlink later.",
+                                      $dflag_warning);
+                                }
 
-                                show_diag($rname, "$RF call to PHP symlink() returns '$symlink_result',",
+                                show_diag($rname, "$RF call to PHP symlink() returns '$symlink_result', per PHP docs returns 1 on success,",
                                   $dflag_create_symlink);
                                 show_diag($rname, "$RF -", $dflag_create_symlink);
                             }
