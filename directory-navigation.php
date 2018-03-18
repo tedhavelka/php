@@ -2338,9 +2338,11 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
     $lbuf = "";
     $dflag_announce  = DIAGNOSTICS_ON;
     $dflag_dev       = DIAGNOSTICS_ON;
+    $dflag_cwd       = DIAGNOSTICS_ON;
     $dflag_php_thumb = DIAGNOSTICS_OFF;
     $dflag_unsupported_file = DIAGNOSTICS_ON;
     $dflag_symlink_count_in_hash = DIAGNOSTICS_ON;
+    $dflag_show_hash_of_symlinks = DIAGNOSTICS_ON;
     $dflag_not_jpg               = DIAGNOSTICS_ON;
     $dflag_phpthumb_src_path     = DIAGNOSTICS_OFF;
 
@@ -2349,21 +2351,23 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
 // VAR END
 
 
-//if (0)
-if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+if (0)
+//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
     $dflag_dev       = DIAGNOSTICS_OFF;
+    $dflag_cwd       = DIAGNOSTICS_OFF;
     $dflag_php_thumb = DIAGNOSTICS_OFF;
     $dflag_unsupported_file = DIAGNOSTICS_OFF;
     $dflag_symlink_count_in_hash = DIAGNOSTICS_OFF;
+    $dflag_show_hash_of_symlinks = DIAGNOSTICS_OFF;
     $dflag_not_jpg               = DIAGNOSTICS_OFF;
     $dflag_phpthumb_src_path     = DIAGNOSTICS_OFF;
 }
 
 
     show_diag($rname, "starting,", $dflag_announce);
-    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_dev);
+    show_diag($rname, "working with \$cwd set to '$cwd',", $dflag_cwd);
 
     {
         $phpThumb = new phpThumb();
@@ -2372,6 +2376,13 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
         show_diag($rname, "received hash of symlinks with ".count($hash_of_symlinks)." entries,",
           $dflag_symlink_count_in_hash);
+
+        if ( $dflag_show_hash_of_symlinks )
+        {
+echo "caller sends us hash of symblic links holding:<br />\n<pre>\n";
+print_r($hash_of_symlinks);
+echo "</pre>\n<br />\n";
+        }
 
         foreach ( $hash_of_symlinks as $key => $entry )
         {
@@ -2416,8 +2427,26 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
 //                show_diag($rname, "using most of server's SCRIPT_NAME, script $cwd and symlink built path to image:", $dflag_phpthumb_src_path);
 
+// NEED TO FIX THIS HARD_CODED TEXT REPLACEMENT:
 // 2018-03-05 - Working on correct relative path for local phpThumb library installation at nn:
 $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to_image);
+
+//
+//
+//  The basedir passed to this script is relative to the script.  The
+//  script also calls this PHP library which is a neighbor of phpThumb
+//  sources.  If this script has a relative path to its images like
+//  this:
+//
+//     /script
+//         +---images
+//         +---lib/php
+//         +---lib/phpThumb/images
+//
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
 
 
 
