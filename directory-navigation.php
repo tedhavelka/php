@@ -881,6 +881,8 @@ if ( 1 )
     {
         show_diag($rname, "- WARNING - caller's base directory doesn't appear to be valid!",
           $dflag_warning);
+        show_diag($rname, "- WARNING - got path '$base_directory' pointing to base directory",
+          $dflag_warning);
         show_diag($rname, "- WARNING - returning early . . .",
           $dflag_warning);
         return;
