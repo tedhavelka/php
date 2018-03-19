@@ -213,6 +213,7 @@
 //----------------------------------------------------------------------
 
 // * REF * http://www.learnlayout.com/position.html
+//  HTML block element position attribute include:  static, relative, fixed, absolute;  HTML default is 'static'
     define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_STATIC", "static");
     define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_RELATIVE", "relative");
     define("KEY_VALUE__BLOCK_ELEMENT_ATTRIBUTES__POSITIONING_FIXED", "fixed");

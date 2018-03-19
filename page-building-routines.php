@@ -380,7 +380,7 @@ function send_html_body_open($caller, $options)
 
 // - STEP - build web document opening body statement:
 
-    if ( strlen($web_page_body_background > 0) )
+    if ( strlen($web_page_body_background) > 0 )
     {
         $style = "style=\"" . $options[KEY_NAME__ATTRIBUTES_BLOCK__BACKGROUND] . "\"";
 
