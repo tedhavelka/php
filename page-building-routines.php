@@ -85,11 +85,50 @@ function send_html_document_closing_lines($caller)
 
 
 
+/*
 function open_body($caller)
 {
 // 2017-10-19 - added by Ted
     echo "<body>\n";
 }
+*/
+
+
+
+function open_body($caller, $options)
+{
+
+    $web_page_body_background = "";
+    $style = "";
+    $html = "";
+
+    $rname = "open_body";
+
+
+// - STEP - query passed options hash for style and other document body attributes:
+
+    if (array_key_exists(KEY_NAME__ATTRIBUTES_BLOCK__BACKGROUND, $options) )
+    {
+        $web_page_body_background = $options[KEY_NAME__ATTRIBUTES_BLOCK__BACKGROUND];
+    }
+
+
+// - STEP - build web document opening body statement:
+
+    if ( strlen($web_page_body_background > 0) )
+    {
+        $style = "style=\"" . $options[KEY_NAME__ATTRIBUTES_BLOCK__BACKGROUND] . "\"";
+
+        $html = "<body $style>\n";
+    }
+    else
+    {
+        $html = "<body>\n";
+    }
+
+    echo $html;
+
+} // end function open_body()
 
 
 

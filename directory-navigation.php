@@ -504,8 +504,8 @@ function present_file_tree_view_mode_links($caller, $options)
     $array_of_view_modes = array();
     $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
     $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
-    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
-    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR;
+//    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
+//    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR;
 
     $options[ARRAY_NAME__ARRAY_OF_VIEW_MODES] = $array_of_view_modes;
 
