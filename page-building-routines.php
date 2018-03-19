@@ -358,14 +358,14 @@ function send_html_body_open($caller)
 
 
 
-function send_html_open_body($caller, $options)
+function send_html_body_open($caller, $options)
 {
 
     $web_page_body_background = "";
     $style = "";
     $html = "";
 
-    $rname = "open_body";
+    $rname = "send_html_body_open";
 
 
 // - STEP - query passed options hash for style and other document body attributes:
@@ -391,7 +391,7 @@ function send_html_open_body($caller, $options)
 
     echo $html;
 
-} // end function open_body()
+} // end function send_html_body_open()
 
 
 
