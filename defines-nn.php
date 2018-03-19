@@ -235,6 +235,8 @@
     define("KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH_LEFT", "doc_section_margin_width_left");
     define("KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH_RIGHT", "doc_section_margin_width_right");
 
+    define("KEY_NAME__DOC_LAYOUT__DOCUMENT_SECTION_WIDTH_IN_PERCENT", "document_section_width_in_percent");
+
 
 // QUESTION should we rename this key to match following three keys? . . . TMH
     define("KEY_NAME__DOC_LAYOUT__CONTENT_COLUMN__BLOCK_ELEMENT_NAME", "block_element_name");
