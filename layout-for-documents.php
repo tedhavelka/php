@@ -262,6 +262,16 @@ function open_document_section_with_margin_block_elements($caller, $options)
     }
 
 
+    $padding_top = "";
+    $padding_bottom = "";
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_TOP, $options) )
+        { $padding_top = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_TOP]; }
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_BOTTOM, $options) )
+        { $padding_top = $options[KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_BOTTOM]; }
+
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - create div element to clear prior HTML position attributes:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -289,7 +299,8 @@ function open_document_section_with_margin_block_elements($caller, $options)
 // - STEP - create div element for center column content:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    echo "   <div style=\"float:left; $attr_width $attr_min_height $attr_border\"><!-- document section, middle column -->
+//    echo "   <div style=\"float:left; $attr_width $attr_min_height $attr_border\"><!-- document section, middle column -->
+    echo "   <div style=\"float:left; $attr_width $attr_min_height $attr_border $padding_top $padding_bottom\"><!-- document section, middle column -->
 ";
 
 

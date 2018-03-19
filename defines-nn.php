@@ -243,7 +243,11 @@
     define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_VERTICAL_HEIGHT_IN_PX", "block_element_minimum_height_in_pixels");
     define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_WIDTH", "block_element_width");
 
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_TOP", "block_element_padding_top");
+    define("KEY_NAME__DOC_LAYOUT__BLOCK_ELEMENT_PADDING_BOTTOM", "block_element_padding_bottom");
+
     define("KEY_NAME__DOC_LAYOUT__SEND_HORIZONTAL_BREAK_OF_WIDTH", "horizontal_break_of_width");
+
 
 
 // 2017-11-08 - TO BE IMPLEMENTED, KEYS POINTING TO PAGE-LOAD-WISE RUNNING COUNTS OF SPECIFIC ROUTINE CALLS:
