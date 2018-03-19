@@ -2353,8 +2353,8 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
 // VAR END
 
 
-if (0)
-//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+// if (0)
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
     $dflag_dev       = DIAGNOSTICS_OFF;

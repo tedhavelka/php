@@ -101,25 +101,58 @@ function ___place_holder___
 */
 
 
-function nav_menu_layout__opening_lines($caller) {
+function nav_menu_layout__opening_lines($caller, $options)
+{
 
-// <div class=\"container\">
+    $mark_margins_with = "";
+
+    if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH, $options) )
+        { $mark_margins_with = $options[KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH]; }
+
     echo "<!-- BEGIN LAYOUT for Neela Nurseries top menu, navigation bar -->
 <div class=\"container\">
   <div class=\"menu-bar-top\">
     <div class=\"menu-block-element-as-margin\">
-      <font color=\"#ffffff\"> . . . </font>
-    </div>\n\n";
+";
+
+    if ( strlen($mark_margins_with) > 0 )
+    {
+//      <font color=\"#ffffff\"> . . . </font>
+        echo "      <font color=\"#ffffff\">$mark_margins_with</font>\n";
+    }
+    else
+    {
+        echo "&nbsp;\n";
+    }
+
+echo "    </div>\n\n";
 
 }
 
 
 
 
-function nav_menu_layout__closing_lines($caller)
+function nav_menu_layout__closing_lines($caller, $options)
 {
-    echo "    <div class=\"menu-block-element-as-margin\">
-      <font color=\"#ffffff\"> . . . </font>
+
+    $mark_margins_with = "";
+
+    if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH, $options) )
+        { $mark_margins_with = $options[KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH]; }
+
+    echo "    <div class=\"menu-block-element-as-margin\">\n";
+
+    if ( strlen($mark_margins_with) > 0 )
+    {
+//        echo "      <font color=\"#ffffff\"> . . . </font>\n";
+        echo "      <font color=\"#ffffff\">$mark_margins_with</font>\n";
+    }
+    else
+    {
+        echo "&nbsp;\n";
+    }
+
+    echo "
     </div>
   </div><!-- close of div element of type 'menu-bar-top' for menu bar 1 -->
 </div><!-- close of div element of type 'container' -->
@@ -415,7 +448,7 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
 
 // - STEP - send navigation menu mark-up opening lines:
 
-    nav_menu_layout__opening_lines($rname);
+    nav_menu_layout__opening_lines($rname, $options);
 
     $last_item = count($menu_items);
 
@@ -482,7 +515,7 @@ function nn_horizontal_navigation_menu($caller, $base_url, $include_path, $exclu
         }
     }
 
-    nav_menu_layout__closing_lines($rname);
+    nav_menu_layout__closing_lines($rname, $options);
 
     echo "done.$term$term$term";
 
@@ -624,7 +657,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 
     $last_item = count($hash_reference);   // NOTE this assignment assumes all keys point to complete valid menu item entries in caller's hash.
 
-    nav_menu_layout__opening_lines($rname);
+    nav_menu_layout__opening_lines($rname, $options);
 
 
     foreach ($hash_reference as $key => $value)
@@ -688,7 +721,7 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
     }
 
 
-    nav_menu_layout__closing_lines($rname);
+    nav_menu_layout__closing_lines($rname, $options);
 
 
 
@@ -885,6 +918,7 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 // diagnostics for code to hide current working directory from showing in navigation menu:
     $dflag_hide_cwd = DIAGNOSTICS_OFF;
     $dflag_hide_item_tests = DIAGNOSTICS_OFF;
+    $dflag_mark_for_nav_menu_margin = DIAGNOSTICS_OFF;
 
     $loop_counter = 0;
 
@@ -939,6 +973,13 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
     show_diag($rname, "starting,", $dflag_announce);
 
     show_diag($rname, "ROUTINE UNDER DEVELOPMENT<br />\n<br />", $dflag_dev);
+
+    if ( $dflag_mark_for_nav_menu_margin )
+    {
+        $lbuf = "caller sends mark for nav menu margin of '" . 
+          $options[KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH] . "'";
+        show_diag($rname, $lbuf, $dflag_mark_for_nav_menu_margin);
+    }
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1452,7 +1493,8 @@ if ( $dflag_parse_file_text )
 // links with horizontal (could be vertical or otherwise) CSS layout
 // and HTML tags for layout and formatting . . .
 
-    present_menu_from_hash_of_hashes($rname, $nav_links, "--no-options");
+//    present_menu_from_hash_of_hashes($rname, $nav_links, "--no-options");
+    present_menu_from_hash_of_hashes($rname, $nav_links, $options);
 
 
     show_diag($rname, "Just presented navigation menu per built hash, PHP print_r() shows that hash contains:",

@@ -130,6 +130,8 @@
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS", "site_navigation_diagnostics");
     define("KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS_DETAILED", "site_navigation_diagnostics_detailed");
 
+    define("KEY_NAME__SITE_NAVIGATION__MARK_MARGINS_WITH", "mark_nav_menu_margins_with");
+
 
 
 //----------------------------------------------------------------------
@@ -406,6 +408,8 @@
 //----------------------------------------------------------------------
 
     define("KEY_NAME__ATTRIBUTES_BLOCK__BACKGROUND", "background");
+    define("KEY_NAME__ATTRIBUTES_BLOCK__LINEAR_GRADIENT_COLOR_1", "linear_gradient_color_1");
+    define("KEY_NAME__ATTRIBUTES_BLOCK__LINEAR_GRADIENT_COLOR_2", "linear_gradient_color_2");
 
 
 
