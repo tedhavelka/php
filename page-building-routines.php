@@ -332,11 +332,13 @@ function nn_build_footer_v2($caller, $options)
         echo "<div style=\"clear:left; position:$block_element_positioning; width:100%; text-align:$text_alignment; font-size:$text_size_as_percentage; font-style:$text_element_style; padding-top:2em; padding-bottom:2em; background:$background_style\">
 ";
 
-    if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
+//    if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
 
     if ( strlen($line_1) > 0 ) { echo $line_1 . $term; }
     if ( strlen($line_2) > 0 ) { echo $line_2 . $term; }
     if ( strlen($line_3) > 0 ) { echo $line_3 . $term; }
+
+    if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
 
         echo"</div>
 <!-- document footer close -->\n\n";
