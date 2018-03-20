@@ -582,11 +582,17 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 //  Apache2 or other web server.  Looks like \$_SERVER[DOCUMENT_ROOT]
 //  may also hold the partial path we need to create a valid path
 //  for our call to create a new symlink.  Let's try:
-//
-                            $current_path_and_symlink = "$callers_path/$symlink_name";
-//                            $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
-                            $current_path_and_symlink = $_SERVER[DOCUMENT_ROOT] . "/" . $current_path_and_symlink;
 
+// step - concatenate symbolic link name with caller's path elements:
+                            $current_path_and_symlink = "$callers_path/$symlink_name";
+
+// step - concatenate trailing path elements and symlink with leading path elements:
+//                            $current_path_and_symlink = $_SERVER[PWD] . $current_path_and_symlink;
+//                            $current_path_and_symlink = $_SERVER[DOCUMENT_ROOT] . "/" . $current_path_and_symlink;
+                            $current_path_and_symlink = dirname($_SERVER[SCRIPT_FILENAME]) . "/$current_path_and_symlink";
+
+                            show_diag($rname, "$RF building full path to symbolic link:  $current_path_and_symlink",
+                              $dflag_note_symlink);
                             show_diag($rname, "$RF <b>noting this symlink</b> in hash of symlinks and respective files . . .",
                               $dflag_note_symlink);
 
