@@ -244,7 +244,7 @@
 // - SECTION - PHP functions
 //----------------------------------------------------------------------
 
-function &file_tree_view_mode_urls($rname, $options)
+function &file_tree_view_mode_urls($caller, $options)
 {
 //----------------------------------------------------------------------
 //
@@ -288,6 +288,7 @@ function &file_tree_view_mode_urls($rname, $options)
 // 2018-03-14 - NEED TO CHECK THAT THESE VALUES ARE PASSED TO THIS FUNCTION:
     $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
     $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $site_and_path_from_doc_root = "";
     $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
 
 // variables to hold 'GET' method values appended to each URL:
@@ -376,6 +377,14 @@ function &file_tree_view_mode_urls($rname, $options)
     $array_of_urls = array();
 
 
+
+// Account for zero-length path from document root:
+    if ( strlen($path_from_doc_root) > 0 )
+        { $site_and_path_from_doc_root = $site . "/" . $path_from_doc_root; }
+    else
+        { $site_and_path_from_doc_root = $site; }
+
+
 // DIAG:
 
     if ( $dflag_view_modes )
@@ -410,7 +419,8 @@ function &file_tree_view_mode_urls($rname, $options)
 //  Firefox 52.2.0's page source view marking these in red . . .
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        $url = "$site/$path_from_doc_root/$script_name?"
+//        $url = "$site/$path_from_doc_root/$script_name?"
+        $url = "$site_and_path_from_doc_root/$script_name?"
           . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
 //          . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir%26"
           . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd&"
@@ -1569,6 +1579,7 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
     $url = "";
     $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
     $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $site_and_path_from_doc_root = "";
     $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
 
 
@@ -1593,6 +1604,14 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
 
 
 
+// Account for zero-length path from document root:
+    if ( strlen($path_from_doc_root) > 0 )
+        { $site_and_path_from_doc_root = $site . "/" . $path_from_doc_root; }
+    else
+        { $site_and_path_from_doc_root = $site; }
+
+
+
     foreach ($file_hierarchy as $key => $noted_file)
     {
         $name = $noted_file[FILE_NAME];
@@ -1608,14 +1627,16 @@ function present_files($caller, $file_hierarchy, $options)  // older function, T
         if ( $type == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
         {
 //            $url = $site . "/" . $path_from_doc_root . "/" . $path . "/" . $name;
-            $url = $site . "/" . $path_from_doc_root . "/$script_name?base_dir=$path/$name";
+//            $url = $site . "/" . $path_from_doc_root . "/$script_name?base_dir=$path/$name";
+            $url = "$site_and_path_from_doc_root/$script_name?base_dir=$path/$name";
             echo "($key) <a href=\"$url\">$name</a><br />\n";
         }
 
         if ( $type == KEY_VALUE__FILE_TYPE__IS_FILE )
         {
             $name = preg_replace('/#/', '%23', $name);
-            $url = $site . "/$path_from_doc_root/$path/$name";
+//            $url = $site . "/$path_from_doc_root/$path/$name";
+            $url = "$site_and_path_from_doc_root/$path/$name";
             echo "($key) <a href=\"$url\">$name</a><br />\n";
         }
 
@@ -1758,9 +1779,8 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 // sets up . . .
 
     $site = "";
-
     $path_from_doc_root = "";
-
+    $site_and_path_from_doc_root = "";
     $basedir = "";
 
 //    $cwd . . . not the same as calling code's path, \$cwd is the end user's latest selected directory or file.
@@ -1893,6 +1913,14 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
     show_diag($rname, "hiding first $hide_first_n_path_elements path elements,", $dflag_dev);
 
 
+// Account for zero-length path from document root:
+    if ( strlen($path_from_doc_root) > 0 )
+        { $site_and_path_from_doc_root = $site . "/" . $path_from_doc_root; }
+    else
+        { $site_and_path_from_doc_root = $site; }
+
+
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - get elements of path from base dir to current working dir:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1935,7 +1963,8 @@ function &url_of_file_tree_intermediate_path($caller, $callers_path, $options)
 //                  $dflag_indent_string);
 //                $indent =& nbsp_based_indent($rname, $path_depth, 0);
 
-                $url = "$site/$path_from_doc_root/$script_name?";
+//                $url = "$site/$path_from_doc_root/$script_name?";
+                $url = "$site_and_path_from_doc_root/$script_name?";
 
                 if ( strlen($view_mode) > 0 )
                 {
@@ -2021,6 +2050,7 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
     $site = "";
     $script_name = "";
     $path_from_doc_root = "";
+    $site_and_path_from_doc_root = "";
     $view_mode = "";
     $base_dir = "";
     $cwd = "";
@@ -2049,6 +2079,13 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
     $cwd = $options[KEY_NAME__DIRECTORY_NAVIGATION__CWD];
 
 
+// Account for zero-length path from document root:
+    if ( strlen($path_from_doc_root) > 0 )
+        { $site_and_path_from_doc_root = $site . "/" . $path_from_doc_root; }
+    else
+        { $site_and_path_from_doc_root = $site; }
+
+
     if ( array_key_exists(KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS, $options) )
         { $hide_first_n_path_elements = $options[KEY_NAME__DIRECTORY_NAVIGATION__HIDE_FIRST_N_PATH_ELEMENTS]; }
     else
@@ -2071,7 +2108,8 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
 
 //
 
-        $url = $site . "/" . $path_from_doc_root . "/" . $script_name
+//        $url = $site . "/" . $path_from_doc_root . "/" . $script_name
+        $url = "$site_and_path_from_doc_root/$script_name"
           . "?" . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$base_dir"
           . "&" . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR . "=$view_mode"
           . "&" . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd";
@@ -2198,8 +2236,8 @@ function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
     {
         if ( $cwd === $entry[FILE_PATH_IN_BASE_DIR] )
         {
-            show_diag($rname, "adding file tree hash entry $key to hash of files in \$cwd,",
-              $dflag_dev);
+//            show_diag($rname, "adding file tree hash entry $key to hash of files in \$cwd,",
+//              $dflag_dev);
             $files_in_cwd[$key] = $entry;
         }
     }
@@ -2585,6 +2623,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 // NEED TO CHECK THESE VALUES PASSED TO US HERE:
     $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
     $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
+    $site_and_path_from_doc_root = "";
     $script_name = $options["script_name"];
     $basedir = "";
     $cwd = "";
@@ -2667,6 +2706,13 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
     }
 
     show_diag($rname, "starting,", $dflag_announce);
+
+
+// Account for zero-length path from document root:
+    if ( strlen($path_from_doc_root) > 0 )
+        { $site_and_path_from_doc_root = $site . "/" . $path_from_doc_root; }
+    else
+        { $site_and_path_from_doc_root = $site; }
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2796,7 +2842,8 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
                   $dflag_indent_string);
 
                 $indent =& nbsp_based_indent($rname, $path_depth, 0);
-                $url = "$site/$path_from_doc_root/$script_name?"
+//                $url = "$site/$path_from_doc_root/$script_name?"
+                $url = "$site_and_path_from_doc_root/$script_name?"
                   . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
                   . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path_intermediate";
 
@@ -2849,7 +2896,8 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
             {
 //                $url = "$site/$path_from_doc_root/$script_name?base_dir=$basedir&cwd=$path/$name";
 //                $url = "$site/$path_from_doc_root/$script_name?base_dir=$path/$filename";
-                $url = "$site/$path_from_doc_root/$script_name?"
+//                $url = "$site/$path_from_doc_root/$script_name?"
+                $url = "$site_and_path_from_doc_root/$script_name?"
                   . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&" 
                   . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$path/$filename";
                 $file_type_note = "(directory)";
@@ -2857,19 +2905,22 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
             elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_FILE )
             {
-                $url = "$site/$path_from_doc_root/$path/$filename";
+//                $url = "$site/$path_from_doc_root/$path/$filename";
+                $url = "$site_and_path_from_doc_root/$path/$filename";
                 $file_type_note = "(file)";
             }
 
             elseif ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
             {
-                $url = "$site/$path_from_doc_root/$path/$filename";
+//                $url = "$site/$path_from_doc_root/$path/$filename";
+                $url = "$site_and_path_from_doc_root/$path/$filename";
                 $file_type_note = "(symlink)";
             }
 
             else
             {
-                $url = "$site/$path_from_doc_root/$path/$filename";
+//                $url = "$site/$path_from_doc_root/$path/$filename";
+                $url = "$site_and_path_from_doc_root/$path/$filename";
                 $file_type_note = "(unrecognized file type)";
             }
 
@@ -3940,8 +3991,6 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 //    file systems this routine needs to be called once for each
 //    directory to show.
 //
-//
-//
 //----------------------------------------------------------------------
 
 // VAR BEGIN
@@ -4042,95 +4091,25 @@ function present_tree_view($caller, $base_directory, $options)  // <-- present t
 
 
 
-// --- END OF CODE ---
-
-
-
-// 2018-02-13 - Implementation notes from function build_tree() . . .
-
+function build_and_present_file_tree_view($caller, $base_directory, $options)
+{
 //----------------------------------------------------------------------
-// - NOTES - Nested loop 1 implementation
+// - 2018-03-20 TUE -
+// This function a clean up and more descriptive naming of the
+// previous function.  Contributor Ted prefers use of this function,
+// yet leaving older function intact for time being for reference
+// purposes.  - TMH
 //----------------------------------------------------------------------
 
-// The first nested loop takes a given path or directory and notes all
-// files in this path by adding them as data structure entries to a PHP
-// hash, also known as an 'ordered map'.  Loop 1 gives numeric keys to
-// the entries of this hash, which increment from 0 inclusive once for
-// each file noted.
-//
-// When all files have been noted by loop 1 then script execution moves
-// to loop 2, which searches the hash of files for directories.  For
-// each directory loop 2 finds it returns script execution to loop 1 so
-// that those directory's files are added to the hash.  Upon finding a
-// noted directory in the hash, however, loop 2 does not immediately
-// end and return control to loop 1, but rather checks all remaining
-// noted but not checked files in the hash.
-//
-// Loop 1 and loop 2 can see which files have been reviewed or checked 
-// by loop 2.  Loop 1 always adds all files in the current path.  The
-// key word here is 'all'.  In the first algorithm design,
-// loop 2 did not always check all files in the file tree hash.
-// Loop 2 wass designed to direct script execution back to loop one at
-// the first un-checked directory loop 2 finds in the hash.
-//
-// Because of this, on the second and successive times when loop 2
-// executes it may be checking a group of files which fall under two
-// or more distinct paths.  To update file counts per directory in
-// this scenario, loop 2 must compare strings -- file paths -- of each
-// file it checks.  It must compare file paths to noted directores
-// until a matchis found.  This is inefficient.  For loop 2 to know
-// up front in which directory its regular files are found, loop 2
-// needs to review all unchecked files every time it is visited.  Then
-// and only then is the case assured that loop 2 will have unchecked
-// files from one directory.
-//
-// To achieve this, loop 2 need keep track of which unchecked directory
-// it first encounters after loop 2 begins execution.  Loop 2 may find
-// multiple directories while checking hash entries during one of its
-// executions.  That is ok, so long as loop 2 is sure to check all
-// unchecked files, all directories, where the first un-checked
-// directory found is the path which is set before script execution
-// resumes at loop 1.
-//
-// To improve efficiency, loop 2 can skip hash entries before the
-// latest un-checked directory.  That is, loop 2 need not ask whether
-// files have been checked earlier in the hash than the latest
-// un-checked directory, because loop 2 checks all non-directory files
-// plus the latest un-checked directory, before the PHP interpreter
-// passes script control back to loop 1.
-//
+    $rname = "build_and_present_tree_view";
 
+    $file_hierarchy = array();
 
+    $file_hierarchy =& build_tree($caller, $base_directory, $options);
 
-// - 2018-02-15 - from function present_path_elements_and_files_of_cwd() . . .
+    present_files_in_selected_view($caller, $file_hierarchy, $options);
 
-//    show_diag($rname, "have following path to parse and show its elements:", $dflag_first_hash_entry);
-//    $lbuf = "'" . $files_in_cwd[0][FILE_PATH_IN_BASE_DIR] . "'";
-//    show_diag($rname, $lbuf , $dflag_first_hash_entry);
-//
-//    if ( $dflag_first_hash_entry )
-//    {
-//        show_diag($rname, "files in current working directory:" , $dflag_first_hash_entry);
-//        echo "<pre>\n";
-//        print_r($files_in_cwd);
-//        echo "</pre>\n";
-//    }
-
-
-
-//        if ( array_key_exists(KEY_NAME__BASE_DIRECTORY, $_SESSION) )
-//        {
-//            $path = $_SESSION[KEY_NAME__BASE_DIRECTORY];
-//        }
-//        else
-//        {
-//            show_diag($rname, "- WARNING - unable to determine base directory of calling code's", $dflag_warning);
-//            show_diag($rname, "- WARNING - file tree!  returning early . . .", $dflag_warning);
-//            return;
-//        }
-
-
-
+}
 
 // End of file directory-navigation.php
 
