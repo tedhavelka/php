@@ -169,6 +169,12 @@
     define("KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL", "site_uniform_resource_locator");
     define("KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL_ABBR", "site_url");
 
+// QUESTION 2018-03-20:  this keyname confusing, was this created to mean path from root to content files
+// to show?  Or path from document root to supporting or page building script?  At first this
+// key was used to aid in building complete, browser compatible paths to file content on given
+// web server.  In Neela Nurseries local PHP library it is being used in potentially two ways,
+// those way mentioned start of this note.  PHP's \$_SERVER hash may be a more sound and flexible
+// way for library routines to obtain path elements to build valid URLs for given web server . . . TMH
     define("KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT", "path_from_document_root");
     define("KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT_ABBR", "path_from_doc_root");
 

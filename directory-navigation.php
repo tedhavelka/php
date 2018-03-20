@@ -196,6 +196,9 @@
     require_once('/opt/nn/lib/phpThumb/phpThumb.config.php');
 
 
+    require_once('/opt/nn/lib/php/urls.php');
+
+
 
 //----------------------------------------------------------------------
 // - SECTION - PHP script constants
@@ -252,6 +255,13 @@ function &file_tree_view_mode_urls($caller, $options)
 //   calling script, a link for each supported file tree view mode.
 //   File tree view modes include:
 //
+//   *  showing files in current directory,
+//   *  showing counts and thumbnail images of files across all directories,
+//
+//   some view modes not yet implemented, but are named by PHP
+//   constants in this routine.
+//
+//
 //  EXPECTS:  to work propery this function at minimum needs to know
 //   the site for which it is generating mark-up and content, the
 //   path from the web document root to the script which calls this
@@ -287,8 +297,12 @@ function &file_tree_view_mode_urls($caller, $options)
 
 // 2018-03-14 - NEED TO CHECK THAT THESE VALUES ARE PASSED TO THIS FUNCTION:
     $site = $options[KEY_NAME__DIRECTORY_NAVIGATION__SITE_URL];
+
+// 2018-03-20 - Looking to replace these two variables by querying
+// +  PHP \$_SERVER hash:
     $path_from_doc_root = $options[KEY_NAME__DIRECTORY_NAVIGATION__PATH_FROM_DOC_ROOT];
     $site_and_path_from_doc_root = "";
+
     $script_name = $options[KEY_NAME__DIRECTORY_NAVIGATION__SCRIPT_NAME];
 
 // variables to hold 'GET' method values appended to each URL:
@@ -304,9 +318,9 @@ function &file_tree_view_mode_urls($caller, $options)
 
     $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
-    $dflag_var_basedir = DIAGNOSTICS_ON;
-    $dflag_view_modes  = DIAGNOSTICS_ON;
-    $dflag_url_contruction = DIAGNOSTICS_ON;
+    $dflag_var_basedir = DIAGNOSTICS_OFF;
+    $dflag_view_modes  = DIAGNOSTICS_OFF;
+    $dflag_url_contruction = DIAGNOSTICS_OFF;
 
     $rname = "file_tree_view_mode_urls";
 
@@ -435,6 +449,7 @@ function &file_tree_view_mode_urls($caller, $options)
 //  Firefox 52.2.0's page source view marking these in red . . .
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+/*
 //        $url = "$site/$path_from_doc_root/$script_name?"
         $url = "$site_and_path_from_doc_root/$script_name?"
           . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
@@ -443,6 +458,13 @@ function &file_tree_view_mode_urls($caller, $options)
 //          . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd%26"
           . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR
           . "=$view_mode";
+*/
+
+
+        $url = $_SERVER[SCRIPT_NAME] . "?"
+          . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . "=$basedir&"
+          . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . "=$cwd&"
+          . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR . "=$view_mode";
 
           array_push($array_of_urls, $url);
     }
