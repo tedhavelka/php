@@ -668,10 +668,37 @@ function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarch
 
 function nn_tree_browser_entry($caller)
 {
+//----------------------------------------------------------------------
 //
-// 2018-02-15 - NEED to add a few key+value pairs to the array built here,
-//   see call to this function in function named &build_tree():
 //
+//
+//  NOTES ON IMPLEMENTATION . . .
+//
+//   Some explanation of newer keys added to Neela Nurseries file tree
+//   hash entry, or data structure:
+//
+//   *  FILE_PATH_IN_BASE_DIR, the path from calling code's starting
+//      or base directory to the given file,
+//
+//   *  FILE_DEPTH_IN_BASE_DIR, number of directories or path elements
+//      between and including base dir to given file,
+//
+//   *  COUNT_OF_REGULAR_FILES, set to a default value of zero and
+//      changed only for files of type directory which themselves
+//      contain other files,
+//
+//   *  PARENT_HASH_ENTRY, as of 2018-03-20 TUE not used but put in
+//      place to capture the parent-child relationship of each file
+//      in given file tree hierarchy,
+//
+//   *  ENTRY_SHOWN, as in "file tree entry shown".  As of 2018-03-20
+//      not used, planned for an algorithm which involved multiple
+//      passes over file hierarchy, and possible need to track whether
+//      given file tree entry already presented in present web page.
+//
+//----------------------------------------------------------------------
+
+
 
     $tree_browser_hash_element = array(
       KEY_NAME__DIRECTORY_NAVIGATION__FILE_NAME => KEY_VALUE__DEFAULT_FILENAME,
@@ -2107,6 +2134,37 @@ function &link_to_first_non_hidden_path_elements($caller, $options)
 
 function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
 {
+//----------------------------------------------------------------------
+//
+//  PURPOSE:  to return a hash in Neela Nurseries (nn) file tree
+//    hash entry format, of files found in current working directory.
+//
+//  EXPECTS:
+//    *  a hash containing at least one valid path to a directory
+//      on the web server / script's accessible file systems,
+//
+//    *  calling code's current working directory to read,
+//
+//  RETURNS:
+//    *  a hash of zero or more files, all files found in current
+//      working directory,
+//
+//
+//  NOTES ON IMPLEMENTATION:
+//    This routine searches and gathers file tree information of files
+//    indicated by calling code to be located in a particular path
+//    of the script's accessible file system or systems.  This routine
+//    makes no calls to read the local file system but instead depends
+//    upon an accurate representation of part of that system in a
+//    script run-time hash.  Calling code's second parameter passes
+//    that hash of file tree entries to this code.
+//
+//    As of 2018-03-20 this routine called only by routine
+//    present_directories_with_file_counts().
+//
+//
+//
+//----------------------------------------------------------------------
 
     $files_in_cwd = array();
 
@@ -2140,8 +2198,8 @@ function &hash_of_files_in_cwd($caller, $file_tree_hierarchy, $options)
     {
         if ( $cwd === $entry[FILE_PATH_IN_BASE_DIR] )
         {
-//            show_diag($rname, "adding file tree hash entry $key to hash of files in \$cwd,",
-//              $dflag_dev);
+            show_diag($rname, "adding file tree hash entry $key to hash of files in \$cwd,",
+              $dflag_dev);
             $files_in_cwd[$key] = $entry;
         }
     }
@@ -2498,9 +2556,9 @@ $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to
 
 
 
-
-
-
+//
+//  == VIEW MODE 1 OF 2 ==
+//
 
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
@@ -2511,6 +2569,11 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 //
 //   This is one of multiple file presentation modes of nn local PHP
 //   library source file named 'directory-navigation.php'.
+//
+//
+//  NOTES ON IMPLEMENTATION . . .
+//
+//
 //
 //----------------------------------------------------------------------
 
@@ -2775,8 +2838,11 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
         foreach ( $files_in_cwd as $key => $file_entry )
         {
             $path = $file_entry[FILE_PATH_IN_BASE_DIR];
-//            $filename = $file_entry[FILE_NAME];
-            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
+// QUESTION 2018-03-20 - why are we passing session var to url_safe_filenames, when it's globally avail? - TMH
+// checked this in library source file text-manipulation.php and third parameter
+// named \$options there and also not yet used.  - TMH
+//            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $_SESSION);
+            $filename = url_safe_filename($rname, $file_entry[FILE_NAME], $options);
             $file_count = $file_entry[FILE_COUNT];
 
             if ( $file_entry[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
@@ -2808,19 +2874,21 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
             }
 
 
-
-            $indent =& nbsp_based_indent($rname, $path_depth, 0);
-            $link_text = $filename;
-            $line_to_browser = "$indent<a href=\"$url\">" . $link_text . "</a>";
-
-            if ( $flag__show_file_type == 'true' )
+            if ( $file_entry[FILE_TYPE] != KEY_VALUE__FILE_TYPE__IS_SYMBOLIC_LINK )
             {
-                $line_to_browser = "$line_to_browser $file_type_note";
-            }
+                $indent =& nbsp_based_indent($rname, $path_depth, 0);
+                $link_text = $filename;
+                $line_to_browser = "$indent<a href=\"$url\">" . $link_text . "</a>";
 
-            $line_to_browser = "$line_to_browser<br />\n";
+                if ( $flag__show_file_type == 'true' )
+                {
+                    $line_to_browser = "$line_to_browser $file_type_note";
+                }
 
-            echo $line_to_browser;
+                $line_to_browser = "$line_to_browser<br />\n";
+
+                echo $line_to_browser;
+            } // end scope to exclude certain file types from tree presenation, e.g. symbolic links
 
         } // end FOREACH construct to iterate over files in caller's file tree hash
 
@@ -3196,7 +3264,7 @@ function present_directories_with_file_counts($caller, $file_hierarchy, $options
 //   directory.
 //
 //
-//  NOTES ON IMPLEMENTATION:  this routine present all files of given
+//  NOTES ON IMPLEMENTATION:  this routine presents all files of given
 //   file tree which are themselves directories.  In this action this
 //   routine always shows the same number of items so long as the
 //   file tree remains unchanged, that is nothing added nor deleted.
