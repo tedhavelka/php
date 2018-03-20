@@ -304,8 +304,9 @@ function &file_tree_view_mode_urls($caller, $options)
 
     $dflag_dev     = DIAGNOSTICS_ON;
     $dflag_warning = DIAGNOSTICS_ON;
-    $dflag_var_basedir = DIAGNOSTICS_OFF;
-    $dflag_view_modes  = DIAGNOSTICS_OFF;
+    $dflag_var_basedir = DIAGNOSTICS_ON;
+    $dflag_view_modes  = DIAGNOSTICS_ON;
+    $dflag_url_contruction = DIAGNOSTICS_ON;
 
     $rname = "file_tree_view_mode_urls";
 
@@ -407,10 +408,25 @@ function &file_tree_view_mode_urls($caller, $options)
     {
         if ( $dflag_view_modes )
         {
-            show_diag($rname, "building URL and appending view mode '$view_mode' as GET parameter . . .",
+            show_diag($rname, "building URL and appending view mode '$view_mode' as GET parameter,",
               $dflag_view_modes);
         }
 
+        if ( $dflag_url_contruction )
+        {
+            show_diag($rname, "to form URL concatenating following pieces elements:",
+              $dflag_url_contruction );
+            echo "<pre>
+   \$site_and_path_from_doc_root = $site_and_path_from_doc_root . / .
+   \$script_name = $script_name . ? .
+";
+            $lbuf = "   " . KEY_NAME__DIRECTORY_NAVIGATION__BASE_DIRECTORY_ABBR . " . =$basedir&\n";
+            echo $lbuf;
+            $lbuf = "   " . KEY_NAME__DIRECTORY_NAVIGATION__CWD_ABBR . " . =$cwd&\n";
+            echo $lbuf;
+            $lbuf = "   " . KEY_NAME__DIRECTORY_NAVIGATION__FILE_TREE_VIEW_MODE_ABBR . " . =$view_mode\n";
+            echo $lbuf . "\n</pre>\n";
+        }
 //
 // NOTE:  ampersand '&' character has ASCII value 0x26, but this makes
 //  the ampersand literal in a web URL which breaks the 'get method' of
