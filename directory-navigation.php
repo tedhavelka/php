@@ -164,6 +164,8 @@
 //
 //    *  https://commons.wikimedia.org/wiki/File:ASCII-Table-wide.svg
 //
+//    *  http://php.net/manual/en/language.constants.predefined.php
+//
 //
 //
 //  AUTHORS AND CONTRIBUTORS:
@@ -2834,7 +2836,7 @@ function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options
 
     $path_element_count = count($path_elements);
 
-    show_diag($rname, "current working directory has $path_element_count elements,", $dflag_path_elements);
+    show_diag($rname, "current working directory has $path_element_count path elements,", $dflag_path_elements);
     show_diag($rname, "we're asked to hide first $hide_first_n_path_elements elements of these," , $dflag_path_elements);
     show_diag($rname, "here are the path elements of \$cwd:" , $dflag_path_elements);
     if ( $dflag_path_elements )
@@ -3799,7 +3801,8 @@ function present_files_in_selected_view($caller, $file_hierarchy, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+if ( 0 )
+// if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce   = DIAGNOSTICS_OFF;
     $dflag_dev        = DIAGNOSTICS_OFF;
@@ -3949,8 +3952,13 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
         foreach ( $file_hierarchy as $key => $file_entry )
         {
-            show_diag($rname, "looking for files in '$cwd', path from base dir to present file is '" .
-              $file_entry[FILE_PATH_IN_BASE_DIR] . "',", $dflag_tracking_cwd);
+//            show_diag($rname, "looking for files in '$cwd', path from base dir to present file is '" .
+//              $file_entry[FILE_PATH_IN_BASE_DIR] . "',", $dflag_tracking_cwd);
+
+            show_diag($rname, "desired path:  $cwd", $dflag_tracking_cwd);
+            show_diag($rname, "present path:  " . $file_entry[FILE_PATH_IN_BASE_DIR], $dflag_tracking_cwd);
+            show_diag($rname, "-", $dflag_tracking_cwd);
+
 //            if ( basename($file_entry[FILE_PATH_IN_BASE_DIR]) == $cwd )
             if ( $file_entry[FILE_PATH_IN_BASE_DIR] == $cwd )
             {
@@ -4147,6 +4155,11 @@ function build_and_present_file_tree_view($caller, $base_directory, $options)
     $file_hierarchy = array();
 
     $file_hierarchy =& build_tree($caller, $base_directory, $options);
+    if ( 1 )
+    {
+        $count_of_files_noted = count($file_hierarchy);
+        show_diag($rname, "function build_tree() returns $count_of_files_noted files noted,", $dflag_dev);
+    }
 
     present_files_in_selected_view($caller, $file_hierarchy, $options);
 
