@@ -2519,7 +2519,7 @@ function present_images_as_thumbnails_with_md5_hashes($caller, $hash_of_symlinks
 if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     $dflag_announce  = DIAGNOSTICS_OFF;
-    $dflag_dev       = DIAGNOSTICS_ON;
+    $dflag_dev       = DIAGNOSTICS_OFF;
     $dflag_cwd       = DIAGNOSTICS_OFF;
     $dflag_php_thumb = DIAGNOSTICS_OFF;
     $dflag_unsupported_file = DIAGNOSTICS_OFF;
@@ -2543,9 +2543,9 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 
         if ( $dflag_show_hash_of_symlinks )
         {
-echo "caller sends us hash of symblic links holding:<br />\n<pre>\n";
-print_r($hash_of_symlinks);
-echo "</pre>\n<br />\n";
+            echo "caller sends us hash of symblic links holding:<br />\n<pre>\n";
+            print_r($hash_of_symlinks);
+            echo "</pre>\n<br />\n";
         }
 
         foreach ( $hash_of_symlinks as $key => $entry )
@@ -2559,8 +2559,6 @@ echo "</pre>\n<br />\n";
 //  What is going on here?  - TMH
 //    define("KEY_NAME__SYMLINK_NAME]", "symlink_name");
 
-
-
             $lbuf = "looking at noted symbolic link '" . $entry[KEY_NAME__SYMLINK_NAME] . "',";
             show_diag($rname, $lbuf, $dflag_not_jpg);
 
@@ -2573,57 +2571,30 @@ echo "</pre>\n<br />\n";
 // // details on settable parameters, many expressed by single letters,
 // // such as thumbnail width 'w' and height 'h':
 
-                $path_to_image = "./" . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
+//                $path_to_image = "./" . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
 //                $path_to_image = $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
 //                $path_to_image = $_SERVER['PWD'] . $cwd . "/".$entry[KEY_NAME__SYMLINK_NAME];
 //                $path_to_image = dirname($_SERVER['SCRIPT_FILENAME']) . "/" . $cwd . "/" . $entry[KEY_NAME__SYMLINK_NAME];
                 $path_2_to_image = dirname($_SERVER['SCRIPT_FILENAME']) . "/" . $cwd . "/" . $entry[KEY_NAME__SYMLINK_NAME];
-
-//                show_diag($rname, "\$_SERVER hash holds:", $dflag_phpthumb_src_path);
-//                if ( $dflag_phpthumb_src_path )
-//                {
-//                    echo "<pre>\n";
-//                    print_r($_SERVER);
-//                    echo "</pre>\n";
-//
-//                    $lbuf = dirname($_SERVER['SCRIPT_FILENAME']);
-//                    show_diag($rname, "closest we can get to needed path elements is '$lbuf',", $dflag_phpthumb_src_path);
-//                }
-
-//                show_diag($rname, "using most of server's SCRIPT_NAME, script $cwd and symlink built path to image:", $dflag_phpthumb_src_path);
+                $path_to_image = dirname($_SERVER['SCRIPT_FILENAME']) . "/" . $cwd . "/" . $entry[KEY_NAME__SYMLINK_NAME];
 
 // NEED TO FIX THIS HARD_CODED TEXT REPLACEMENT:
 // 2018-03-05 - Working on correct relative path for local phpThumb library installation at nn:
-$path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to_image);
+// $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to_image);
 
-//
-//
-//  The basedir passed to this script is relative to the script.  The
-//  script also calls this PHP library which is a neighbor of phpThumb
-//  sources.  If this script has a relative path to its images like
-//  this:
-//
-//     /script
-//         +---images
-//         +---lib/php
-//         +---lib/phpThumb/images
-//
-//
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-
-
-
                 show_diag($rname, "for phpThumb library routine built source path:", $dflag_dev);
-                show_diag($rname, "<i>$path_to_image_amended</i>", ($dflag_phpthumb_src_path | $dflag_dev));
+//                show_diag($rname, "<i>$path_to_image_amended</i>", ($dflag_phpthumb_src_path | $dflag_dev));
 
-                show_diag($rname, "second source path which is absolute is:", $dflag_dev);
-                show_diag($rname, "<i>$path_2_to_image</i>", $dflag_dev);
+//                show_diag($rname, "second source path which is absolute is:", $dflag_dev);
+//                show_diag($rname, "<i>$path_2_to_image</i>", $dflag_dev);
+                show_diag($rname, "<i>$path_to_image</i>", $dflag_dev);
 
 
-//                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
-                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image_amended&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
+                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
+//                $link_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_to_image_amended&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
                 $link_2_to_thumbnail = '<img src="'.htmlspecialchars(phpThumbURL("src=$path_2_to_image&h=$thumbnail_height", './lib/phpThumb/phpThumb.php')).'">';
 
 // 2018-03-05 - Monday, Ted testing whether &amp; pattern throwing off call
@@ -2636,7 +2607,7 @@ $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to
 // Send to browser mark-up of thumbnail image as link to full size image:
 //                echo $link_to_image . "<br /> <br />\n";
                 echo $link_to_image;
-                echo $link_2_to_image;
+//                echo $link_2_to_image;
 
 
             } // end IF to test whether current symlink name refers to supported image type file
@@ -2651,7 +2622,6 @@ $path_to_image_amended = preg_replace('/images/', 'images/public_html', $path_to
         } // end FOREACH to iterate over hash of filenames and respective symbolic links
 
     } // end local scope, 
-
 
 
     echo "<br />\n";
