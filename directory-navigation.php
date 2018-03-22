@@ -166,6 +166,8 @@
 //
 //    *  http://php.net/manual/en/language.constants.predefined.php
 //
+//    *  https://git-scm.com/book/en/v2/Git-Branching-Branch-Management
+//
 //
 //
 //  AUTHORS AND CONTRIBUTORS:
@@ -218,6 +220,7 @@
     define("FILE_DEPTH_IN_BASE_DIR", KEY_NAME__DIRECTORY_NAVIGATION__FILE_DEPTH_IN_BASE_DIR);
     define("FILE_COUNT",             KEY_NAME__DIRECTORY_NAVIGATION__COUNT_OF_REGULAR_FILES);
     define("FILE_SHOWN_T_F",         KEY_NAME__DIRECTORY_NAVIGATION__ENTRY_SHOWN);
+    define("PARENT_HASH_ENTRY",      KEY_NAME__DIRECTORY_NAVIGATION__PARENT_HASH_ENTRY);
 
     define("FILE_CHECKED",           KEY_VALUE__FILE_STATUS__CHECKED);
     define("FILE_NOT_CHECKED",       KEY_VALUE__FILE_STATUS__NOT_CHECKED);
@@ -795,18 +798,9 @@ function &build_tree($caller, $base_directory, $options)
 //   searching . . .
 //
 //
-//  NOTES ON IMPLEMENTATION:  this routine a non-recursive algorithm
-//   which builds a flattened hash of a directory and file structure.
-//
-//   See also large approximate forty line comment block at end of
-//   this file for details of this routines algorithm versions 1 and
-//   2 . . . . as of 2018-03-05 Monday that larger comment block may
-//   be removed altogether.  Some quick notes:
-//
-//   This routine named 'build_tree', a reference to its design to
-//   build in its executing script's memory a tree like structure to
-//   reflect the file system hierarchy which is already in place on a
-//   given server, is written with two loops nested inside an outer
+//  NOTES ON IMPLEMENTATION:  this routine uses a non-recursive
+//   algorithm which builds a hash of a directory and file structure.
+//   This routine is written with two loops nested inside an outer
 //   "iterate over files in directory" loop.
 //
 //   In the first nested loop all files in the current directory are
@@ -843,11 +837,13 @@ function &build_tree($caller, $base_directory, $options)
     $files_noted = 0;
 
 // D'ah poorly named variable.  'file tree hash entry' sounds like a PHP hash table, not a pointer - TMH
-    $file_tree_hash_entry = 0;           // pointer to hash entry, may be duplicative of variable $files_noted,
+    $file_tree_hash__entry = 0;           // pointer to hash entry, may be duplicative of variable $files_noted,
 
     $file_limit_not_reached = 'true';
 
     $files_in_current_dir = array();
+
+    $count_files_in_current_dir = 0;
 
 
 // "file tree" hash related:
@@ -913,6 +909,7 @@ function &build_tree($caller, $base_directory, $options)
     $dflag_file_count_per_directory = DIAGNOSTICS_ON;
     $dflag_base_directory_file_list = DIAGNOSTICS_ON;
     $dflag_loop_1                   = DIAGNOSTICS_ON;
+    $dflag_summary_loop_1           = DIAGNOSTICS_OFF;
     $dflag_loop_2                   = DIAGNOSTICS_ON;
 
     $dflag_file_limit_reached       = DIAGNOSTICS_ON;
@@ -926,8 +923,8 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-// if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 if ( 1 )
+// if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
     $dflag_announce = DIAGNOSTICS_OFF;
@@ -982,30 +979,30 @@ if ( 1 )
     {
         if ( 0 )
         {
-            show_diag($rname, "noting base directory '$base_directory' in file tree hash at entry $file_tree_hash_entry . . .",
+            show_diag($rname, "noting base directory '$base_directory' in file tree hash at entry $file_tree_hash__entry . . .",
               $dflag_noting_first);
 
-            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
+            $navigable_tree[$file_tree_hash__entry] =& nn_tree_browser_entry($rname);
 
-            $navigable_tree[$file_tree_hash_entry][FILE_NAME] = basename($base_directory);
-//        $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
-            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__FILE_STATUS__CHECKED;
-            $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
+            $navigable_tree[$file_tree_hash__entry][FILE_NAME] = basename($base_directory);
+//        $navigable_tree[$file_tree_hash__entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
+            $navigable_tree[$file_tree_hash__entry][FILE_STATUS] = KEY_VALUE__FILE_STATUS__CHECKED;
+            $navigable_tree[$file_tree_hash__entry][FILE_TYPE] = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
 
  // was "." but creates "./dir_name" which list_of_filenames_by_pattern() cannot open - TMH
             if ( dirname($base_directory) === "." )
-                { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = ""; }
+                { $navigable_tree[$file_tree_hash__entry][FILE_PATH_IN_BASE_DIR] = ""; }
             else
-                { $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = dirname($base_directory); }
+                { $navigable_tree[$file_tree_hash__entry][FILE_PATH_IN_BASE_DIR] = dirname($base_directory); }
 
-//        $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = realpath($base_directory); 
-            $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = 0;
-            $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
+//        $navigable_tree[$file_tree_hash__entry][FILE_PATH_IN_BASE_DIR] = realpath($base_directory); 
+            $navigable_tree[$file_tree_hash__entry][FILE_DEPTH_IN_BASE_DIR] = 0;
+            $navigable_tree[$file_tree_hash__entry][FILE_COUNT] = 0;
 
             ++$files_noted;
-            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
+            $file_tree_hash__entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
 
-            show_diag($rname, "hash entry pointer now holds $file_tree_hash_entry.  Continuing,",
+            show_diag($rname, "hash entry pointer now holds $file_tree_hash__entry.  Continuing,",
               $dflag_noting_first);
         }
         else
@@ -1029,8 +1026,9 @@ if ( 1 )
         { $_SESSION[KEY_NAME__FILE_DEPTH_GREATEST_VALUE] = 0; }
 
 
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - STEP - 
+// - STEP - get list of files in calling code's base directory
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     show_diag($rname, "calling for list of files in base directory '$base_directory' . . .",
@@ -1052,7 +1050,7 @@ if ( 1 )
 
     $current_dir_has_files_to_process = 'true';
 
-    $index_to_latest_not_checked = 0;    // . . . loop set up, this value may already by assigned in var block top of routine
+    $index_to_latest_not_checked = 0;
 
 //    $files_noted = 0;
 
@@ -1066,10 +1064,13 @@ if ( 1 )
     }
 
 //
-// Variable 'current_path' which used to be 'file_path_in_base_dir'
+// Variable $current_path which used to be $file_path_in_base_dir
 // holds the notion of a path which starts at calling code's base
 // directory, and changes per subdirectories found as we map files
-// -- directories and other file types -- starting at that path:
+// -- directories and other file types -- starting at that path.
+//
+// Variable $current_path is distinct from $cwd, which holds and end
+// user's current working directory.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     $current_path = $base_directory;
@@ -1077,11 +1078,8 @@ if ( 1 )
 
 // Primary file-processing loop:
 
-//    $j = 0;
     while (( $current_dir_has_files_to_process == 'true' ) && ( $file_limit_not_reached == 'true' ))
-//    while ( ($current_dir_has_files_to_process == 'true') && ($file_limit_not_reached == 'true') && ($j < 20) )
     {
-//        ++$j;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - add files from latest checked directory
@@ -1091,7 +1089,8 @@ if ( 1 )
 
         if ( $dflag_loop_1 ) // base directory file list and subdir file lists too - TMH
         {
-            echo "From current path got file list:<br />\n";
+            $count_files_in_current_dir = count($files_in_current_dir);
+            echo "In current path found $count_files_in_current_dir files, names of these files are:<br />\n";
             echo "<pre>\n";
             print_r($files_in_current_dir);
             echo "</pre>\n";
@@ -1100,16 +1099,17 @@ if ( 1 )
 
 // 2018-02-13 QUESTION:  is there one good variable name which we can
 //  employ here, for the variable which is the key to the next file tree
-//  hash entry?  How about 'next_file_tree_hash_entry' or
+//  hash entry?  How about 'next_file_tree_hash__entry' or
 //  'file_tree_hash_pointer'?   - TMH
 //
 
 //        $key_name = $files_noted;   // <-- prepare file hash tree pointer for loop 1,
-        $file_tree_hash_entry = $files_noted;   // <-- prepare file hash tree pointer for loop 1,
+        $file_tree_hash__entry = $files_noted;   // <-- prepare file hash tree pointer for loop 1,
 
 //        $key_to_present_directory = 0;
 
-        show_diag($rname, "entering loop 1 with file tree hash entry = $file_tree_hash_entry,", $dflag_loop_1);
+        show_diag($rname, "- LOOP 1 BEGIN -", $dflag_loop_1);
+        show_diag($rname, "entering loop 1 with file tree hash entry = $file_tree_hash__entry,", $dflag_loop_1);
         show_diag($rname, "and key to present directory = $key_to_present_directory,", $dflag_loop_1);
 
 
@@ -1119,13 +1119,24 @@ if ( 1 )
 
         foreach ( $files_in_current_dir as $key => $file )
         {
-            show_diag($rname, "- TOP OF LOOP 1 -", $dflag_loop_1);
+//            show_diag($rname, "- LOOP 1 BEGIN -", $dflag_loop_1);
 
             if (( $file == "." ) || ( $file == ".." ))
             {
                 show_diag($rname, "skipping relative directory '$file' . . .", $dflag_note_file);
                 continue;
             }
+
+
+define ("DIRECTORY_NAVIGATION__SAFER_URL_SYMLINK_PREFIX", "'/z-tn--*.*/'");
+
+//            if ( is_link($current_path_and_file) && preg_match(DIRECTORY_NAVIGATION__SAFER_URL_SYMLINK_PREFIX, $file, $matches) )
+            if ( is_link($current_path_and_file) && preg_match('/^z-tn--*.*/', $file, $matches) )
+            {
+                show_diag($rname, "skipping symlink with nn local lib prefix, link '$file' . . .", $dflag_note_file);
+                continue;
+            }
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - Check file types . . .
@@ -1146,8 +1157,8 @@ if ( 1 )
                 $file_type = KEY_VALUE__FILE_TYPE__IS_DIRECTORY;
                 ++$count_of_directories;
 
-                show_diag($rname, "for development purposes noting directory hash entry '$file_tree_hash_entry' in PHP session variable,", $dflag_dev);
-                array_push($_SESSION[KEY_NAME__DIRECTORY_ENTRIES], $file_tree_hash_entry);
+                show_diag($rname, "for development purposes noting directory hash entry '$file_tree_hash__entry' in PHP session variable,", $dflag_dev);
+                array_push($_SESSION[KEY_NAME__DIRECTORY_ENTRIES], $file_tree_hash__entry);
 
             }
 
@@ -1228,7 +1239,27 @@ if ( 1 )
             show_diag($rname, "figuring current file's depth in base directory from path '$current_path' . . .",
               $dflag_file_depth);
             $file_depth_in_base_dir = substr_count($current_path, "/");
-            ++$file_depth_in_base_dir;
+//            ++$file_depth_in_base_dir;
+
+            if ( $dflag_file_depth )
+            {
+                if ( $file_depth_in_base_dir > 1 )
+                {
+                    show_diag($rname, "present file found $file_depth_in_base_dir directories away from base dir,",
+                      $dflag_file_depth);
+                }
+                elseif ( $file_depth_in_base_dir == 1 )
+                {
+                    show_diag($rname, "present file found $file_depth_in_base_dir directory away from base dir,",
+                      $dflag_file_depth);
+                }
+                elseif ( $file_depth_in_base_dir == 0 )
+                {
+                    show_diag($rname, "present file found in base dir,",
+                      $dflag_file_depth);
+                }
+            }
+
 
             $_SESSION[KEY_NAME__FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
 
@@ -1238,38 +1269,37 @@ if ( 1 )
             }
 
 
-//            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
+//            $file_tree_hash__entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1
 
-            $navigable_tree[$file_tree_hash_entry] = nn_tree_browser_entry($rname);
+            $navigable_tree[$file_tree_hash__entry] = nn_tree_browser_entry($rname);
 // PHP Notice:  Only variables should be assigned by reference in ./lib/php/directory-navigation.php on line 1086
-//            $navigable_tree[$file_tree_hash_entry] =& nn_tree_browser_entry($rname);
+//            $navigable_tree[$file_tree_hash__entry] =& nn_tree_browser_entry($rname);
 
-            $navigable_tree[$file_tree_hash_entry][FILE_NAME] = $file;
-            $navigable_tree[$file_tree_hash_entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
-            $navigable_tree[$file_tree_hash_entry][FILE_TYPE] = $file_type;
-            $navigable_tree[$file_tree_hash_entry][FILE_PATH_IN_BASE_DIR] = $current_path;
-            $navigable_tree[$file_tree_hash_entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
-            $navigable_tree[$file_tree_hash_entry][FILE_COUNT] = 0;
-            $navigable_tree[$file_tree_hash_entry][FILE_SHOWN_T_F] = false;
+            $navigable_tree[$file_tree_hash__entry][FILE_NAME] = $file;
+            $navigable_tree[$file_tree_hash__entry][FILE_STATUS] = KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_STATUS;
+            $navigable_tree[$file_tree_hash__entry][FILE_TYPE] = $file_type;
+            $navigable_tree[$file_tree_hash__entry][FILE_PATH_IN_BASE_DIR] = $current_path;
+            $navigable_tree[$file_tree_hash__entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
+            $navigable_tree[$file_tree_hash__entry][FILE_COUNT] = 0;
+            $navigable_tree[$file_tree_hash__entry][FILE_SHOWN_T_F] = false;
 
             ++$files_noted;
-            $file_tree_hash_entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
+            $file_tree_hash__entry = $files_noted;  // <-- update file tree hash pointer at end of loop 1, needed here or at top of loop 1 :/
 
         } // end of loop 1 to note files in current directory
 
+        show_diag($rname, "- LOOP 1 END -", $dflag_loop_1);
 
-        show_diag($rname, "after loop 1 execution array of noted files holds:", $dflag_note_file);
-        if ( $dflag_note_file )
+
+        show_diag($rname, "after loop 1 execution array of noted files holds:",
+          $dflag_summary_loop_1);
+        if ( $dflag_summary_loop_1 )
         {
             echo "<pre>\n";
             print_r($navigable_tree);
             echo "</pre>\n";
+            echo $term;
         }
-
-        if ( $dflag_note_file )
-            { echo $term; }
-
-        
 
 
 
@@ -1278,11 +1308,16 @@ if ( 1 )
 //          unchecked directory:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        show_diag($rname, "Loop 2 - Checking noted files for next directory to map:", $dflag_check_file);
-        show_diag($rname, "--------------------------------------------------------", $dflag_check_file);
-        show_diag($rname, "hash element pointer set to latest file not checked = $index_to_latest_not_checked,",
+        show_diag($rname, "Checking noted files in file tree hash for next directory to map . . .",
           $dflag_check_file);
-        show_diag($rname, "hash element pointer set to earliest file not checked = $index_to_earliest_not_checked,",
+//        show_diag($rname, "--------------------------------------------------------", $dflag_check_file);
+        show_diag($rname, "hash element pointer of latest file not checked = $index_to_latest_not_checked,",
+          $dflag_check_file);
+        show_diag($rname, "hash element pointer of earliest file not checked = $index_to_earliest_not_checked, (this var used to build current path which loop 1 reads on its next execution)",
+          $dflag_check_file);
+        show_diag($rname, "which is stored as the path of all non-directory type files checked during present execution of loop 2,",
+          $dflag_check_file);
+        show_diag($rname, "QUESTION:  what mean \"latest checked\" and \"earliest checked\" in this algorithm?",
           $dflag_check_file);
 
 
@@ -1298,7 +1333,7 @@ if ( 1 )
         {
 //            $noted_file = $navigable_tree[$index_to_latest_not_checked];
             $noted_file = $navigable_tree[$index_to_earliest_not_checked];
-show_diag($rname, "- zztop - above loop 2 setting \$current_path_and_file from file hash tree data, to '$current_path_and_file',", $dflag_dev);
+show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash tree data, to '$current_path_and_file',", $dflag_dev);
             $current_path_and_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
         }
         else
@@ -1324,25 +1359,31 @@ show_diag($rname, "- zztop - above loop 2 setting \$current_path_and_file from f
 //  The noted file at this entry point to loop 2 is the file at hash
 //  entry '$index_to_earliest_not_checked'.
 //
-//  Loop 2 must check files from file tree hash entry $index_to_earliest_not_checked
-//  to hash entry $file_tree_hash_entry.
+//  Loop 2 must check files stored so far in file hash tree, across
+//  hash entries:
+//    from:  $index_to_earliest_not_checked
+//      to:  $hash entry $file_tree_hash__entry.
+//
 //----------------------------------------------------------------------
 
 // removing algorithm 1 test:
 //        while ( ($noted_file[FILE_STATUS] == FILE_NOT_CHECKED) && ($current_dir_has_files_to_process == 'true') )
 //        while ( $current_dir_has_files_to_process == 'true' )
 
+        show_diag($rname, "- LOOP 2 BEGIN -", $dflag_check_file);
         $loop_2_iteration = 0;   // Variable $i quick and dirty limit setter on loop iterations - TMH
 
-        while ( ($hash_pointer_loop_2 < $file_tree_hash_entry) && ($loop_2_iteration < LIMIT__BUILD_TREE__LOOP_2_ITERATION) )
+        while ( ($hash_pointer_loop_2 < $file_tree_hash__entry) && ($loop_2_iteration < LIMIT__BUILD_TREE__LOOP_2_ITERATION) )
         {
             ++$loop_2_iteration;
 
-            show_diag($rname, "- TOP OF LOOP 2 - iteration $loop_2_iteration, file_tree_hash_entry = $file_tree_hash_entry, hash_pointer_loop_2 = $hash_pointer_loop_2,", $dflag_check_file);
+            show_diag($rname, "loop 2 iteration $loop_2_iteration, file_tree_hash__entry = $file_tree_hash__entry, hash_pointer_loop_2 = $hash_pointer_loop_2,",
+              $dflag_check_file);
             show_diag($rname, "checking file '$current_path_and_file',", $dflag_check_file);
 
 
-// So we have this shortr-hand variable name 'noted_file' which is a
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// So we have this shorter-hand variable name 'noted_file' which is a
 // copy of the present entry in the file tree hash, the entry that we're
 // processing.  But this variable is in a sense read-only in that we
 // cannot update the file tree hash by writing this short-hand copy
@@ -1359,6 +1400,12 @@ show_diag($rname, "- zztop - above loop 2 setting \$current_path_and_file from f
 //
 //    $noted_file = $navigable_tree[$hash_pointer_loop_2];
 //
+//
+// QUESTION 2018-03-21 - Are we really treating $noted_file as a copy
+// of a file tree hash entry?  That is are we only using it for reading
+// and not writing or changing file hash tree data?  - TMH
+//
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
             if ( $noted_file[FILE_STATUS] == FILE_NOT_CHECKED )
             {
@@ -1385,7 +1432,7 @@ show_diag($rname, "- zztop - above loop 2 setting \$current_path_and_file from f
                         {
                             $current_path = $noted_file[FILE_NAME];
                         }
-show_diag($rname, "- ZZTop - in loop 2 setting \$current_path from file hash tree data, to '$current_path',", $dflag_dev);
+show_diag($rname, "in loop 2 setting \$current_path from file hash tree data, to '$current_path',", $dflag_dev);
 
                         $index_to_earliest_not_checked = $hash_pointer_loop_2;
 show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to_earliest_not_checked,", $dflag_check_file);
@@ -1395,7 +1442,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
                     }
                     else
                     {
-                        show_diag($rname, "at hash entry $file_tree_hash_entry passing over successive un-checked directory '" . $noted_file[FILE_NAME] .
+                        show_diag($rname, "at hash entry $file_tree_hash__entry passing over successive un-checked directory '" . $noted_file[FILE_NAME] .
                           "' for time being,", $dflag_check_file);
                     }
                 }
@@ -1462,6 +1509,8 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
             }
 
         } // end of loop 2 to check noted files
+
+        show_diag($rname, "- LOOP 2 END -", $dflag_loop_2);
 
 
 
@@ -3341,6 +3390,7 @@ if (0)
 
 
 
+// - 2018-03-21 - Note no changes yet from version 1 this routine.
 
 function present_directories_with_file_counts($caller, $file_hierarchy, $options)
 {
@@ -3680,7 +3730,7 @@ if (0)
 
     show_diag($rname, "returning . . .", $dflag_announce);
 
-} // end function present_directories_with_file_counts()
+} // end function present_directories_with_file_counts() - 2018-03-21 no changes yet from version 1 this routine.
 
 
 
