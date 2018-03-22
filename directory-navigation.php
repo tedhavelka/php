@@ -571,7 +571,7 @@ function present_file_tree_view_mode_links($caller, $options)
     $array_of_view_modes = array();
     $array_of_view_modes[0] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR;
     $array_of_view_modes[1] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_AND_FILE_COUNTS_ABBR;
-//    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
+    $array_of_view_modes[2] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR;
 //    $array_of_view_modes[3] = KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR;
 
     $options[ARRAY_NAME__ARRAY_OF_VIEW_MODES] = $array_of_view_modes;
@@ -732,6 +732,9 @@ function show_select_attributes_of_file_tree_hash_entries($rname, $file_hierarch
 
 
 
+/*
+function -
+*/
 
 function nn_tree_browser_entry($caller)
 {
@@ -1612,6 +1615,10 @@ show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash t
 
 
 
+
+/*
+function -
+*/
 
 function present_files($caller, $file_hierarchy, $options)  // older function, Ted not sure of correctness of this function
 {
@@ -2701,6 +2708,10 @@ if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $opti
 //  == VIEW MODE 1 OF 2 ==
 //
 
+/*
+function -
+*/
+
 function present_path_elements_and_files_of_cwd($caller, $files_in_cwd, $options)
 {
 //----------------------------------------------------------------------
@@ -3747,10 +3758,142 @@ if (0)
 
 
 
+function present_files_to_depth_n($caller, $file_hierarchy, $options)
+{
+
+// VAR BEGIN
+
+    $depth = -1;
+
+    $dflag_announce = DIAGNOSTICS_ON;
+    $dflag_dev = DIAGNOSTICS_ON;
+
+    $rname = "present_files_to_depth_n";
+
+// VAR END
+
+    show_diag($rname, "2018-03-22 - IMPLEMNTATION UNDERWAY, ROUTINE NOT DONE -", $dflag_announce);
+    show_diag($rname, "returning . . .", $dflag_announce);
+
+
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+// Algorithm, first draft:
+//
+//  *  assume no order of files, not by file type and not alphabetic by filename,
+//  *  start at path depth zero with respect to base directory of given file tree,
+//  - loop -
+//     Display option 1:  show dirs of current dir first, dirs fully expanded
+//     *  show present dir and mark dir shown,
+//     *  iterate over file tree hash and . . . hey, regular files of first dir may be shown far away from the dir itself in this schema! - TMH
+//
+//  But hey, this will only happen when more-parent level directories
+//  when those dirs contain both files and directories.  When only the
+//  most-child level dirs contain files then the presentation is the
+//  same regardless of whether our algorithm shows dirs or files first.
+//
+//     Display option 2:  show files of current dir first, dirs fully expanded
+//
+//     *  keep track whether we've shown all directories
+//
+//
+//
+//  The more difficult file hierarchy to present cleanly:
+//
+//  dir_1                   :   dir_1
+//    |                     :     |
+//    + file                :     + dir_2
+//    + file                :     |   |
+//    + dir_2               :     |   + dir_3
+//    |   |                 :     |   |   |
+//    |   + file            :     |   |   + file
+//    |   + file            :     |   |   + file
+//    |   + dir_3           :     |   |   + file
+//    |       |             :     |   |
+//    |       + file        :     |   + file
+//    |       + file        :     |   + file
+//    |       + file        :     |
+//    |                     :     + dir_4
+//    + dir_4               :     |   |
+//    |   |                 :     |   + file
+//    |   + file            :     |
+//    |                     :     + dir_5
+//    + dir_5               :     |   |
+//        |                 :     |   + file
+//        + file            :     |
+//                          :     + file
+//                          :     + file
+//
+//
+//  and with files shown first:
+//
+//  dir_1
+//    |
+//    + dir_2
+//    |   |
+//    |   + dir_3
+//    |   |   |
+//    |   |   + file
+//    |   |   + file
+//    |   |   + file
+//    |   |
+//    |   + file
+//    |   + file
+//    |
+//    + dir_4
+//    |   |
+//    |   + file
+//    |
+//    + dir_5
+//    |   |
+//    |   + file
+//    |
+//    + file
+//    + file
+//
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+
+
+//     *  in file tree hash find next not shown directory
+
+    $key = "";
+    $noted_file = null;
+
+// Studying the output of build_tree() it looks like the parent directory
+// hash entries are ascending in value, from -1 on up.  There are gaps,
+// but they're ascending and more important, perhaps the only important
+// quality of ordering here is that files' parent directory entries are
+// grouped together by the algorithm which build_tree() implements.  If
+// we can depend on this grouping, then we can much more efficiently
+// iterate over the file tree hash by keeping track of a couple of hash
+// entries via pointers.  These hash entries are,
+//
+//   1)  hash entry of latest dir shown,
+//   2)  hash entry of latest file shown,
+//
+// We also need to keep track when showing files of a particular parent
+// dir entry when the parent dir entry -- a numeric key name -- changes.
+// At this change we can stop showing files and return to searching for
+// the next directory that's not yet been shown.
+//
+
+    foreach ( $files_in_hierarchy as $key => $noted_file ) // this kind of loop condition may create only a 'factorial at best' solution - TMH
+    {
+
+    }
+
+
+} // end function present_files_to_depth_n()
 
 
 
 
+/*
+function -
+*/
 
 // function present_files_conventional_view($caller, $file_hierarchy, $options)  // <-- name change 2018-02-22 THU - TMH
 function present_files_in_selected_view($caller, $file_hierarchy, $options)
@@ -4065,7 +4208,7 @@ if ( 0 )
                 break;
 
             case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_DIRECTORIES_TO_DEPTH_N_ABBR:
-                show_diag($rname, "File browsing view mode 'directories to depth n' not yet implemented!", $dflag_warning);
+                present_files_to_depth_n($rname, $file_hierarchy, $options);
                 break;
 
             case KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_GALLERY_ABBR:
