@@ -849,7 +849,7 @@ function &build_tree($caller, $base_directory, $options)
 // "file tree" hash related:
     $key = 0;
 
-    $key_to_present_directory = 0;       // . . . key used to store count of files in containing directory hash entry
+    $key_to_present_directory = -1;      // . . . key used to store count of files in containing directory hash entry, minus one is a priming value
 
     $index_to_latest_not_checked = 0;    // . . . used by loop 2 in algorithm version 1, see notes on routine implementation
 
@@ -923,7 +923,7 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-if ( 1 )
+if ( 0 )
 // if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
@@ -1108,9 +1108,10 @@ if ( 1 )
 
 //        $key_to_present_directory = 0;
 
-        show_diag($rname, "- LOOP 1 BEGIN -", $dflag_loop_1);
-        show_diag($rname, "entering loop 1 with file tree hash entry = $file_tree_hash__entry,", $dflag_loop_1);
-        show_diag($rname, "and key to present directory = $key_to_present_directory,", $dflag_loop_1);
+        show_diag($rname, "| - LOOP 1 BEGIN -", $dflag_loop_1);
+        show_diag($rname, "| - entering loop 1 with file tree hash entry = $file_tree_hash__entry,", $dflag_loop_1);
+        show_diag($rname, "| - and key to present directory = $key_to_present_directory,", $dflag_loop_1);
+        show_diag($rname, "| - looking at all files in '$current_path',", $dflag_loop_1);
 
 
 //----------------------------------------------------------------------
@@ -1119,7 +1120,6 @@ if ( 1 )
 
         foreach ( $files_in_current_dir as $key => $file )
         {
-//            show_diag($rname, "- LOOP 1 BEGIN -", $dflag_loop_1);
 
             if (( $file == "." ) || ( $file == ".." ))
             {
@@ -1281,6 +1281,7 @@ define ("DIRECTORY_NAVIGATION__SAFER_URL_SYMLINK_PREFIX", "'/z-tn--*.*/'");
             $navigable_tree[$file_tree_hash__entry][FILE_PATH_IN_BASE_DIR] = $current_path;
             $navigable_tree[$file_tree_hash__entry][FILE_DEPTH_IN_BASE_DIR] = $file_depth_in_base_dir;
             $navigable_tree[$file_tree_hash__entry][FILE_COUNT] = 0;
+            $navigable_tree[$file_tree_hash__entry][PARENT_HASH_ENTRY] = $key_to_present_directory;
             $navigable_tree[$file_tree_hash__entry][FILE_SHOWN_T_F] = false;
 
             ++$files_noted;
@@ -1409,8 +1410,9 @@ show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash t
 
             if ( $noted_file[FILE_STATUS] == FILE_NOT_CHECKED )
             {
-//                if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY) && ($unchecked_directory_found == 'false') )
-//                if ( $noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+                show_diag($rname, "reviewing unchecked file " . $noted_file[FILE_NAME] . ",",
+                  $dflag_check_file);
+
                 if ( ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_DIRECTORY) || ($noted_file[FILE_TYPE] == KEY_VALUE__FILE_TYPE__IS_SYMLINK_TO_DIRECTORY) )
                 {
                     if ( $unchecked_directory_found == 'false' )
@@ -1423,7 +1425,9 @@ show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash t
                         $unchecked_directory_found = 'true';
                         $navigable_tree[$hash_pointer_loop_2][FILE_STATUS] = FILE_CHECKED;
 
-// - NOTE - Here set the path from which loop 1 will next read files:
+
+// NOTE - Here set the path from which loop 1 will next read files:
+
                         if ( strlen($noted_file[FILE_PATH_IN_BASE_DIR]) > 0 )
                         {
                             $current_path = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
@@ -1432,13 +1436,15 @@ show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash t
                         {
                             $current_path = $noted_file[FILE_NAME];
                         }
-show_diag($rname, "in loop 2 setting \$current_path from file hash tree data, to '$current_path',", $dflag_dev);
+
+                        show_diag($rname, "in loop 2 setting \$current_path from file hash tree data, to '$current_path',",
+                          $dflag_dev);
 
                         $index_to_earliest_not_checked = $hash_pointer_loop_2;
-show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to_earliest_not_checked,", $dflag_check_file);
+                        show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to_earliest_not_checked,",
+                          $dflag_check_file);
 
                         $key_to_present_directory = $hash_pointer_loop_2;
-//                        break;
                     }
                     else
                     {
@@ -1475,6 +1481,7 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
 //                }
 
             } // end IF-block to process files not yet checked
+
             else
             {
                 show_diag($rname, "passing over checked file,", $dflag_dev);
@@ -1487,6 +1494,10 @@ show_diag($rname, "setting index to earliest-not-checked-file entry to $index_to
 
             ++$hash_pointer_loop_2;
             $noted_file = $navigable_tree[$hash_pointer_loop_2];  // 2018-02-14 - undefined offset warnings this line - TMH
+
+// Note:  first files encountered, those in the base directory of the
+//  file tree to show, will have a zero-length path from the basedir,
+//  as they are located there in the basedir.  Handle that case here:
             if ( strlen($noted_file[FILE_PATH_IN_BASE_DIR]) > 0 )
             {
                 $current_path_and_file = $noted_file[FILE_PATH_IN_BASE_DIR] . "/" . $noted_file[FILE_NAME];
