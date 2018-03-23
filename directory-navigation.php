@@ -926,8 +926,8 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-if ( 0 )
-// if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+//if ( 0 )
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
     $dflag_announce = DIAGNOSTICS_OFF;
@@ -3765,6 +3765,18 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
     $depth = -1;
 
+    $hay_files_to_check = 'true';
+
+    $key = "";
+//    $noted_file = null;
+    $pointer_latest_dir_shown = -1;
+    $pointer_latest_file_shown = -1;
+    $count_of_files = count($file_hierarchy);
+
+
+// diagnostics:
+
+//    $lbuf = "";
     $dflag_announce = DIAGNOSTICS_ON;
     $dflag_dev = DIAGNOSTICS_ON;
 
@@ -3773,94 +3785,8 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 // VAR END
 
     show_diag($rname, "2018-03-22 - IMPLEMNTATION UNDERWAY, ROUTINE NOT DONE -", $dflag_announce);
-    show_diag($rname, "returning . . .", $dflag_announce);
 
 
-//
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//
-// Algorithm, first draft:
-//
-//  *  assume no order of files, not by file type and not alphabetic by filename,
-//  *  start at path depth zero with respect to base directory of given file tree,
-//  - loop -
-//     Display option 1:  show dirs of current dir first, dirs fully expanded
-//     *  show present dir and mark dir shown,
-//     *  iterate over file tree hash and . . . hey, regular files of first dir may be shown far away from the dir itself in this schema! - TMH
-//
-//  But hey, this will only happen when more-parent level directories
-//  when those dirs contain both files and directories.  When only the
-//  most-child level dirs contain files then the presentation is the
-//  same regardless of whether our algorithm shows dirs or files first.
-//
-//     Display option 2:  show files of current dir first, dirs fully expanded
-//
-//     *  keep track whether we've shown all directories
-//
-//
-//
-//  The more difficult file hierarchy to present cleanly:
-//
-//  dir_1                   :   dir_1
-//    |                     :     |
-//    + file                :     + dir_2
-//    + file                :     |   |
-//    + dir_2               :     |   + dir_3
-//    |   |                 :     |   |   |
-//    |   + file            :     |   |   + file
-//    |   + file            :     |   |   + file
-//    |   + dir_3           :     |   |   + file
-//    |       |             :     |   |
-//    |       + file        :     |   + file
-//    |       + file        :     |   + file
-//    |       + file        :     |
-//    |                     :     + dir_4
-//    + dir_4               :     |   |
-//    |   |                 :     |   + file
-//    |   + file            :     |
-//    |                     :     + dir_5
-//    + dir_5               :     |   |
-//        |                 :     |   + file
-//        + file            :     |
-//                          :     + file
-//                          :     + file
-//
-//
-//  and with files shown first:
-//
-//  dir_1
-//    |
-//    + dir_2
-//    |   |
-//    |   + dir_3
-//    |   |   |
-//    |   |   + file
-//    |   |   + file
-//    |   |   + file
-//    |   |
-//    |   + file
-//    |   + file
-//    |
-//    + dir_4
-//    |   |
-//    |   + file
-//    |
-//    + dir_5
-//    |   |
-//    |   + file
-//    |
-//    + file
-//    + file
-//
-//
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//
-
-
-//     *  in file tree hash find next not shown directory
-
-    $key = "";
-    $noted_file = null;
 
 // Studying the output of build_tree() it looks like the parent directory
 // hash entries are ascending in value, from -1 on up.  There are gaps,
@@ -3880,11 +3806,38 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 // the next directory that's not yet been shown.
 //
 
-    foreach ( $files_in_hierarchy as $key => $noted_file ) // this kind of loop condition may create only a 'factorial at best' solution - TMH
-    {
+//    foreach ( $files_in_hierarchy as $key => $noted_file ) // this kind of loop condition may create only a 'factorial at best' solution - TMH
 
+    if ( $count_of_files == 0 )
+    {
+        $hay_files_to_check = 'false';
     }
 
+// loop set up:
+    $key = 0;
+
+    while ( ($hay_files_to_check == 'true') && ( $key < 100 ) )
+    {
+        $present_file = $file_hierarchy[$key];
+
+        if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
+        {
+            $line = "$key => " . $present_file[FILE_NAME] . "<br />\n";
+            echo $line;
+        }
+
+        ++$key;
+
+        if ( $key > $count_of_files )
+        {
+            $hay_files_to_check = 'false';
+        }
+    }
+
+    show_diag($rname, "after inerating over file hierarchy, hash key set to $key,", $dflag_dev);
+
+
+    show_diag($rname, "returning . . .", $dflag_announce);
 
 } // end function present_files_to_depth_n()
 
