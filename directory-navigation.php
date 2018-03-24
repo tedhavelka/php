@@ -879,7 +879,8 @@ function &build_tree($caller, $base_directory, $options)
 
 
 // PHP "file tree" hash to return to calling code:
-    $navigable_tree = array();
+//    $navigable_tree = array();
+    $navigable_tree = null;
 
 
 // Summary and reportable info not distilled in the hash itself:
@@ -926,8 +927,8 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-//if ( 0 )
-if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+if ( 0 )
+//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
     $dflag_announce = DIAGNOSTICS_OFF;
@@ -1182,6 +1183,7 @@ define ("DIRECTORY_NAVIGATION__SAFER_URL_SYMLINK_PREFIX", "'/z-tn--*.*/'");
                 $file_type = KEY_VALUE__FILE_TYPE__IS_FILE;
                 ++$count_of_regular_files;
                 ++$navigable_tree[$key_to_present_directory][FILE_COUNT];
+if ( $key_to_present_directory < 0 ) { show_diag($rname, "- HEY PROBLEM HERE - near line " . __LINE__ . " incremented file count of file tree hash entry whose key is $key_to_present_directory;  key should be zero or positive integer!", $dflag_warning); }
 
                 if ( $dflag_file_count_per_directory )
                 {
@@ -1212,6 +1214,7 @@ define ("DIRECTORY_NAVIGATION__SAFER_URL_SYMLINK_PREFIX", "'/z-tn--*.*/'");
                 {
                     ++$count_of_regular_files;
                     ++$navigable_tree[$key_to_present_directory][FILE_COUNT];
+if ( $key_to_present_directory < 0 ) { show_diag($rname, "- HEY PROBLEM HERE - near line " . __LINE__ . " incremented file count of file tree hash entry whose key is $key_to_present_directory;  key should be zero or positive integer!", $dflag_warning); }
                 }
             }
 
@@ -1598,6 +1601,12 @@ show_diag($rname, "Above loop 2 setting \$current_path_and_file from file hash t
         {
             echo "$key => " . $file_entry[FILE_NAME] . "\n";
         }
+        echo "</pre>\n";
+
+
+        echo "full showing of file tree hash:<br />\n";
+        echo "<pre>\n";
+        print_r($navigable_tree);
         echo "</pre>\n";
     }
 
@@ -3822,9 +3831,24 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
         if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
         {
-            $line = "$key => " . $present_file[FILE_NAME] . "<br />\n";
-            echo $line;
+            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+//            echo $line;
+
+//
+//
+//
+//
         }
+        else
+        {
+            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+//            echo $line;
+        }
+
+        $line = $line . "<i>, parent dir at hash entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
+
+        echo $line;
+
 
         ++$key;
 
