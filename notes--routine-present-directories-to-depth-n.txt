@@ -1,0 +1,152 @@
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+// Algorithm, first draft:
+//
+//  *  assume no order of files, not by file type and not alphabetic by filename,
+//  *  start at path depth zero with respect to base directory of given file tree,
+//  - loop -
+//     Display option 1:  show dirs of current dir first, dirs fully expanded
+//     *  show present dir and mark dir shown,
+//     *  iterate over file tree hash and . . . hey, regular files of first dir may be shown far away from the dir itself in this schema! - TMH
+//
+//  But hey, this will only happen when more-parent level directories
+//  when those dirs contain both files and directories.  When only the
+//  most-child level dirs contain files then the presentation is the
+//  same regardless of whether our algorithm shows dirs or files first.
+//
+//     Display option 2:  show files of current dir first, dirs fully expanded
+//
+//     *  keep track whether we've shown all directories
+//
+//
+//
+//  Two ways of showing file tree hierarchy:
+//
+//  "files before dirs"                "dirs before files"
+//  highlights dir contents            highlights directory structure
+//
+//  dir_1                           :   dir_1
+//    |                             :     |
+//    + file                        :     + dir_2
+//    + file                        :     |   |
+//    + dir_2                       :     |   + dir_3
+//    |   |                         :     |   |   |
+//    |   + file                    :     |   |   + file
+//    |   + file                    :     |   |   + file
+//    |   + dir_3                   :     |   |   + file
+//    |       |                     :     |   |
+//    |       + file                :     |   + file
+//    |       + file                :     |   + file
+//    |       + file                :     |
+//    |                             :     + dir_4
+//    + dir_4                       :     |   |
+//    |   |                         :     |   + file
+//    |   + file                    :     |
+//    |                             :     + dir_5
+//    + dir_5                       :     |   |
+//        |                         :     |   + file
+//        + file                    :     |
+//                                  :     + file
+//                                  :     + file
+//
+//
+//  and with files shown first, how can we describe this presentation
+//  file by file, implemented in non-recursive code?
+//
+//  dir_a   script sees dirs in order a, b, d, e, c
+//    |
+//    + dir_b
+//    |   |
+//    |   + dir_c
+//    |   |   |
+//    |   |   + file
+//    |   |   + file
+//    |   |   + file
+//    |   |
+//    |   + file
+//    |   + file
+//    |
+//    + dir_d
+//    |   |
+//    |   + file
+//    |
+//    + dir_e
+//    |   |
+//    |   + file
+//    |
+//    + file
+//    + file
+//
+//  Algorithm . . .
+//    *  show first directory not yet shown,  <-- first in file tree hash?  That's not algorithmically correct!
+//       +  note key of or pointer to latest dir shown
+//       +  create serialized presentation of file tree "branch" characters, here pipe chars and plus characters
+//       +  store serialized presentation of file tree "branch"
+//
+//    *  present zero or more files when latest dir has no more dirs to present
+//
+//
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//
+
+
+
+2018-03-26 SUN
+
+0 => b-directory-empty, parent entry -1
+1 => dir-a, parent entry -1
+2 => dir-b, parent entry -1
+3 => dir-c, parent entry -1
+4 => file-1.txt, parent entry -1
+5 => file-2.txt, parent entry -1
+6 => dir-a-1, parent entry 1
+7 => file-2.txt, parent entry 1
+8 => file-1.txt, parent entry 1
+9 => d.txt, parent entry 3
+10 => e.txt, parent entry 3
+11 => f.txt, parent entry 3
+12 => jale.txt, parent entry 6
+13 => jiya.txt, parent entry 6
+14 => dir-a-2, parent entry 6
+15 => des.txt, parent entry 14
+16 => ye.txt, parent entry 14
+17 => jo.txt, parent entry 14
+
+
+With notes . . .
+
+0 => b-directory-empty, parent entry -1
+1 => dir-a, parent entry -1
+2 => dir-b, parent entry -1
+3 => dir-c, parent entry -1
+4 => file-1.txt, parent entry -1  <-+
+5 => file-2.txt, parent entry -1  <-+-- want to show these files last
+6 => dir-a-1, parent entry 1      . . . subdirectory 1, parent entry changes
+7 => file-2.txt, parent entry 1
+8 => file-1.txt, parent entry 1
+9 => d.txt, parent entry 3        . . . subdirectory 2, parent entry changes
+10 => e.txt, parent entry 3
+11 => f.txt, parent entry 3
+12 => jale.txt, parent entry 6    . . . subdirectory 3, parent entry changes but we can't tell so from this sequence (1)
+13 => jiya.txt, parent entry 6
+14 => dir-a-2, parent entry 6
+15 => des.txt, parent entry 14
+16 => ye.txt, parent entry 14
+17 => jo.txt, parent entry 14
+
+
+(1)  Sometimes per our observations running this PHP code, regular files appear to the script before directory type files.  The parent hash entry always increases, and files of a given directory are always neighbors in the series, but we need an efficient sub-search per each group of files in a given directory, to catch and display all first directories -- more specifically first not-yet-shown directories -- before showing files of one or another already shown directory.
+
+Our last sentence is vague.  What we really are looking at is that a given directory has a couple of statae to track:
+
+*  directory shown
+*  directory contents shown
+
+In effort to avoid recursive algorithms, which could be costly in memory, we can potentially keep track of arbitrarily many directories' statae in one or two stacks.  One stack may be sufficient:  a stack to hold file tree hash entries of directories shown, whose contents are not yet shown.  This will likely work -- be algorithmically correct -- if our code in routine build_tree() always returns directories in their hierarchical order, an order like that produced by calling the `ls` command to list files recursively.  - TMH
+
+
+
+
+# --- EOF ---
