@@ -3818,15 +3818,27 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 //    foreach ( $files_in_hierarchy as $key => $noted_file ) // this kind of loop condition may create only a 'factorial at best' solution - TMH
 
     if ( $count_of_files == 0 )
-    {
-        $hay_files_to_check = 'false';
-    }
+        { $hay_files_to_check = 'false'; }
 
 // loop set up:
     $key = 0;
 
     while ( ($hay_files_to_check == 'true') && ( $key < 100 ) )
     {
+
+        if ( !array_key_exists($key, $file_hierarchy) )
+        {
+            show_diag($rname, "- WARNING - no file tree hash key $key found!", $dflag_warning);
+            show_diag($rname, "- WARNING - may be problem in build_tree(), resulting too big count of files,",
+              $dflag_warning);
+
+            ++$key;
+            if ( $key > $count_of_files )
+                { $hay_files_to_check = 'false'; }
+
+            continue;
+        }
+
         $present_file = $file_hierarchy[$key];
 
         if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
@@ -3845,17 +3857,15 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 //            echo $line;
         }
 
-        $line = $line . "<i>, parent dir at hash entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
+//        $line = $line . "<i>, parent dir at hash entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
+        $line = $line . "<i>, parent entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
 
         echo $line;
 
 
         ++$key;
-
         if ( $key > $count_of_files )
-        {
-            $hay_files_to_check = 'false';
-        }
+            { $hay_files_to_check = 'false'; }
     }
 
     show_diag($rname, "after inerating over file hierarchy, hash key set to $key,", $dflag_dev);
