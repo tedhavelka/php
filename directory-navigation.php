@@ -3772,6 +3772,8 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
 // VAR BEGIN
 
+    define("MAX_NUMBER_HASH_ENTRIES_TO_CHECK", 100);
+
     $depth = -1;
 
     $hay_files_to_check = 'true';
@@ -3782,6 +3784,19 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
     $pointer_latest_file_shown = -1;
     $count_of_files = count($file_hierarchy);
 
+// 2018-04-08 SUN -
+
+// numeric keys to the file tree hash:
+    $previous_parent_entry = -1;
+    $present_parent_entry = -1;
+
+// Implementation note:  from this code's perspective the base directory
+//  has no parent directory to note, that is file tree building code
+//  doesn't look for the parent dir of calling code's specified base
+//  dir.  To account for no noted parent dir this local library code
+//  stores -1 in the base dir's parent dir attribute/data member, and
+//  so too for regualr non-dir files found in given base dir.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // diagnostics:
 
@@ -3793,7 +3808,7 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
 // VAR END
 
-    show_diag($rname, "2018-03-22 - IMPLEMNTATION UNDERWAY, ROUTINE NOT DONE -", $dflag_announce);
+    show_diag($rname, "2018-04-08 - IMPLEMNTATION UNDERWAY, ROUTINE NOT DONE -", $dflag_announce);
 
 
 
@@ -3823,7 +3838,7 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 // loop set up:
     $key = 0;
 
-    while ( ($hay_files_to_check == 'true') && ( $key < 100 ) )
+    while ( ($hay_files_to_check == 'true') && ( $key < MAX_NUMBER_HASH_ENTRIES_TO_CHECK ) )
     {
 
         if ( !array_key_exists($key, $file_hierarchy) )

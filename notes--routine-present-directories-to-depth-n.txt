@@ -26,25 +26,25 @@
 //  "files before dirs"                "dirs before files"
 //  highlights dir contents            highlights directory structure
 //
-//  dir_1                           :   dir_1
+//  base_dir                        :   base_dir
 //    |                             :     |
-//    + file                        :     + dir_2
+//    + file                        :     + dir_1
 //    + file                        :     |   |
-//    + dir_2                       :     |   + dir_3
+//    + dir_1                       :     |   + dir_4
 //    |   |                         :     |   |   |
 //    |   + file                    :     |   |   + file
 //    |   + file                    :     |   |   + file
-//    |   + dir_3                   :     |   |   + file
+//    |   + dir_4                   :     |   |   + file
 //    |       |                     :     |   |
 //    |       + file                :     |   + file
 //    |       + file                :     |   + file
 //    |       + file                :     |
-//    |                             :     + dir_4
-//    + dir_4                       :     |   |
+//    |                             :     + dir_2
+//    + dir_2                       :     |   |
 //    |   |                         :     |   + file
 //    |   + file                    :     |
-//    |                             :     + dir_5
-//    + dir_5                       :     |   |
+//    |                             :     + dir_3
+//    + dir_3                       :     |   |
 //        |                         :     |   + file
 //        + file                    :     |
 //                                  :     + file
@@ -145,6 +145,29 @@ Our last sentence is vague.  What we really are looking at is that a given direc
 *  directory contents shown
 
 In effort to avoid recursive algorithms, which could be costly in memory, we can potentially keep track of arbitrarily many directories' statae in one or two stacks.  One stack may be sufficient:  a stack to hold file tree hash entries of directories shown, whose contents are not yet shown.  This will likely work -- be algorithmically correct -- if our code in routine build_tree() always returns directories in their hierarchical order, an order like that produced by calling the `ls` command to list files recursively.  - TMH
+
+
+ALGORITHM THOUGHTS:
+
+When we look for parent directory changes, we can use two variables called 'previous_parent_entry' and 'present_parent_entry'.  We can prime both these variables to the starting value of the first-in-hash entry's parent directory value.
+
+
+  To show directories first, we need to be at a file tree hash entry of a dir, whose parent directory has not changed from the prior entry's value of parent dir.  We note the key name of this dir's hash entry.  We search the remaining hash entries for files with this dir as their parent dir.
+
+For example, we encounter directory dir-a at hash entry 1.  We make a note that dir-a is shown -- placed in a serialized list which is easy to show as a tree -- but that its contents are not yet fully shown.
+
+We then look entry by entry and find three files with this dir as their parent.  The first file is another directory.  We add this to the stack of directories which are shown but whose contents are not shown.  We now look for files whose parent directory is this latest dir added to the "dir and not content shown" stack.
+
+In this example directory dir-a-1 is at hash entry 6.  We look for files which this entry as their parent dir.  We look for all files with entry 6 as parent dir and find three files, last of these another dir at hash entry 14.  We push this directory's hash entry / key onto the stack of "dir and not content shown" stack.  We look for all files whose parent is stored at hash entry 14.  
+
+This time we find only regular non-directory type files.  We add these to the serialized string or hash of strings which represent the viewable tree, file by file and roughly one file to a line.  After adding all these regular files we pop the latest directory off the stack of "dir and not content shown", because we're also adding the group of regular non-dir files to the serialized string representing the file tree in a web browsable way.  But we also need to mark the directory as shown or fully shown somewhere, such as in the hash tree itself, so that we don't push that directory onto our directories stack a second time . . .
+
+Finishing dir processing and removing a dir entry from our "dir shown" stack highlights an important step in our algorithm:  check if there's something to process on our dir stack and when so process it.  We've already noted when our algorithm adds to the stack, and we just noted when our algorithm removes an item from the stack.  This description should give us now a good point from which to outline the algorithm in a more succint step-wise fashion":
+
+
+
+
+
 
 
 
