@@ -154,9 +154,13 @@ When we look for parent directory changes, we can use two variables called 'prev
 
   To show directories first, we need to be at a file tree hash entry of a dir, whose parent directory has not changed from the prior entry's value of parent dir.  We note the key name of this dir's hash entry.  We search the remaining hash entries for files with this dir as their parent dir.
 
-For example, we encounter directory dir-a at hash entry 1.  We make a note that dir-a is shown -- placed in a serialized list which is easy to show as a tree -- but that its contents are not yet fully shown.
+For example, we encounter directory dir-a at hash entry 1.  We make a note that dir-a is shown -- where here "shown" means placed in a serialized list which is easy to show as a tree -- but that its contents are not yet fully shown.
 
-We then look entry by entry and find three files with this dir as their parent.  The first file is another directory.  We add this to the stack of directories which are shown but whose contents are not shown.  We now look for files whose parent directory is this latest dir added to the "dir and not content shown" stack.
+We then look entry by entry and find all files (in this example three files) with this dir as their parent.  The first file is another directory.  We add this to the stack of directories which are shown but whose contents are not shown.  We now look for files whose parent directory is this latest dir added to the "dir and not content shown" stack.
+
+
+Note:  our "dir shown" stack is a PHP hash, whose keys are numeric and point to the file tree hash entry at which our algorithm is pointed when a further subdir is found.  So when we find dir-a-1 we note its hash entry in the latest "dir shown" hash entry, then we add the latest found dir to that hash.
+
 
 In this example directory dir-a-1 is at hash entry 6.  We look for files which this entry as their parent dir.  We look for all files with entry 6 as parent dir and find three files, last of these another dir at hash entry 14.  We push this directory's hash entry / key onto the stack of "dir and not content shown" stack.  We look for all files whose parent is stored at hash entry 14.  
 

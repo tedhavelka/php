@@ -927,8 +927,8 @@ function &build_tree($caller, $base_directory, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-if ( 0 )
-//if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
+//if ( 0 )
+if ( array_key_exists(KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS, $options) && $options[KEY_NAME__SITE_NAVIGATION__DIAGNOSTICS] == DIAGNOSTICS_OFF )
 {
     show_diag($rname, "turning off most diagnostics . . .", $dflag_minimal);
     $dflag_announce = DIAGNOSTICS_OFF;
@@ -3798,6 +3798,9 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 //  so too for regualr non-dir files found in given base dir.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    $encountered_dirs = array();
+
+
 // diagnostics:
 
 //    $lbuf = "";
@@ -3859,17 +3862,10 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
         if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
         {
             $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
-//            echo $line;
-
-//
-//
-//
-//
         }
         else
         {
             $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
-//            echo $line;
         }
 
 //        $line = $line . "<i>, parent dir at hash entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
@@ -3878,12 +3874,32 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
         echo $line;
 
 
+        $previous_parent_entry = $present_parent_entry;
+        $present_parent_entry = $present_file[PARENT_HASH_ENTRY];
+
+        if ( !($previous_parent_entry === $present_parent_entry) )
+        {
+           $line = "<font color=\"green\">detected change in parent directory!</font><br />\n";
+           echo $line;
+           array_push($encountered_dirs, 0);
+        }
+
+
+
+// - STEP - after hash entry processing move us forward to next hash entry:
+
         ++$key;
         if ( $key > $count_of_files )
             { $hay_files_to_check = 'false'; }
+
     }
 
     show_diag($rname, "after inerating over file hierarchy, hash key set to $key,", $dflag_dev);
+    show_diag($rname, "and encountered dirs hash holds:", $dflag_dev);
+    echo "<pre>\n";
+    print_r($encountered_dirs);
+    echo "</pre>\n";
+
 
 
     show_diag($rname, "returning . . .", $dflag_announce);
