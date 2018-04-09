@@ -62,9 +62,9 @@
 //    |   |   |
 //    |   |   + file
 //    |   |   + file
-//    |   |   + file
-//    |   |
-//    |   + file
+//    |   |   + file   <-- when parent dir changes during run of non-directory file encounters, we pop
+//    |   |                latest encountered dir, send it and its files to the serializing, HTML formatting
+//    |   + file           code,
 //    |   + file
 //    |
 //    + dir_d
@@ -75,8 +75,16 @@
 //    |   |
 //    |   + file
 //    |
-//    + file
-//    + file
+//    + file           <-- But!  we had to hold onto these files during all the finding and processing
+//    + file               of the dirs and files shown above.  It's like we had to have a stack of
+//                         groups of files per directory found.
+//
+//
+//  Fortunately we can easily populate a PHP hash of hashes using non-recursive
+//  algorithm.
+//
+//
+//
 //
 //  Algorithm . . .
 //    *  show first directory not yet shown,  <-- first in file tree hash?  That's not algorithmically correct!
@@ -149,17 +157,19 @@ In effort to avoid recursive algorithms, which could be costly in memory, we can
 
 ALGORITHM THOUGHTS:
 
-When we look for parent directory changes, we can use two variables called 'previous_parent_entry' and 'present_parent_entry'.  We can prime both these variables to the starting value of the first-in-hash entry's parent directory value.
+When we look for parent directory changes, we can use two variables called 'previous_parent_entry' and 'present_parent_entry'.  We can prime both these variables to the value of the parent directory -- which is a file tree hash key value or name -- of the first file tree hash entry.
 
 
   To show directories first, we need to be at a file tree hash entry of a dir, whose parent directory has not changed from the prior entry's value of parent dir.  We note the key name of this dir's hash entry.  We search the remaining hash entries for files with this dir as their parent dir.
 
-For example, we encounter directory dir-a at hash entry 1.  We make a note that dir-a is shown -- where here "shown" means placed in a serialized list which is easy to show as a tree -- but that its contents are not yet fully shown.
+For example, we encounter directory dir-a at hash entry 1.  We make a note that dir-a has been encountered but that its contents are not yet fully found and serialized for sending to a web browser.
 
-We then look entry by entry and find all files (in this example three files) with this dir as their parent.  The first file is another directory.  We add this to the stack of directories which are shown but whose contents are not shown.  We now look for files whose parent directory is this latest dir added to the "dir and not content shown" stack.
+We then look entry by entry and find all files (in this example three files) with this dir as their parent.  The first file is another directory.  We add this to the stack of directories which are encountered but whose contents are not yet known.  We now look for files whose parent directory is this latest dir added to the "dir and not content shown" stack.
+
+Our search for regular files of a given directory is over when the parent dir value changes, thanks to the way routine build_tree() gets its info from PHP dir() function.  In fact, looking at the hash from build_tree() we find files for each directory in groups, in groups in the same order as the order of directories found.  As we've been noting directories found in a stack, as soon as we find the last file in a given directory we know that our latest group of files belongs to the directory at the top of our encountered dirs stack.  
 
 
-Note:  our "dir shown" stack is a PHP hash, whose keys are numeric and point to the file tree hash entry at which our algorithm is pointed when a further subdir is found.  So when we find dir-a-1 we note its hash entry in the latest "dir shown" hash entry, then we add the latest found dir to that hash.
+Note:  our "dir encountered" stack is a PHP hash, whose keys are numeric.  Our directories encountered stack holds keys to the file tree hash entries of each encountered dir.  So when we find dir-a-1 we note its hash entry in the latest "dir encountered" hash entry, then we add the latest found dir to that hash.
 
 
 In this example directory dir-a-1 is at hash entry 6.  We look for files which this entry as their parent dir.  We look for all files with entry 6 as parent dir and find three files, last of these another dir at hash entry 14.  We push this directory's hash entry / key onto the stack of "dir and not content shown" stack.  We look for all files whose parent is stored at hash entry 14.  

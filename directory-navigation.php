@@ -3774,7 +3774,7 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
     define("MAX_NUMBER_HASH_ENTRIES_TO_CHECK", 100);
 
-    $depth = -1;
+    $depth = -1;  // <-- 2018-04-09 may not be needed - TMH
 
     $hay_files_to_check = 'true';
 
@@ -3799,6 +3799,10 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     $encountered_dirs = array();
+
+    $files_of_present_dir = array();
+
+    $flag_encountered_only_non_dir_files = 'true';
 
 
 // diagnostics:
@@ -3861,14 +3865,16 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
         if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
         {
-            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+//            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+            array_push($encountered_dirs, $key);
+            $flag_encountered_only_non_dir_files = 'false';
         }
         else
         {
-            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+//            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
         }
 
-//        $line = $line . "<i>, parent dir at hash entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
+        $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
         $line = $line . "<i>, parent entry " . $present_file[PARENT_HASH_ENTRY] . "</i><br />\n";
 
         echo $line;
@@ -3881,7 +3887,6 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
         {
            $line = "<font color=\"green\">detected change in parent directory!</font><br />\n";
            echo $line;
-           array_push($encountered_dirs, 0);
         }
 
 
