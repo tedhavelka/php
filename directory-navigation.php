@@ -235,16 +235,19 @@
 
 
 // 2018-02-06 - For development work:
-    define ("KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES", "non_empty_directory_entries");
-    define ("KEY_NAME__DIRECTORY_ENTRIES", "directory_entries");
+    define("KEY_NAME__NON_EMPTY_DIRECTORY_ENTRIES", "non_empty_directory_entries");
+    define("KEY_NAME__DIRECTORY_ENTRIES", "directory_entries");
 
 // 2018-02-13 - File count per directory work:
-    define ("KEY_NAME__FILE_COUNT_PER_LOOP_1", "file_count_per_loop_1");
-    define ("KEY_NAME__FILE_COUNT_PER_LOOP_2", "file_count_per_loop_2");
+    define("KEY_NAME__FILE_COUNT_PER_LOOP_1", "file_count_per_loop_1");
+    define("KEY_NAME__FILE_COUNT_PER_LOOP_2", "file_count_per_loop_2");
 //    define ("KEY_NAME__", "");
 
-    define ("LIMIT_TO_100", 100);
-    define ("LIMIT__BUILD_TREE__LOOP_2_ITERATION", 300);
+    define("LIMIT_TO_100", 100);
+    define("LIMIT__BUILD_TREE__LOOP_2_ITERATION", 300);
+
+// 2018-04-13 - for 'show dirs before files' view mode:
+    define("FILES_IN_DIRECTORY", KEY_NAME__DIRECTORY_NAVIGATION__FILES_IN_DIRECTORY);
 
 
 
@@ -3780,7 +3783,7 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
     $key = "";
 //    $noted_file = null;
-    $pointer_latest_dir_shown = -1;
+    $pointer_latest_dir = -1;
     $pointer_latest_file_shown = -1;
     $count_of_files = count($file_hierarchy);
 
@@ -3866,12 +3869,23 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
         if ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_DIRECTORY )
         {
 //            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
-            array_push($encountered_dirs, $key);
+//            array_push($encountered_dirs, $key);
+
+//            $pointer_latest_dir = $key;
+            $encountered_dirs[$key] = array();
+            $encountered_dirs[$key][FILE_NAME] = $present_file[FILE_NAME];
+            $encountered_dirs[$key][FILES_IN_DIRECTORY] = array();
             $flag_encountered_only_non_dir_files = 'false';
+        }
+        elseif ( $present_file[FILE_TYPE] === KEY_VALUE__FILE_TYPE__IS_FILE )
+        {
+//            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+            $pointer_to_parent_dir = $present_file[PARENT_HASH_ENTRY];
+            array_push($encountered_dirs[$pointer_to_parent_dir][FILES_IN_DIRECTORY], $key);
         }
         else
         {
-//            $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
+// STATE - encountered file which is neither directory nor regular data file
         }
 
         $line = "$key => " . $present_file[FILE_NAME]; //  . "<br />\n";
@@ -3899,7 +3913,7 @@ function present_files_to_depth_n($caller, $file_hierarchy, $options)
 
     }
 
-    show_diag($rname, "after inerating over file hierarchy, hash key set to $key,", $dflag_dev);
+    show_diag($rname, "after iterating over file hierarchy, hash key set to $key,", $dflag_dev);
     show_diag($rname, "and encountered dirs hash holds:", $dflag_dev);
     echo "<pre>\n";
     print_r($encountered_dirs);

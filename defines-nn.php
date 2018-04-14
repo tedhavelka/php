@@ -214,6 +214,7 @@
 
     define("KEY_VALUE__DIRECTORY_NAVIGATION__DEFAULT_FILE_VIEW_MODE_ABBR", KEY_VALUE__DIRECTORY_NAVIGATION__VIEW_FILES_IN_CWD_ABBR);
 
+    define("KEY_NAME__DIRECTORY_NAVIGATION__FILES_IN_DIRECTORY", "files-in-directory");
 
 
 //----------------------------------------------------------------------
