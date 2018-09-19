@@ -349,12 +349,11 @@ function nn_build_footer_v2($caller, $options)
 
 
 
-/*
-function send_html_body_open($caller)
-{
-    echo "<body>\n";
-}
-*/
+
+// function send_html_body_open($caller)
+// {
+//     echo "<body>\n";
+// }
 
 
 

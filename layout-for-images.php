@@ -361,14 +361,29 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
 
     $image_width = 134;
 
-    $image_dir = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
+//    $image_dir = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
+// 2018-08-04 - keyname changed some time ago, need to fix that here:
+    $image_dir = $options[KEY_NAME__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
 
+
+// diagnostics:
+
+    $dflag_announce = DIAGNOSTICS_OFF;
+    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_development = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_OFF;
+
+    $rname = "build_layout_for_image_and_caption";
 
 // VAR END
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    $rname = "build_layout_for_image_and_caption";
 
+
+    show_diag($rname, "starting,", $dflag_announce);
+//    show_diag($rname, "--- NOTE THIS ROUTINE UNDER DEBUGGING! ---", $dflag_development);
+
+    show_diag($rname, "called with image directory '$image_dir',", $dflag_announce);
 
 
 // DEV - single echo statement at point of initial developement:
@@ -474,9 +489,9 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // diagnostics:
 
     $dflag_announce = DIAGNOSTICS_OFF;
-    $dflag_summary  = DIAGNOSTICS_OFF;
     $dflag_verbose  = DIAGNOSTICS_OFF;
     $dflag_development = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_OFF;
 
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
