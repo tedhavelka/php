@@ -363,15 +363,17 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
 
 //    $image_dir = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
 // 2018-08-04 - keyname changed some time ago, need to fix that here:
-    $image_dir = $options[KEY_NAME__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
+    $image_dir = $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_DIR];  // <-- NEED TO CHECK FOR NON-ZERO DIRNAME LENGTH HERE - TMH
 
 
 // diagnostics:
 
-    $dflag_announce = DIAGNOSTICS_OFF;
-    $dflag_verbose  = DIAGNOSTICS_OFF;
+    $dflag_announce    = DIAGNOSTICS_OFF;
+    $dflag_verbose     = DIAGNOSTICS_OFF;
     $dflag_development = DIAGNOSTICS_OFF;
-    $dflag_summary  = DIAGNOSTICS_OFF;
+    $dflag_summary     = DIAGNOSTICS_OFF;
+
+    $dflag_warning     = DIAGNOSTICS_ON;
 
     $rname = "build_layout_for_image_and_caption";
 
@@ -383,7 +385,8 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
     show_diag($rname, "starting,", $dflag_announce);
 //    show_diag($rname, "--- NOTE THIS ROUTINE UNDER DEBUGGING! ---", $dflag_development);
 
-    show_diag($rname, "called with image directory '$image_dir',", $dflag_announce);
+    show_diag($rname, "called with image directory '$image_dir',", $dflag_verbose);
+
 
 
 // DEV - single echo statement at point of initial developement:
@@ -491,7 +494,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_verbose  = DIAGNOSTICS_OFF;
     $dflag_development = DIAGNOSTICS_OFF;
-    $dflag_summary  = DIAGNOSTICS_ON;
+    $dflag_summary  = DIAGNOSTICS_OFF;
 
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
@@ -509,6 +512,8 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 
     if ( $dflag_summary )
     {
+        $dflag_verbose_routine_setting = $dflag_verbose;
+        $dflag_verbose = DIAGNOSTICS_ON;
         show_diag($rname, "called by '$caller',", $dflag_verbose);
         show_diag($rname, "with image directory '$image_directory',", $dflag_verbose);
         show_diag($rname, "with explanatory text file '$explanatory_text_file',", $dflag_verbose);
@@ -516,6 +521,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
         echo "<pre>\n";
         print_r($options);
         echo "</pre>\n";
+        $dflag_verbose = $dflag_verbose_routine_setting;
     }
 
 
@@ -563,11 +569,33 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     show_diag($rname, "building list of image files . . .", $dflag_verbose);
-    $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/i");
-    sort($list_of_images);
+
+// NOTE:  following IF test assumes key exists in caller's passed options
+// + array and assignment in first block of IF-ELSE assumes named key
+// + points to a valid PHP array . . .
+    if ( $options[KEY_NAME__IMAGE_LAYOUT__IMAGE_LIST_SOURCE] === KEY_VALUE__CALLER )
+    {
+        show_diag($rname, "using list of image files from caller,", $dflag_verbose);
+        $list_of_images = $options[KEY_NAME__IMAGE_LIST];
+    }
+    else
+    {
+        show_diag($rname, "building list of image files found in caller's specified directory . . .",
+          $dflag_verbose);
+        $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/i");
+    }
+
+
+// 2018-09-22 - We may likely make image filename sorting optional, so
+// adding braces about this statement here:
+    {
+        sort($list_of_images);
+    }
+
 
     if ( $dflag_show_image_list )
     {
+        show_diag($rname, "ready to lay out following images:", $dflag_verbose);
         echo "<pre>\n";
         print_r($list_of_images);
         echo "</pre>\n";
@@ -602,7 +630,6 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 echo "<div style=\"min-height:10px; overflow:auto; border:none; background:none\"><center> &nbsp; </center>
 </div>
 ";
-
                 echo "<!-- image row $row_count begin -->";
                 open_row_of_images($rname, $options);
                 handle_image_row_indents($rname, $row_count, $options);

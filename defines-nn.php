@@ -351,6 +351,12 @@
     define("KEY_NAME__IMAGE_LAYOUT__TEXT_FILE_HOLDING_IMAGE_CAPTIONS",       "text_file_holding_image_captions");
     define("KEY_NAME__IMAGE_LAYOUT__CAPTIONS_FROM_DATABASE",                 "get_captions_from_database");
 
+// 2018-09-22 - gallery template builder work:
+    define("KEY_NAME__IMAGE_LAYOUT__IMAGE_LIST_SOURCE", "image_list_source");
+    define("KEY_VALUE__DIRECTORY_LISTING", "directory listing");
+    define("KEY_VALUE__CALLER", "caller");
+    define("KEY_NAME__IMAGE_LIST", "image_list");
+
 
 
 //----------------------------------------------------------------------
