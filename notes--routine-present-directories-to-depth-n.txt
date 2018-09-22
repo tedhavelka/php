@@ -157,7 +157,7 @@ In effort to avoid recursive algorithms, which could be costly in memory, we can
 
 ALGORITHM THOUGHTS:
 
-When we look for parent directory changes, we can use two variables called 'previous_parent_entry' and 'present_parent_entry'.  We can prime both these variables to the value of the parent directory -- which is a file tree hash key value or name -- of the first file tree hash entry.
+When we look for parent directory changes, we can use two variables called 'previous_parent_entry' and 'present_parent_entry'.  We can prime both these variables to the value of the base directory's hash entry, which actually doesn't normally exists but is designed to be equal to -1.  All file tree hash keys are numeric starting from zero and increasing by one from first file tree hash entry onwards.
 
 
   To show directories first, we need to be at a file tree hash entry of a dir, whose parent directory has not changed from the prior entry's value of parent dir.  We note the key name of this dir's hash entry.  We search the remaining hash entries for files with this dir as their parent dir.

@@ -424,7 +424,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 //  EXPECTS:
 //    *  calling code identifying string
 //    *  directory holding image files or image list in text file form
-//    *  full path to explanatory notes of and for images
+//    *  full path to explanatory notes about images
 //    *  PHP array (ordered map) of various formatting options
 //
 //  Formatting options include:
@@ -491,7 +491,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_verbose  = DIAGNOSTICS_OFF;
     $dflag_development = DIAGNOSTICS_OFF;
-    $dflag_summary  = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_ON;
 
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
