@@ -312,6 +312,10 @@ function nn_build_footer_v2($caller, $options)
         { $contact_line = $contact_name; }
 
 
+//
+// 2018-09-24 - NEED TO CHECK whether contact line is non-null . . .
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     if ((( strlen($contact_email) > 0 ) || ( strlen($contact_name) > 0 ) ) && ( strlen($page_last_updated) > 0 ) )
     {
         $contact_line = "Page last update $page_last_updated by $contact_line";
@@ -427,17 +431,10 @@ function &nbsp_based_indent($caller, $depth, $options)
     $rname = "nbsp_based_indent";
 
 
-//    if ( $depth > 1 )
     if ( $depth > 0 )
     {
-//        $indent = $mark_up . str_repeat(" $mark_up", ($depth - 1));
-//        $indent = $mark_up . str_repeat("*$mark_up", ($depth - 1));
         $indent = str_repeat($mark_up, $depth);
     }
-//    elseif ( $depth == 1 )
-//    {
-//        $indent = $mark_up;
-//    }
     else
     {
         $indent = "";

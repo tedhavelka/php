@@ -732,8 +732,6 @@ function present_menu_from_hash_of_hashes($caller, $hash_reference, $options)
 
 
 
-// function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix)
-// function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix, $filename_postfix)
 function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_infix, $filename_postfix, $options)
 {
 //----------------------------------------------------------------------
@@ -839,7 +837,6 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 
     $key_name = "";                // . . . string to hold constructed hash key names,
 
-//    const KEY_NAME_LENGTH = 3;
     define("KEY_NAME_LENGTH", 3);  // . . . constant to define character width of hash key names,
 
     $pattern = "";                 // . . . locally built regex making use of calling code's filename infix pattern,
