@@ -399,7 +399,14 @@ function build_layout_for_image_and_caption($caller, $image_file, $caption, $opt
             <div style=\"min-width:100px; max-width:${image_width}px; min-height:100px; max-height:100px; padding-top:10px; padding-bottom:10px; border:none\">\n";
 
 //              <img src="./images/icons/A52-TrendArrow-Blue-FourDirections.svg" alt="blue arrows, four directions" width="100">
-    echo "               <img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\">";
+    if ( 0 )
+    {
+        echo "               <img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\">";
+    }
+    else
+    {
+        echo "               <a href=\"${image_dir}/${image_file}\"><img src=\"${image_dir}/${image_file}\" alt=\"blue arrows, four directions\" width=\"${image_width}\"></a>";
+    }
 
     echo "
             </div>
@@ -434,7 +441,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
 //      +  width of image row
 //      +  height of image row
 //      +  background of image row, color or style passed here as string
-//      +  images shown per row before wrapping to next row
+//      +  number of images shown per row before wrapping to next row
 //      +  image row indent style
 //      +  source of captions
 //      +
@@ -580,8 +587,14 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     }
     else
     {
+
+//
+// NEED 2019-02-10 - need to address and amend fact that list of images
+//  presently built captures only jpeg format images:
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         show_diag($rname, "building list of image files found in caller's specified directory . . .",
           $dflag_verbose);
+
         $list_of_images = list_of_filenames_by_pattern($rname, $image_directory, "/(.*).jpg/i");
     }
 
@@ -654,10 +667,6 @@ echo "<div style=\"min-height:10px; overflow:auto; border:none; background:none\
     }
 
     close_row_of_images($rname, $options);
-
-
-
-
 
     show_diag($rname, "returning to calling code . . .", $dflag_announce);
 
