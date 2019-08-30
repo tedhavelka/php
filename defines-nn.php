@@ -28,7 +28,7 @@
 //   may be useful if this file, as of 2017-11-07 named defines-nn.php
 //   is included in part of another PHP project.  But the fixed part of
 //   naming scheme 1 is long and only useful for that one
-//   distination.
+//   distinction.
 //
 //   Naming scheme 2 highlights the syntactic purpose of related
 //   defined constants, indicating when they are key names in ordered

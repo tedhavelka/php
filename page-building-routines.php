@@ -38,6 +38,9 @@
 
 
 
+require_once '/opt/nn/lib/php/defines-hypertext-mark-up.php';
+
+
 
 /*
 function --
@@ -344,6 +347,8 @@ function nn_build_footer_v2($caller, $options)
 
     if ( strlen($contact_line) > 0 ) { echo $contact_line . $term; }
 
+//    echo "2019-07-28 SUN - zzz<br />\n";
+
         echo"</div>
 <!-- document footer close -->\n\n";
     }
@@ -443,6 +448,69 @@ function &nbsp_based_indent($caller, $depth, $options)
     return $indent;
 
 }
+
+
+
+
+/*
+function --
+function -- SECTION -- file reading routines
+function --
+*/
+
+function file_to_browser($caller, $filename, $options)
+{
+// --- VAR BEGIN ---
+
+// file handle variable:
+    $file_handle = NULL;
+
+// latest line read from calling code's file:
+    $line;
+
+// variable to count and to put bounds on count of lines processed:
+    $line_count = 0;
+
+// line termination string, NEED TO DEFINE THIS IN MORE GLOBAL SCOPE:
+//    $term = "<br />\n";
+    $term = HTML__MARK_UP_FOR_LINE_BREAK;
+
+// . . .
+    $max_lines_to_process = 1000;
+
+
+// diagnostics:
+    $rname = "file_to_browser";
+
+// --- VAR END ---
+
+
+    $file_handle = fopen($filename, "r");
+
+    if ( $file_handle != NULL )
+    {
+        if ( $options == NULL )
+        {
+        }
+
+
+        while ( (!feof($file_handle)) && ($line_count < $max_lines_to_process) )
+        {
+
+            $line = fgets($file_handle);
+            ++$line_count;
+
+            echo $line . $term;
+        }
+    }
+    else
+    {
+        show_diag($rname, "WARNING - unable to open file '%filename'!");
+    }
+
+} // end function file_to_browser()
+
+
 
 
 ?>

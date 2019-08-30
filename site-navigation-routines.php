@@ -1269,11 +1269,11 @@ function nn_menu_building_hybrid_fashion($caller, $path_to_search, $filename_inf
 //
 //  Our solution then is to use a specific postfix, and have this
 //  routine check its present search path, in order to hide menu
-//  navigation items which represent the page in which or for which
-//  we're constructing a navigation menu.
+//  navigation items which represent the page for which we're
+//  constructing a navigation menu.
 //
 //
-//  In the case where search path poitns to directory outside of
+//  In the case where search path points to directory outside of
 //  current working directory, we can compare link text parsed from
 //  a filename of a symbolic link to the name of the current directory . . .
 //
