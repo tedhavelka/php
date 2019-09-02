@@ -501,7 +501,7 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
     $dflag_announce = DIAGNOSTICS_OFF;
     $dflag_verbose  = DIAGNOSTICS_OFF;
     $dflag_development = DIAGNOSTICS_OFF;
-    $dflag_summary  = DIAGNOSTICS_OFF;
+    $dflag_summary  = DIAGNOSTICS_OFF; // DIAGNOSTICS_ON;
 
     $dflag_show_image_list    = DIAGNOSTICS_OFF;
     $dflag_image_count_in_row = DIAGNOSTICS_OFF;
@@ -623,7 +623,8 @@ function present_image_set($caller, $image_directory, $explanatory_text_file, $o
         $images_in_current_row = 0; 
 
         ++$row_count;
-        echo "<!-- image row $row_count begin -->";
+        echo "<!-- routine $rname() starting to present images in set, -->\n";
+        echo "<!-- image row $row_count begin: -->";
         open_row_of_images($rname, $options);
 
         foreach ($list_of_images as $key => $image_file )

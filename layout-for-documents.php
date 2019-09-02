@@ -99,25 +99,41 @@ function block_element_for_document_section_margin($caller, $options) // 2017-11
     if ( array_key_exists(KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK, $options) )
     {
         $mark_for_margin = $options[KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK];
+
+// Only when calling code sets key to show block element mark, one or
+// more visible or printable characters, need we worry about aligning
+// these characters:
+        if ( array_key_exists(KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK, $options) )
+        {
+            if ( $options[KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK] === KEY_VALUE__TEXT_ELEMENT__ALIGN_CENTER )
+            $mark_for_margin = "<center>" . $mark_for_margin . "</center>";
+        }
     }
 
-    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK, $options) )
-    {
-        if ( $options[KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK] === KEY_VALUE__TEXT_ELEMENT__ALIGN_CENTER )
-        $mark_for_margin = "<center>" . $mark_for_margin . "</center>";
-    }
 
+// NEED 2019-09-01 - to amend naming scheme where some options key names
+//  begin with 'KEY_NAME__DOC_LAYOUT__' and some begin with
+//  'KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__' . . . confusing! - TMH
     if ( array_key_exists(KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH, $options) )
     {
         $attr_width = "width:" . $options[KEY_NAME__DOC_LAYOUT__MARGIN_WIDTH] . ";";
     }
+
+
+    if ( array_key_exists(KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_BORDER, $options) )
+    {
+        $attr_border = "border:" . $options[KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_BORDER] . ";";
+    }
+
+
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - STEP - generate mark-up . . .
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 //    echo "   <div style=\"float:left; width:15%; border:none\">
-    echo "   <div style=\"float:left; $attr_width border:none\">
+//    echo "   <div style=\"float:left; $attr_width border:none\">
+    echo "   <div style=\"float:left; $attr_width $attr_border\">
       ${mark_for_margin}
    </div>
 

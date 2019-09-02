@@ -235,6 +235,11 @@
 // QUESTION should we shorten names of these key to match following three keys dated 2018-02-16? . . . TMH
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK", "content_margin_block_element_mark_with");
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__ALIGN_MARK", "content_margin_block_element_mark_alignment");
+    define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_BORDER", "content_margin_block_element_border_style");
+// 2019-09-01 - From layout-for-documents code, it appears that this variable
+// created on this first of September date is already implemented in the
+// keyname 'KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__SHOW_MARK'.  - TMH
+    define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__CALLERS_CUSTOM_MARK", "content_margin_block_element_callers_custom_mark");
     define("KEY_NAME__DOC_LAYOUT__CONTENT_MARGIN__BORDER_STYLE", "content_margin_block_element_border_style");
 
 // 2018-02-16 FRI . . .
